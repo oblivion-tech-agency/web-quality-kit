@@ -1,0 +1,39 @@
+# DESIGN SYSTEM & BRAND GUIDELINES: {{NOMBRE DEL PROYECTO}}
+
+> Copiá este archivo a la raíz del proyecto como `DESIGN.md` y completá cada sección con datos reales.
+> Si más adelante existe un mockup visual aprobado (Figma, Claude Artifact, etc.), ese mockup manda por
+> sobre este documento — actualizá los valores acá para que no queden desincronizados (ver skill `design-tokens`).
+
+## 1. Contexto de producto y marca
+- **Producto:** {{qué es, en una línea}}
+- **Arquetipo visual:** {{referencias — ej. "sobrio/técnico tipo Vercel/Linear/Stripe" o "cálido/editorial"}}
+- **Propuesta de valor:** {{la frase central que diferencia al negocio, no un genérico}}
+- **Público objetivo:** {{quién decide, qué le importa}}
+
+## 2. Tokens de diseño
+- **Background principal:** `#______`
+- **Surface / cards:** `#______` (borde: `#______`)
+- **Texto primario:** `#______` (verificar contraste WCAG 4.5:1 mínimo contra el background)
+- **Texto secundario:** `#______`
+- **Accent:** `#______`
+- **Tipografía:** {{familia sans}} para cuerpo/títulos, {{familia mono}} para datos técnicos
+- **Espaciado:** sistema de 8px. Padding de sección: `{{valor desktop}}` / `{{valor mobile}}`
+
+## 3. Reglas de movimiento y animación
+- **Filosofía:** {{ej. "reveals elegantes en CSS puro, costo cero de JS"}}
+- **Transiciones:** {{easing/duración por defecto}}
+- Evitar secuencias pesadas (3D, video) salvo que el momento lo justifique (ej. un intro de marca puntual).
+
+## 4. Estructura y narrativa del sitio
+Listá las secciones en el orden que van a aparecer, cada una con su propósito de una línea. Ejemplo de esqueleto que suele funcionar para un sitio B2B/servicios:
+1. **Hero** — propuesta de valor específica + máximo 2 CTAs.
+2. **Casos / portfolio** — estructura Problema / Decisión / Resultado por caso.
+3. **Cómo trabajamos** — el proceso, en pasos numerados.
+4. **Criterio técnico** — qué se elige y qué NO se hace, y por qué (señal de confianza fuerte, casi nadie lo tiene).
+5. **Equipo** — nombres y roles reales, no "nuestro equipo de expertos".
+6. **Cómo empieza un proyecto** — pasos concretos tras el primer contacto, baja fricción.
+7. **Contacto** — un canal directo, dominio de email propio (nunca Gmail/Hotmail en un sitio de marca).
+
+## 5. Higiene de contacto
+- Email de contacto: `{{nombre}}@{{dominio propio}}` — nunca un email personal de proveedor público.
+- Si hay formulario con envío por email, verificar que el dominio de envío (`from:`) esté configurado/verificado en el proveedor (Resend, SendGrid, etc.).
