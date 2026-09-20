@@ -22,6 +22,31 @@ cp -r skills/{audit-landing,design-tokens,rebuild-section,motion-design} /ruta/a
 Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`, y completalo
 con los datos reales de esa marca — es la fuente de verdad que leen `design-tokens` y `rebuild-section`.
 
+`reference/awesome-design-md/` es un submódulo git — inicializalo después de clonar:
+
+```bash
+git submodule update --init reference/awesome-design-md
+```
+
+## Herramientas compañeras (no vendoreadas acá, se instalan aparte)
+
+Son plugins completos de Claude Code (marketplace propio), no un `SKILL.md` suelto — no tiene sentido
+forkearlos adentro de este repo, se instalan directo y quedan actualizables solos:
+
+```bash
+# Taste Skill — anti-slop de diseño frontend (88k★, github.com/Leonxlnx/taste-skill)
+/plugin marketplace add Leonxlnx/taste-skill
+/plugin install taste-skill@taste-skill
+
+# Humanizer — saca el tono "IA" de cualquier texto (50k★, github.com/blader/humanizer)
+/plugin marketplace add blader/humanizer
+/plugin install humanizer@humanizer
+```
+
+Usalos así: `taste-skill` antes/junto con `/rebuild-section` para que el resultado no caiga en los defaults
+típicos de IA (gradientes morados, Inter para todo, shadcn sin tocar); `humanizer` al final, sobre cualquier
+copy que haya escrito un agente (hero, casos, contacto) para que no suene a IA.
+
 ## El flujo
 
 ```
@@ -69,4 +94,6 @@ skills/
   motion-design/            (upstream: github.com/LottieFiles/motion-design-skill, MIT)
 templates/
   DESIGN.md.template
+reference/
+  awesome-design-md/       (submódulo git — github.com/VoltAgent/awesome-design-md, MIT)
 ```

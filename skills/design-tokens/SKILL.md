@@ -13,6 +13,8 @@ Buscá, en este orden de prioridad:
 2. Si no hay mockup, `DESIGN.md` (u otro doc de marca) en la raíz del proyecto.
 3. Si no hay ninguno de los dos, extraé y consolidá lo que YA está hardcodeado en el código (es probablemente inconsistente — ese es el problema a resolver).
 
+Si ninguna de las tres existe o el proyecto arranca de cero, mirá `reference/awesome-design-md/` (submódulo de este repo, colección real de +100 `DESIGN.md` de marcas conocidas) para tomar un punto de partida creíble en vez de inventar valores al azar.
+
 ## 2. Detectá la arquitectura CSS real antes de tocar nada
 No asumas Tailwind v3 con `tailwind.config.js`. Revisá si el proyecto usa Tailwind v4 con bloque `@theme` inline en el CSS global (sin archivo de config), CSS Modules, o variables CSS planas. Trabajá DENTRO del patrón que ya existe — no inventes un `tailwind.config.js` en un proyecto que usa `@theme`.
 
