@@ -16,6 +16,8 @@ Al ejecutar `/rebuild-section [nombre-sección]`:
 - Semántica clara: `<section>`, `<article>` por ítem repetido, JSON-LD si corresponde al tipo de contenido.
 - **Server Component por defecto.** Usá `'use client'` solo en el componente específico que necesita estado/efectos/una librería de animación — si solo una parte de la sección lo necesita (ej. un canvas generativo o un contador), aislala en su propio componente cliente chico en vez de convertir toda la sección.
 - Animaciones: CSS puro o reveals de scroll livianos por defecto. Si hay una skill de motion design instalada, invocala antes de animar.
+- **Efectos de alto impacto:** si la sección necesita un efecto visual que va más allá de CSS puro (partículas, gradient shaders, scroll narrativo, image displacement, text reveal), consultá la skill `fx-effects` antes de inventar uno desde cero — tiene 8 módulos verificados y probados. Leé `fx-effects/SKILL.md` para el catálogo completo y las reglas de integración.
+- Si el usuario eligió un prompt de `web-fx-kit/prompts/` para esta sección, leelo y seguí su estructura — ya tiene las referencias, anti-referencias y restricciones técnicas para ese tipo de sitio.
 - Si la sección monta contenido de forma asíncrona (ej. detrás de un fetch client-side), y el proyecto usa un observer compartido de scroll-reveal, verificá que ese observer también capture elementos que aparecen DESPUÉS del mount inicial (un `IntersectionObserver` que solo escanea una vez al montar se pierde todo lo que llega después vía fetch — esos elementos quedan con `opacity:0` para siempre si el CSS los esconde por defecto).
 
 ## 3. Verificá de verdad, no solo con el build
