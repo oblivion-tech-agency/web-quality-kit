@@ -1,39 +1,219 @@
-# DESIGN SYSTEM & BRAND GUIDELINES: {{NOMBRE DEL PROYECTO}}
+# DESIGN.md
 
-> Copiá este archivo a la raíz del proyecto como `DESIGN.md` y completá cada sección con datos reales.
-> Si más adelante existe un mockup visual aprobado (Figma, Claude Artifact, etc.), ese mockup manda por
-> sobre este documento — actualizá los valores acá para que no queden desincronizados (ver skill `design-tokens`).
+> Sistema de diseño en texto plano. Este archivo es la fuente de verdad visual del
+> proyecto: lo leen las personas y lo lee el agente (Claude Code, Cursor, Codex).
+>
+> **Cómo usarlo:** copiá este archivo a la raíz de cada proyecto nuevo y reemplazá
+> los valores de las secciones 0 a 5. No borres las secciones 6 a 9 — son las reglas
+> que evitan que el agente produzca el "look de IA genérica".
+>
+> Si más adelante existe un mockup visual aprobado (Figma, Claude Artifact, etc.),
+> ese mockup manda por sobre este documento — actualizá los valores acá para que no
+> queden desincronizados (ver skill `design-tokens`).
 
-## 1. Contexto de producto y marca
-- **Producto:** {{qué es, en una línea}}
-- **Arquetipo visual:** {{referencias — ej. "sobrio/técnico tipo Vercel/Linear/Stripe" o "cálido/editorial"}}
-- **Propuesta de valor:** {{la frase central que diferencia al negocio, no un genérico}}
-- **Público objetivo:** {{quién decide, qué le importa}}
+---
 
-## 2. Tokens de diseño
-- **Background principal:** `#______`
-- **Surface / cards:** `#______` (borde: `#______`)
-- **Texto primario:** `#______` (verificar contraste WCAG 4.5:1 mínimo contra el background)
-- **Texto secundario:** `#______`
-- **Accent:** `#______`
-- **Tipografía:** {{familia sans}} para cuerpo/títulos, {{familia mono}} para datos técnicos
-- **Espaciado:** sistema de 8px. Padding de sección: `{{valor desktop}}` / `{{valor mobile}}`
+## 0. Identidad del proyecto
 
-## 3. Reglas de movimiento y animación
-- **Filosofía:** {{ej. "reveals elegantes en CSS puro, costo cero de JS"}}
-- **Transiciones:** {{easing/duración por defecto}}
-- Evitar secuencias pesadas (3D, video) salvo que el momento lo justifique (ej. un intro de marca puntual).
+| Campo | Valor |
+|---|---|
+| Proyecto | `[NOMBRE]` |
+| Qué es | `[una frase: qué hace y para quién]` |
+| Tono | `[3 adjetivos: p.ej. sobrio, técnico, cálido]` |
+| Referencias | `[2-3 URLs, y qué se toma de cada una]` |
+| Anti-referencias | `[1-2 URLs y qué NO queremos de ellas]` |
 
-## 4. Estructura y narrativa del sitio
-Listá las secciones en el orden que van a aparecer, cada una con su propósito de una línea. Ejemplo de esqueleto que suele funcionar para un sitio B2B/servicios:
-1. **Hero** — propuesta de valor específica + máximo 2 CTAs.
-2. **Casos / portfolio** — estructura Problema / Decisión / Resultado por caso.
-3. **Cómo trabajamos** — el proceso, en pasos numerados.
-4. **Criterio técnico** — qué se elige y qué NO se hace, y por qué (señal de confianza fuerte, casi nadie lo tiene).
-5. **Equipo** — nombres y roles reales, no "nuestro equipo de expertos".
-6. **Cómo empieza un proyecto** — pasos concretos tras el primer contacto, baja fricción.
-7. **Contacto** — un canal directo, dominio de email propio (nunca Gmail/Hotmail en un sitio de marca).
+La línea de anti-referencias importa más de lo que parece: un agente sin restricción
+negativa converge siempre al mismo promedio.
 
-## 5. Higiene de contacto
-- Email de contacto: `{{nombre}}@{{dominio propio}}` — nunca un email personal de proveedor público.
-- Si hay formulario con envío por email, verificar que el dominio de envío (`from:`) esté configurado/verificado en el proveedor (Resend, SendGrid, etc.).
+---
+
+## 1. Color
+
+Definí los colores como **tokens**, nunca como literales sueltos en los componentes.
+
+```css
+:root {
+  /* Fondo y superficies */
+  --ground:        #______;   /* fondo base */
+  --ground-raised: #______;   /* tarjetas, paneles */
+
+  /* Texto */
+  --ink:           #______;   /* texto principal */
+  --ink-dim:       #______;   /* texto secundario */
+  --muted:         #______;   /* etiquetas, metadatos */
+
+  /* Acento — UNO. Si hay dos, el segundo es semántico, no decorativo */
+  --accent:        #______;
+  --accent-alt:    #______;
+
+  /* Líneas */
+  --line:          rgba(_____, _____, _____, 0.10);
+  --line-strong:   rgba(_____, _____, _____, 0.24);
+
+  /* Semánticos — separados del acento */
+  --ok:            #______;
+  --warn:          #______;
+  --crit:          #______;
+}
+```
+
+**Reglas:**
+
+- **Un solo acento.** Si sentís que necesitás tres, el problema es la jerarquía, no la paleta.
+- **Los neutros se eligen, no se heredan.** Un gris puro (`#808080`) lee como no-decidido.
+  Sesgá el neutro un par de grados hacia el acento o hacia su complemento.
+- **El color semántico no es el acento.** Verde/ámbar/rojo comunican estado; el acento
+  comunica marca. Mezclarlos rompe los dos.
+- **Contraste:** texto principal ≥ 7:1 contra su fondo, secundario ≥ 4.5:1. Verificalo,
+  no lo estimes.
+
+---
+
+## 2. Tipografía
+
+```
+Display   [FAMILIA]   — títulos. Se usa poco y grande.
+Cuerpo    [FAMILIA]   — texto corrido. Legible a 16px.
+Utilidad  [FAMILIA]   — mono. Etiquetas, datos, metadatos, números.
+```
+
+**Escala** (ratio 1.25, base 16px):
+
+| Rol | Tamaño | Interlínea | Tracking |
+|---|---|---|---|
+| Display XL | `clamp(3.5rem, 12vw, 8rem)` | 0.88 | −0.02em |
+| Display | `clamp(2rem, 5vw, 3.4rem)` | 1.02 | −0.015em |
+| Título | 1.5rem | 1.15 | 0 |
+| Cuerpo | 1rem | 1.6 | 0 |
+| Etiqueta | 0.7rem | 1.4 | **0.11em**, mayúsculas |
+
+**Reglas:**
+
+- Texto corrido a **65 caracteres** de ancho (`max-width: 58ch`). No más.
+- `text-wrap: balance` en todos los títulos.
+- Las etiquetas en mayúscula **siempre** llevan tracking; sin él parecen un error.
+- `font-variant-numeric: tabular-nums` en cualquier columna de números.
+- Tres familias es el techo. La cuarta nunca aporta.
+
+**Elegí familias con carácter.** Inter y Space Grotesk son la opción por defecto de todo
+agente — usarlas es declarar que no hubo decisión tipográfica. Alternativas con personalidad:
+Instrument Serif, Bodoni Moda, Fraunces, Archivo, Söhne, Redaction, Newsreader, GT Sectra.
+
+---
+
+## 3. Espaciado y grilla
+
+```css
+--s-1: 0.25rem;  --s-2: 0.5rem;   --s-3: 0.75rem;
+--s-4: 1rem;     --s-5: 1.5rem;   --s-6: 2rem;
+--s-7: 3rem;     --s-8: 4.5rem;   --s-9: 7rem;
+```
+
+- Ancho de columna: `62rem` máximo, centrado, con `24px` de margen lateral mínimo.
+- El espaciado entre hermanos se hace con `gap` en flex/grid, **nunca** con `margin`
+  por elemento (los márgenes colapsan y se duplican en silencio).
+- Ritmo vertical de sección: `clamp(4.5rem, 11vh, 8rem)` de `padding-block`.
+- Radio: **uno solo** para todo el proyecto, o ninguno. `rounded-lg` en todo aplana la jerarquía.
+
+---
+
+## 4. Movimiento
+
+| Gesto | Duración | Curva |
+|---|---|---|
+| Micro (hover, foco) | 120–180ms | `cubic-bezier(0.2, 0, 0.2, 1)` |
+| Transición de elemento | 320–450ms | `cubic-bezier(0.16, 1, 0.3, 1)` |
+| Entrada de sección | 600–900ms | `cubic-bezier(0.16, 1, 0.3, 1)` |
+| Seguimiento continuo (scroll, mouse) | — | lerp exponencial, ver abajo |
+
+**El lerp exponencial es el secreto del "peso" cinematográfico.** No es una curva CSS,
+es esta línea en el loop de render:
+
+```js
+valor += (objetivo - valor) * (1 - Math.pow(0.0015, dt));
+```
+
+Independiente del framerate (a diferencia de `v += (t - v) * 0.1`), que corre distinto
+a 60 y a 144 Hz. Base más chica = más pesado. `0.0015` es un buen punto de partida.
+
+**Reglas:**
+
+- Una sola orquestación fuerte por página, normalmente la entrada. El resto, micro.
+- Nada aparece desde `opacity: 0` esperando un observer: la primera pintura de la página
+  tiene que ser legible. Animá **desde** un estado visible.
+- `@media (prefers-reduced-motion: reduce)` desactiva todo lo continuo. No es opcional.
+
+---
+
+## 5. Presupuesto de performance
+
+Un sitio hermoso que tarda 12 segundos está muerto. Estos números son límites, no metas:
+
+| Métrica | Límite |
+|---|---|
+| JS inicial (comprimido) | 180 KB |
+| Peso total de la primera vista | 1.5 MB |
+| LCP en 4G simulado | < 2.5 s |
+| Frames en la escena WebGL | ≥ 50 fps en una laptop integrada |
+| Partículas por defecto | 60.000 escritorio / 35.000 móvil |
+| Texturas | `.webp` o `.avif`, nunca `.png` para fotos |
+| Video de fondo | `.webm` (VP9/AV1), < 3 MB, sin audio, `muted playsinline loop` |
+| Modelos 3D | `.glb` con compresión Draco, < 2 MB |
+
+Toda escena WebGL debe **degradar sola**: si el framerate cae por debajo de 32 fps
+durante 2 segundos, se recorta la densidad una vez y se deja constancia.
+
+---
+
+## 6. Qué NO hacer
+
+Esta lista existe porque son las salidas por defecto de todo modelo cuando no hay dirección.
+Si el resultado se parece a alguna, hay que rehacerlo:
+
+- Crema cálido `#F4F1EA` + serif display + acento terracota.
+- Negro casi puro con un único pop verde ácido o bermellón.
+- Héroe con gradiente violeta-a-azul sobre blanco.
+- Inter o Space Grotesk "porque es seguro".
+- Emojis como marcadores de sección.
+- Todo centrado.
+- `border-radius` + sombra + borde en cada bloque (todo es una tarjeta).
+- Marcadores numerados `01 / 02 / 03` en contenido que **no** es una secuencia.
+- Barra de acento a la izquierda de cada tarjeta.
+- Héroe de `100vh` que empuja la página entera fuera de la primera vista.
+
+---
+
+## 7. Estructura como información
+
+Los recursos estructurales (numeración, epígrafes, divisores, etiquetas) tienen que
+**codificar algo verdadero** del contenido, no decorarlo.
+
+- Numerá solo lo que es una secuencia real (un proceso, una cronología).
+- Una tarjeta implica "objeto separable". Si el contenido no lo es, no es una tarjeta.
+- Borde, relleno, radio y sombra son cuatro señales distintas de separación.
+  Gastalas por rol: levantá **una** cosa, no todas.
+
+---
+
+## 8. Accesibilidad (no negociable)
+
+- Foco visible en todo control: `outline: 2px solid var(--accent); outline-offset: 3px`.
+- Todo control interactivo es un `<button>` o `<a>` real, con `aria-pressed`/`aria-label`
+  cuando el texto visible no alcanza.
+- El canvas decorativo lleva `aria-hidden="true"` y nunca contiene información única.
+- La página funciona sin JavaScript al nivel de leer el contenido.
+- Objetivos táctiles ≥ 44×44 px.
+
+---
+
+## 9. Checklist antes de dar algo por terminado
+
+- [ ] La primera pintura es legible sin scrollear ni esperar animaciones.
+- [ ] No hay scroll horizontal a 360px de ancho.
+- [ ] Los dos temas (claro/oscuro) están definidos por tokens, o el proyecto se
+      compromete a uno solo de forma explícita.
+- [ ] Ningún color vive únicamente dentro de un `@media` o `[data-theme]`.
+- [ ] `prefers-reduced-motion` desactiva lo continuo.
+- [ ] Los números del presupuesto de performance se midieron, no se estimaron.
+- [ ] Ninguna decisión visual coincide con la sección 6.
