@@ -1,0 +1,1687 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>web-fx-kit · Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground:      #06070B;
+  --ground-2:    #0D0F17;
+  --ground-3:    #141620;
+  --ink:         #F0EEE9;
+  --ink-dim:     #C8C6C2;
+  --muted:       #7A7B8C;
+  --accent:      #E8A051;
+  --accent-2:    #5B4FCF;
+  --line:        rgba(240,238,233,0.08);
+  --line-strong: rgba(240,238,233,0.18);
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans:  "Archivo", system-ui, sans-serif;
+  --mono:  "DM Mono", ui-monospace, monospace;
+  --r: 6px;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ground);color:var(--ink);
+  font:15px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+
+/* ── Layout ── */
+.layout{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:var(--ground-2);
+  border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;
+  padding:1.6rem 0 2rem;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line-strong)}
+.sidebar-title{
+  font:500 0.62rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);padding:.2rem 1.4rem 1rem;
+}
+.sidebar-group{margin-bottom:.4rem}
+.sidebar-group-label{
+  font:500 0.58rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);padding:.9rem 1.4rem .4rem;display:block;
+}
+.sidebar a{
+  display:flex;align-items:center;gap:.55rem;
+  padding:.42rem 1.4rem;
+  font:0.72rem/1.3 var(--mono);color:var(--muted);
+  transition:color .15s,background .15s;
+  border-radius:0;
+}
+.sidebar a:hover{color:var(--ink);background:rgba(240,238,233,.04)}
+.sidebar a.active{color:var(--ink);background:rgba(232,160,81,.06)}
+.sidebar a .num{color:var(--line-strong);font-size:.6rem;width:1.6rem;flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* ── Main ── */
+.main{flex:1;min-width:0;padding:2.4rem 2.8rem 4rem}
+.main-header{margin-bottom:3rem;padding-bottom:1.8rem;border-bottom:1px solid var(--line)}
+.main-header h1{font:400 clamp(2.2rem,5vw,3.8rem)/1 var(--serif);letter-spacing:-.02em;margin-bottom:.7rem}
+.main-header p{color:var(--ink-dim);max-width:52ch;font-size:.9rem}
+
+.section-block{margin-bottom:3.5rem}
+.section-block-title{
+  font:500 .58rem/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1.2rem;padding-bottom:.7rem;
+  border-bottom:1px solid var(--line);
+}
+
+/* ── Effect Grid ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.2rem;
+}
+.card{
+  background:var(--ground-2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.card:hover{border-color:var(--line-strong)}
+.card-preview{
+  position:relative;height:170px;
+  background:var(--ground-3);
+  overflow:hidden;cursor:pointer;
+}
+.card-preview canvas{display:block;width:100%;height:100%}
+.card-body{padding:1rem 1.1rem 1.1rem}
+.card-num{
+  font:.58rem var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.35rem;
+}
+.card-title{
+  font:400 1rem/1.15 var(--serif);color:var(--ink);margin-bottom:.45rem;
+}
+.card-desc{font:.78rem/1.55 var(--sans);color:var(--muted);max-width:44ch}
+.card-tag{
+  display:inline-block;margin-top:.75rem;
+  font:.6rem var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ground);background:var(--accent-2);
+  border-radius:999px;padding:.28rem .7rem;
+}
+.card-tag.gpu{background:var(--accent-2)}
+.card-tag.dom{background:#2a6b4c}
+.card-tag.css{background:#4a3a7c}
+.card-tag.tokens{background:#6b4a2a}
+.card-tag.react{background:#1a5a7c}
+
+/* ── Demo-specific previews ── */
+.preview-center{display:flex;align-items:center;justify-content:center;height:100%;width:100%}
+
+/* 01 Particles */
+.particles-demo{position:relative;width:100%;height:100%}
+
+/* 02 Gradient */
+.gradient-demo{width:100%;height:100%;animation:gradShift 4s ease infinite}
+@keyframes gradShift{
+  0%  {background:radial-gradient(ellipse at 20% 50%,#5B4FCF 0%,#06070B 60%)}
+  33% {background:radial-gradient(ellipse at 80% 30%,#E8A051 0%,#06070B 60%)}
+  66% {background:radial-gradient(ellipse at 50% 80%,#2a6b9c 0%,#06070B 60%)}
+  100%{background:radial-gradient(ellipse at 20% 50%,#5B4FCF 0%,#06070B 60%)}
+}
+
+/* 03 Text Reveal */
+.text-reveal-demo{
+  padding:1.2rem;display:flex;flex-wrap:wrap;gap:.4rem .5rem;
+  align-items:flex-start;align-content:center;
+}
+.tr-word{
+  font:400 1.1rem/1 var(--serif);
+  opacity:0;transform:translateY(8px);
+  animation:trIn .5s forwards;
+}
+.text-reveal-demo:hover .tr-word{animation:trIn .5s forwards}
+.tr-word:nth-child(1){animation-delay:.05s}
+.tr-word:nth-child(2){animation-delay:.12s}
+.tr-word:nth-child(3){animation-delay:.19s}
+.tr-word:nth-child(4){animation-delay:.26s}
+.tr-word:nth-child(5){animation-delay:.33s}
+.tr-word:nth-child(6){animation-delay:.40s}
+.tr-word:nth-child(7){animation-delay:.47s}
+.tr-word:nth-child(8){animation-delay:.54s}
+@keyframes trIn{to{opacity:1;transform:translateY(0)}}
+
+/* 04 Smooth Scroll */
+.smooth-scroll-demo{padding:1rem;overflow:hidden;position:relative}
+.ss-bar{
+  width:3px;background:var(--line-strong);position:absolute;right:12px;top:10px;bottom:10px;border-radius:3px;
+}
+.ss-thumb{
+  width:3px;height:28px;background:var(--accent);border-radius:3px;position:absolute;right:0;top:0;
+  animation:ssScroll 3s ease-in-out infinite;
+}
+@keyframes ssScroll{
+  0%,5%{top:0}60%,65%{top:calc(100% - 28px)}100%{top:0}
+}
+.ss-lines{display:flex;flex-direction:column;gap:.5rem}
+.ss-line{height:8px;border-radius:3px;background:var(--line-strong)}
+.ss-line:nth-child(1){width:90%}
+.ss-line:nth-child(2){width:70%}
+.ss-line:nth-child(3){width:85%}
+.ss-line:nth-child(4){width:55%}
+.ss-line:nth-child(5){width:80%}
+.ss-content{animation:ssMove 3s ease-in-out infinite;will-change:transform}
+@keyframes ssMove{
+  0%,5%{transform:translateY(0)}
+  60%,65%{transform:translateY(-40px)}
+  100%{transform:translateY(0)}
+}
+
+/* 05 Magnetic */
+.magnetic-demo{display:flex;align-items:center;justify-content:center;gap:1.2rem;height:100%}
+.mag-btn{
+  font:.7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;
+  padding:.7rem 1.3rem;background:none;cursor:pointer;
+  transition:transform .25s cubic-bezier(.23,1,.32,1);
+}
+.mag-btn:nth-child(1){animation:magPull1 3s ease-in-out infinite}
+.mag-btn:nth-child(2){animation:magPull2 3s ease-in-out infinite;background:var(--accent);color:var(--ground);border-color:var(--accent)}
+@keyframes magPull1{
+  0%,100%{transform:translate(0,0)}
+  40%,60%{transform:translate(-6px,-4px)}
+}
+@keyframes magPull2{
+  0%,100%{transform:translate(0,0)}
+  40%,60%{transform:translate(5px,3px)}
+}
+.mag-cursor{
+  width:28px;height:28px;border:1.5px solid var(--accent);border-radius:50%;
+  position:absolute;pointer-events:none;
+  animation:magCursor 3s ease-in-out infinite;
+}
+@keyframes magCursor{
+  0%{top:40%;left:30%}30%{top:35%;left:52%}60%{top:42%;left:48%}100%{top:40%;left:30%}
+}
+
+/* 06 Image Displacement */
+.disp-demo{width:100%;height:100%;position:relative;overflow:hidden}
+.disp-a{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#1a1230 0%,#5B4FCF 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.disp-b{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#3A1F0E 0%,#E8A051 100%);
+  display:flex;align-items:center;justify-content:center;
+  clip-path:inset(0 100% 0 0);
+  animation:dispReveal 3.5s ease-in-out infinite;
+}
+@keyframes dispReveal{
+  0%,15%{clip-path:inset(0 100% 0 0)}
+  45%,55%{clip-path:inset(0 0% 0 0)}
+  85%,100%{clip-path:inset(0 100% 0 0)}
+}
+.disp-noise{
+  position:absolute;inset:0;opacity:.08;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.disp-label{font:.65rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(240,238,233,.6)}
+
+/* 07 Scroll Narrative */
+.narr-demo{display:grid;grid-template-columns:1fr 1fr;height:100%;gap:0}
+.narr-canvas{position:relative;overflow:hidden;animation:narrBg 6s ease-in-out infinite}
+@keyframes narrBg{
+  0%,100%{background:radial-gradient(ellipse at 50% 50%,#5B4FCF 0%,#06070B 70%)}
+  50%{background:radial-gradient(ellipse at 50% 50%,#E8A051 0%,#06070B 70%)}
+}
+.narr-steps{display:flex;flex-direction:column;justify-content:center;gap:.5rem;padding:.8rem 1rem;background:rgba(6,7,11,.5)}
+.narr-step{
+  font:.65rem/1.4 var(--mono);color:var(--muted);
+  border-left:2px solid var(--line);padding-left:.7rem;
+  transition:all .4s;
+}
+.narr-step.active{color:var(--ink);border-left-color:var(--accent)}
+
+/* 08 Post-FX */
+.postfx-demo{width:100%;height:100%;position:relative;overflow:hidden}
+.pfx-scene{
+  width:100%;height:100%;
+  background:radial-gradient(ellipse at 50% 50%,#3a2090 0%,#06070B 65%);
+  animation:pfxPulse 3s ease-in-out infinite;
+}
+@keyframes pfxPulse{
+  0%,100%{filter:brightness(1) saturate(1)}
+  50%{filter:brightness(1.3) saturate(1.6)}
+}
+.pfx-bloom{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(91,79,207,.6) 0%,transparent 60%);
+  filter:blur(12px);
+  animation:pfxBloom 3s ease-in-out infinite;
+}
+@keyframes pfxBloom{
+  0%,100%{opacity:.4;transform:scale(.9)}
+  50%{opacity:1;transform:scale(1.1)}
+}
+.pfx-aberr{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(255,0,0,.06) 0%,transparent 30%,transparent 70%,rgba(0,0,255,.06) 100%);
+  animation:pfxAberr 2s linear infinite;
+}
+@keyframes pfxAberr{
+  0%,100%{transform:translateX(-2px)}
+  50%{transform:translateX(2px)}
+}
+.pfx-vignette{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(0,0,0,.7) 100%);
+}
+.pfx-grain{position:absolute;inset:0;opacity:.12;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  animation:pfxGrain .12s steps(1) infinite;
+}
+@keyframes pfxGrain{
+  0%{background-position:0 0}
+  25%{background-position:5% 10%}
+  50%{background-position:-3% 7%}
+  75%{background-position:8% -4%}
+  100%{background-position:0 0}
+}
+.pfx-dot{
+  position:absolute;top:50%;left:50%;
+  width:60px;height:60px;border-radius:50%;
+  background:var(--accent-2);
+  transform:translate(-50%,-50%);
+  animation:pfxDot 3s ease-in-out infinite;
+}
+@keyframes pfxDot{
+  0%,100%{width:50px;height:50px;opacity:.9}
+  50%{width:80px;height:80px;opacity:1}
+}
+
+/* Motion Personalities */
+.mp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.9rem}
+.mp-card{
+  background:var(--ground-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:1.2rem 1.1rem;cursor:pointer;
+  transition:transform .3s,border-color .3s;
+  position:relative;overflow:hidden;
+}
+.mp-card-playful{animation:mpPlayful 2s ease-in-out infinite}
+@keyframes mpPlayful{
+  0%,100%{transform:rotate(-1deg) scale(1)}
+  25%{transform:rotate(1.5deg) scale(1.02)}
+  75%{transform:rotate(-0.5deg) scale(.99)}
+}
+.mp-card-premium{transition:transform .8s cubic-bezier(.16,1,.3,1)}
+.mp-card-premium:hover{transform:translateY(-4px)}
+.mp-card-corporate{transition:transform .22s ease}
+.mp-card-corporate:hover{transform:translateY(-2px)}
+.mp-card-energetic{animation:mpEnergetic 1.5s ease-in-out infinite}
+@keyframes mpEnergetic{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.03)}
+}
+.mp-label{font:.6rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.mp-name{font:400 1.1rem/1.1 var(--serif);margin-bottom:.6rem}
+.mp-curve{
+  width:100%;height:40px;position:relative;margin-bottom:.6rem;
+}
+.mp-curve svg{width:100%;height:100%}
+.mp-desc{font:.72rem/1.4 var(--sans);color:var(--muted)}
+.mp-accent{position:absolute;top:0;right:0;width:40px;height:40px;border-radius:0 0 0 999px;opacity:.15}
+
+/* Stagger Patterns */
+.stagger-demo{padding:1rem;display:flex;flex-direction:column;gap:.7rem}
+.stagger-group{display:flex;gap:.5rem;align-items:center}
+.stagger-label{font:.6rem var(--mono);color:var(--muted);width:70px;flex-shrink:0;letter-spacing:.08em;text-transform:uppercase}
+.stagger-dots{display:flex;gap:.3rem}
+.stagger-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--accent-2);opacity:0;
+}
+.stagger-micro .stagger-dot{animation:staggerIn .15s forwards}
+.stagger-standard .stagger-dot{animation:staggerIn .22s forwards}
+.stagger-dramatic .stagger-dot{animation:staggerIn .35s forwards}
+@keyframes staggerIn{to{opacity:1}}
+
+/* Animated States */
+.states-demo{display:flex;flex-wrap:wrap;gap:.7rem;padding:1rem;align-items:center}
+.state-btn{
+  font:.65rem var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  border-radius:999px;padding:.55rem 1rem;cursor:pointer;border:1px solid;
+  font-size:.65rem;
+}
+.state-success{
+  color:#2a6b4c;border-color:#2a6b4c;background:rgba(42,107,76,.1);
+  animation:successPulse 2s ease-in-out infinite;
+}
+@keyframes successPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(42,107,76,.3)}
+  50%{box-shadow:0 0 0 6px rgba(42,107,76,0)}
+}
+.state-error{
+  color:#b03a3a;border-color:#b03a3a;background:rgba(176,58,58,.1);
+  animation:errorShake 2.5s ease-in-out infinite;
+}
+@keyframes errorShake{
+  0%,80%,100%{transform:translateX(0)}
+  84%{transform:translateX(-5px)}
+  88%{transform:translateX(5px)}
+  92%{transform:translateX(-4px)}
+  96%{transform:translateX(4px)}
+}
+.state-press{
+  color:var(--ink);border-color:var(--line-strong);background:none;
+  animation:btnPress 2s ease-in-out infinite;
+}
+@keyframes btnPress{
+  0%,40%,100%{transform:scale(1)}
+  55%{transform:scale(.94)}
+  65%{transform:scale(1.02)}
+  75%{transform:scale(1)}
+}
+.state-card-entrance{
+  background:var(--ground-3);border:1px solid var(--line);border-radius:var(--r);
+  padding:.6rem .9rem;font:.65rem var(--mono);color:var(--ink);
+  animation:cardEntrance 3s ease-in-out infinite;
+}
+@keyframes cardEntrance{
+  0%,70%{opacity:0;transform:translateY(10px)}
+  85%,95%{opacity:1;transform:translateY(0)}
+  100%{opacity:0;transform:translateY(10px)}
+}
+
+/* Timing Table */
+.timing-table{width:100%;border-collapse:collapse;font:.75rem/1.5 var(--mono)}
+.timing-table th{
+  font:.6rem var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:.5rem .8rem;text-align:left;
+  border-bottom:1px solid var(--line);
+}
+.timing-table td{padding:.5rem .8rem;border-bottom:1px solid var(--line);color:var(--ink-dim)}
+.timing-table td:first-child{color:var(--ink)}
+.timing-table tr:last-child td{border-bottom:none}
+.timing-bar{
+  display:inline-block;height:3px;background:var(--accent-2);
+  border-radius:3px;vertical-align:middle;margin-right:.5rem;
+}
+
+/* Tokens */
+.tokens-colors{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1.2rem}
+.token-swatch{
+  display:flex;flex-direction:column;gap:.4rem;min-width:80px;
+}
+.token-swatch-color{
+  width:100%;height:44px;border-radius:4px;
+  border:1px solid var(--line);
+}
+.token-swatch-name{font:.58rem var(--mono);letter-spacing:.08em;color:var(--muted)}
+.token-swatch-val{font:.6rem var(--mono);color:var(--ink-dim)}
+
+.spacing-scale{display:flex;align-items:flex-end;gap:.7rem;padding:1.2rem;background:var(--ground-2);border:1px solid var(--line);border-radius:var(--r);margin-top:.8rem}
+.space-block{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.space-visual{background:var(--accent-2);border-radius:2px;width:100%;min-width:12px}
+.space-label{font:.55rem var(--mono);color:var(--muted);letter-spacing:.08em}
+
+/* Typography */
+.type-scale{display:flex;flex-direction:column;gap:.8rem}
+.type-sample{border-bottom:1px solid var(--line);padding-bottom:.8rem;display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap}
+.type-sample-label{font:.58rem var(--mono);color:var(--muted);width:80px;flex-shrink:0;letter-spacing:.1em;text-transform:uppercase}
+.type-sample-text{color:var(--ink)}
+.type-sample-meta{font:.6rem var(--mono);color:var(--muted)}
+.type-serif .type-sample-text{font-family:var(--serif)}
+.type-sans  .type-sample-text{font-family:var(--sans)}
+
+/* Custom Cursor Demo */
+.cursor-demo{
+  height:100%;display:flex;align-items:center;justify-content:center;gap:1.5rem;
+  cursor:none;position:relative;
+}
+.fake-cursor{
+  width:32px;height:32px;border:1.5px solid var(--accent);border-radius:50%;
+  position:absolute;pointer-events:none;
+  animation:fakeCursor 4s ease-in-out infinite;
+}
+.fake-cursor-dot{
+  width:4px;height:4px;background:var(--accent);border-radius:50%;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+}
+@keyframes fakeCursor{
+  0%{top:30%;left:25%;width:32px;height:32px;opacity:1}
+  30%{top:45%;left:55%;width:44px;height:44px}
+  60%{top:55%;left:40%;width:32px;height:32px}
+  100%{top:30%;left:25%;width:32px;height:32px;opacity:1}
+}
+.cursor-target{
+  font:.65rem var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink);border:1px solid var(--line-strong);border-radius:999px;
+  padding:.6rem 1rem;
+}
+
+/* Parallax Demo */
+.parallax-demo{position:relative;height:100%;overflow:hidden}
+.parallax-layer{
+  position:absolute;width:100%;height:120%;
+  display:flex;align-items:center;justify-content:center;
+}
+.parallax-layer-bg{
+  animation:parallaxSlow 6s ease-in-out infinite;
+  top:-10%;
+}
+.parallax-layer-mid{
+  animation:parallaxMid 6s ease-in-out infinite;
+}
+.parallax-layer-fg{
+  animation:parallaxFast 6s ease-in-out infinite;
+}
+@keyframes parallaxSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes parallaxMid {0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+@keyframes parallaxFast{0%,100%{transform:translateY(0)}50%{transform:translateY(-28px)}}
+.plx-circle{border-radius:50%;position:absolute}
+
+/* Pipeline Cards */
+.pipeline-card{
+  background:var(--ground-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:1.1rem;
+}
+.pipeline-flow{display:flex;align-items:center;gap:.5rem;margin:1rem 0;flex-wrap:wrap}
+.pf-step{
+  font:.62rem var(--mono);letter-spacing:.08em;color:var(--ink);
+  background:var(--ground-3);border:1px solid var(--line-strong);
+  border-radius:4px;padding:.3rem .7rem;
+}
+.pf-arrow{color:var(--muted);font-size:.8rem}
+.pf-result{
+  font:.62rem var(--mono);letter-spacing:.08em;color:var(--ground);
+  background:var(--accent);border-radius:4px;padding:.3rem .7rem;
+}
+
+/* Tools */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.9rem}
+.tool-card{
+  background:var(--ground-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:1.1rem;
+}
+.tool-cmd{
+  font:.75rem var(--mono);color:var(--accent);letter-spacing:.06em;
+  background:var(--ground-3);border-radius:4px;padding:.3rem .7rem;
+  display:inline-block;margin-bottom:.7rem;
+}
+.tool-title{font:400 .95rem/1.2 var(--serif);margin-bottom:.4rem}
+.tool-desc{font:.75rem/1.5 var(--sans);color:var(--muted)}
+
+/* Anti-patterns */
+.antipattern-list{display:flex;flex-direction:column;gap:.7rem}
+.ap-item{
+  display:flex;align-items:flex-start;gap:.9rem;
+  background:var(--ground-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:.9rem 1rem;
+}
+.ap-num{
+  font:.6rem var(--mono);color:var(--muted);
+  background:var(--ground-3);border-radius:4px;
+  padding:.2rem .5rem;flex-shrink:0;white-space:nowrap;
+}
+.ap-bad{font:.82rem/1.4 var(--sans);color:#b03a3a;margin-bottom:.25rem}
+.ap-bad::before{content:"✗ "}
+.ap-good{font:.78rem/1.4 var(--sans);color:#2a6b4c}
+.ap-good::before{content:"✓ "}
+
+/* Demo link button */
+.demo-link{
+  display:inline-flex;align-items:center;gap:.5rem;margin-top:.8rem;
+  font:.62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);border:1px solid rgba(232,160,81,.3);border-radius:999px;
+  padding:.35rem .9rem;transition:border-color .2s,background .2s;
+}
+.demo-link:hover{border-color:var(--accent);background:rgba(232,160,81,.06)}
+.demo-link svg{width:10px;height:10px}
+
+/* Responsive */
+@media(max-width:860px){
+  .sidebar{display:none}
+  .main{padding:1.5rem 1.2rem 3rem}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-title">web-fx-kit</div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Efectos Visuales</span>
+    <a href="#s-particles"><span class="num">01</span>Particles Morph</a>
+    <a href="#s-gradient"><span class="num">02</span>Gradient Backdrop</a>
+    <a href="#s-textreveal"><span class="num">03</span>Text Reveal</a>
+    <a href="#s-smoothscroll"><span class="num">04</span>Smooth Scroll</a>
+    <a href="#s-magnetic"><span class="num">05</span>Magnetic</a>
+    <a href="#s-displacement"><span class="num">06</span>Image Displacement</a>
+    <a href="#s-narrative"><span class="num">07</span>Scroll Narrative</a>
+    <a href="#s-postfx"><span class="num">08</span>Post-FX</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Motion Design</span>
+    <a href="#s-personalities"><span class="num">09</span>4 Personalities</a>
+    <a href="#s-layers"><span class="num">10</span>3 Capas</a>
+    <a href="#s-stagger"><span class="num">11</span>Stagger Patterns</a>
+    <a href="#s-states"><span class="num">12</span>Animated States</a>
+    <a href="#s-timing"><span class="num">13</span>Timing Calibrado</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Design System</span>
+    <a href="#s-tokens"><span class="num">14</span>Tokens CSS</a>
+    <a href="#s-typography"><span class="num">15</span>Tipografías</a>
+    <a href="#s-typescale"><span class="num">16</span>Escala clamp()</a>
+    <a href="#s-spacing"><span class="num">17</span>Espaciado 8px</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Componentes React</span>
+    <a href="#s-react-components"><span class="num">18</span>ParticlesMorph</a>
+    <a href="#s-react-components"><span class="num">19</span>GradientBackdrop</a>
+    <a href="#s-react-components"><span class="num">20</span>ImageDisplacement</a>
+    <a href="#s-react-components"><span class="num">21</span>NarrativeSection</a>
+    <a href="#s-hooks"><span class="num">22</span>Hooks</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Cursor & Scroll</span>
+    <a href="#s-cursor"><span class="num">23</span>Custom Cursor</a>
+    <a href="#s-magnetic-expanded"><span class="num">24</span>Magnetic Config</a>
+    <a href="#s-scroll-narrative"><span class="num">25</span>Scroll Narrativo</a>
+    <a href="#s-parallax"><span class="num">26</span>Parallax attr</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Assets & Pipeline</span>
+    <a href="#s-pipeline"><span class="num">27</span>Pipeline Imagen IA</a>
+    <a href="#s-pipeline"><span class="num">28</span>Pipeline Video</a>
+    <a href="#s-pipeline"><span class="num">29</span>Pipeline 3D</a>
+    <a href="#s-pipeline"><span class="num">30</span>Subset Fonts</a>
+  </div>
+
+  <div class="sidebar-group">
+    <span class="sidebar-group-label">Herramientas</span>
+    <a href="#s-tools"><span class="num">31</span>/audit-landing</a>
+    <a href="#s-tools"><span class="num">32</span>/design-tokens</a>
+    <a href="#s-tools"><span class="num">33</span>/rebuild-section</a>
+    <a href="#s-tools"><span class="num">34</span>7 Prompts por sitio</a>
+    <a href="#s-antipatterns"><span class="num">35</span>Anti-Patterns</a>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <div class="main-header">
+    <h1>FX Showcase</h1>
+    <p>35 módulos, efectos y herramientas. Usalo como referencia antes de elegir qué aplicar en cada proyecto.</p>
+    <a class="demo-link" href="../web-fx-kit/demo/index.html" target="_blank">
+      Ver demo técnica completa
+      <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8L8 2M4 2h4v4"/></svg>
+    </a>
+  </div>
+
+  <!-- ═══ EFECTOS VISUALES ═══ -->
+  <div class="section-block">
+    <div class="section-block-title">Efectos Visuales GPU / DOM</div>
+    <div class="grid">
+
+      <!-- 01 Particles Morph -->
+      <div class="card" id="s-particles">
+        <div class="card-preview">
+          <canvas id="c-particles" style="display:block;width:100%;height:100%"></canvas>
+        </div>
+        <div class="card-body">
+          <div class="card-num">01</div>
+          <div class="card-title">Particles Morph</div>
+          <div class="card-desc">60k partículas GPU interpolando entre 8 formas 3D. Scroll → secuencia automática. Bloom y aberración sobre Three.js.</div>
+          <span class="card-tag gpu">GPU · Three.js</span>
+          <a class="demo-link" href="../web-fx-kit/demo/index.html#s-particles" target="_blank">
+            Live demo
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8L8 2M4 2h4v4"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 02 Gradient Backdrop -->
+      <div class="card" id="s-gradient">
+        <div class="card-preview">
+          <div class="gradient-demo"></div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">02</div>
+          <div class="card-title">Gradient Backdrop</div>
+          <div class="card-desc">Fondo WebGL con ruido Simplex que reacciona al mouse. 6 KB, cero dependencias, fallback CSS si no hay WebGL.</div>
+          <span class="card-tag gpu">GPU · WebGL crudo</span>
+        </div>
+      </div>
+
+      <!-- 03 Text Reveal -->
+      <div class="card" id="s-textreveal">
+        <div class="card-preview">
+          <div class="text-reveal-demo preview-center" id="tr-demo">
+            <span class="tr-word">El</span>
+            <span class="tr-word">texto</span>
+            <span class="tr-word">entra</span>
+            <span class="tr-word">palabra</span>
+            <span class="tr-word">por</span>
+            <span class="tr-word">palabra,</span>
+            <span class="tr-word">escalonado.</span>
+            <span class="tr-word">Siempre.</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">03</div>
+          <div class="card-title">Text Reveal</div>
+          <div class="card-desc">Revelado escalonado por palabras, caracteres o líneas. Accesible: el DOM original se mantiene en .sr-only.</div>
+          <span class="card-tag dom">DOM puro</span>
+        </div>
+      </div>
+
+      <!-- 04 Smooth Scroll -->
+      <div class="card" id="s-smoothscroll">
+        <div class="card-preview">
+          <div class="smooth-scroll-demo preview-center" style="width:100%;height:100%;position:relative;padding:1.2rem 2rem 1.2rem 1.2rem">
+            <div class="ss-bar"><div class="ss-thumb"></div></div>
+            <div class="ss-content">
+              <div class="ss-lines">
+                <div class="ss-line" style="width:85%"></div>
+                <div class="ss-line" style="width:70%"></div>
+                <div class="ss-line" style="width:90%"></div>
+                <div class="ss-line" style="width:60%"></div>
+                <div class="ss-line" style="width:78%"></div>
+                <div class="ss-line" style="width:88%"></div>
+                <div class="ss-line" style="width:55%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">04</div>
+          <div class="card-title">Smooth Scroll</div>
+          <div class="card-desc">Lerp exponencial independiente de FPS. El canvas de fondo vive fuera del contenedor: sin romper position:fixed.</div>
+          <span class="card-tag dom">DOM · rAF</span>
+        </div>
+      </div>
+
+      <!-- 05 Magnetic -->
+      <div class="card" id="s-magnetic">
+        <div class="card-preview">
+          <div class="magnetic-demo preview-center" style="position:relative;height:100%">
+            <div class="mag-cursor"></div>
+            <button class="mag-btn">Contacto</button>
+            <button class="mag-btn">Ver trabajo</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">05</div>
+          <div class="card-title">Magnetic</div>
+          <div class="card-desc">El cursor atrae elementos interactivos. Vuelta con el mismo lerp de salida — no spring CSS, tiene masa real.</div>
+          <span class="card-tag dom">DOM · pointer events</span>
+        </div>
+      </div>
+
+      <!-- 06 Image Displacement -->
+      <div class="card" id="s-displacement">
+        <div class="card-preview">
+          <div class="disp-demo">
+            <div class="disp-a">
+              <span class="disp-label">Imagen A</span>
+            </div>
+            <div class="disp-b">
+              <span class="disp-label">Imagen B</span>
+            </div>
+            <div class="disp-noise"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">06</div>
+          <div class="card-title">Image Displacement</div>
+          <div class="card-desc">Transición entre imágenes con shader de desplazamiento. El hover activa la interpolación. AVIF &lt;250 KB en producción.</div>
+          <span class="card-tag gpu">WebGL · GLSL</span>
+        </div>
+      </div>
+
+      <!-- 07 Scroll Narrative -->
+      <div class="card" id="s-narrative">
+        <div class="card-preview">
+          <div class="narr-demo">
+            <div class="narr-canvas" id="narr-canvas"></div>
+            <div class="narr-steps">
+              <div class="narr-step active" id="ns-0">Paso 01 — Índigo</div>
+              <div class="narr-step" id="ns-1">Paso 02 — Verde</div>
+              <div class="narr-step" id="ns-2">Paso 03 — Magenta</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">07</div>
+          <div class="card-title">Scroll Narrative</div>
+          <div class="card-desc">Canvas sticky + bloques de texto que pasan encima interpolando estados. Colores, bloom, cualquier valor numérico.</div>
+          <span class="card-tag dom">DOM · scroll</span>
+        </div>
+      </div>
+
+      <!-- 08 Post-FX -->
+      <div class="card" id="s-postfx">
+        <div class="card-preview">
+          <div class="postfx-demo">
+            <div class="pfx-scene">
+              <div class="pfx-dot"></div>
+            </div>
+            <div class="pfx-bloom"></div>
+            <div class="pfx-aberr"></div>
+            <div class="pfx-vignette"></div>
+            <div class="pfx-grain"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">08</div>
+          <div class="card-title">Post-FX</div>
+          <div class="card-desc">Bloom, aberración cromática, viñeta y grano sobre cualquier escena Three.js. Configurable por sliders en runtime.</div>
+          <span class="card-tag gpu">GPU · Three.js · GLSL</span>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div>
+
+  <!-- ═══ MOTION DESIGN ═══ -->
+  <div class="section-block">
+    <div class="section-block-title">Motion Design — Sistema Completo</div>
+
+    <!-- 09 Personalities -->
+    <div id="s-personalities" style="margin-bottom:1.5rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:1rem;letter-spacing:.08em">09 · MOTION PERSONALITIES</p>
+      <div class="mp-grid">
+
+        <div class="mp-card mp-card-playful">
+          <div class="mp-accent" style="background:#E8A051"></div>
+          <div class="mp-label">Playful</div>
+          <div class="mp-name">Lúdico</div>
+          <div class="mp-curve">
+            <svg viewBox="0 0 100 40" fill="none">
+              <path d="M0 38 C15 38 20 2 35 2 C50 2 55 38 70 38 C85 38 90 10 100 2" stroke="#E8A051" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="mp-desc">Bouncy, overshoots leves. Botones que respiran.</div>
+        </div>
+
+        <div class="mp-card mp-card-premium" style="cursor:pointer">
+          <div class="mp-accent" style="background:#5B4FCF"></div>
+          <div class="mp-label">Premium</div>
+          <div class="mp-name">Premium</div>
+          <div class="mp-curve">
+            <svg viewBox="0 0 100 40" fill="none">
+              <path d="M0 38 C40 38 60 2 100 2" stroke="#5B4FCF" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="mp-desc">Entrada lenta, aceleración suave. Hover = -4px.</div>
+        </div>
+
+        <div class="mp-card mp-card-corporate" style="cursor:pointer">
+          <div class="mp-accent" style="background:#4a8a5c"></div>
+          <div class="mp-label">Corporate</div>
+          <div class="mp-name">Corporativo</div>
+          <div class="mp-curve">
+            <svg viewBox="0 0 100 40" fill="none">
+              <path d="M0 38 L20 38 C40 38 50 2 70 2 L100 2" stroke="#4a8a5c" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="mp-desc">Preciso, sin adornos. ease-out 220ms.</div>
+        </div>
+
+        <div class="mp-card mp-card-energetic">
+          <div class="mp-accent" style="background:#b03a3a"></div>
+          <div class="mp-label">Energetic</div>
+          <div class="mp-name">Energético</div>
+          <div class="mp-curve">
+            <svg viewBox="0 0 100 40" fill="none">
+              <path d="M0 20 L10 2 L20 36 L30 8 L40 32 L55 2 L70 38 L85 10 L100 20" stroke="#b03a3a" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="mp-desc">Pulso, escala, vibración. Máximo impacto.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 10 Capas -->
+    <div id="s-layers" style="margin-bottom:1.5rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">10 · 3 CAPAS DE ANIMACIÓN</p>
+      <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem">Primary</div>
+          <div style="font:400 .95rem var(--serif);margin-bottom:.5rem">Elemento principal</div>
+          <div style="font:.72rem var(--sans);color:var(--muted)">La animación que el usuario vino a ver. Una por sección. Easing pronunciado, duración larga.</div>
+          <div style="margin-top:.7rem;font:.62rem var(--mono);color:var(--ink-dim)">cubic-bezier(.16,1,.3,1) · 600–900ms</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--accent-2);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem">Secondary</div>
+          <div style="font:400 .95rem var(--serif);margin-bottom:.5rem">Apoya al primario</div>
+          <div style="font:.72rem var(--sans);color:var(--muted)">Entra con stagger respecto al principal. Subtítulos, labels, íconos complementarios.</div>
+          <div style="margin-top:.7rem;font:.62rem var(--mono);color:var(--ink-dim)">ease-out · 300–500ms · delay +80ms</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem">Ambient</div>
+          <div style="font:400 .95rem var(--serif);margin-bottom:.5rem">Siempre activo</div>
+          <div style="font:.72rem var(--sans);color:var(--muted)">Loop continuo de baja intensidad. Gradient, partículas, cursor. No distrae del contenido.</div>
+          <div style="margin-top:.7rem;font:.62rem var(--mono);color:var(--ink-dim)">linear · ∞ · opacity &lt; 0.3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11 Stagger -->
+    <div id="s-stagger" style="margin-bottom:1.5rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">11 · STAGGER PATTERNS</p>
+      <div class="stagger-demo" id="stagger-container">
+        <div class="stagger-group">
+          <div class="stagger-label">Micro</div>
+          <div class="stagger-dots stagger-micro" id="stagger-micro">
+            <div class="stagger-dot"></div><div class="stagger-dot"></div><div class="stagger-dot"></div>
+            <div class="stagger-dot"></div><div class="stagger-dot"></div>
+          </div>
+          <span style="font:.6rem var(--mono);color:var(--muted);margin-left:.7rem">&lt;200ms total</span>
+        </div>
+        <div class="stagger-group">
+          <div class="stagger-label">Standard</div>
+          <div class="stagger-dots stagger-standard" id="stagger-standard">
+            <div class="stagger-dot"></div><div class="stagger-dot"></div><div class="stagger-dot"></div>
+            <div class="stagger-dot"></div><div class="stagger-dot"></div>
+          </div>
+          <span style="font:.6rem var(--mono);color:var(--muted);margin-left:.7rem">&lt;400ms total</span>
+        </div>
+        <div class="stagger-group">
+          <div class="stagger-label">Dramatic</div>
+          <div class="stagger-dots stagger-dramatic" id="stagger-dramatic">
+            <div class="stagger-dot"></div><div class="stagger-dot"></div><div class="stagger-dot"></div>
+            <div class="stagger-dot"></div><div class="stagger-dot"></div>
+          </div>
+          <span style="font:.6rem var(--mono);color:var(--muted);margin-left:.7rem">&lt;600ms total</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12 Animated States -->
+    <div id="s-states" style="margin-bottom:1.5rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">12 · ANIMATED STATES</p>
+      <div class="states-demo">
+        <button class="state-btn state-success">✓ Success</button>
+        <button class="state-btn state-error">✗ Error shake</button>
+        <button class="state-btn state-press">Button press</button>
+        <div class="state-card-entrance">Card entrance</div>
+      </div>
+    </div>
+
+    <!-- 13 Timing -->
+    <div id="s-timing" style="margin-bottom:1rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">13 · TIMING CALIBRADO</p>
+      <div style="border:1px solid var(--line);border-radius:var(--r);overflow:hidden">
+        <table class="timing-table">
+          <thead>
+            <tr>
+              <th>Elemento</th>
+              <th>Duración</th>
+              <th>Easing</th>
+              <th style="width:120px">Barra</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tooltip</td><td>120ms</td><td>ease-out</td>
+              <td><span class="timing-bar" style="width:12px"></span>micro</td>
+            </tr>
+            <tr>
+              <td>Hover state</td><td>180ms</td><td>ease</td>
+              <td><span class="timing-bar" style="width:18px"></span>micro</td>
+            </tr>
+            <tr>
+              <td>Modal open</td><td>300ms</td><td>cubic(.16,1,.3,1)</td>
+              <td><span class="timing-bar" style="width:30px"></span>standard</td>
+            </tr>
+            <tr>
+              <td>Page transition</td><td>500ms</td><td>cubic(.16,1,.3,1)</td>
+              <td><span class="timing-bar" style="width:50px"></span>standard</td>
+            </tr>
+            <tr>
+              <td>Hero reveal</td><td>800ms</td><td>cubic(.16,1,.3,1)</td>
+              <td><span class="timing-bar" style="width:80px"></span>dramatic</td>
+            </tr>
+            <tr>
+              <td>Particles morph</td><td>1200ms</td><td>linear (shader)</td>
+              <td><span class="timing-bar" style="width:100px;background:var(--accent)"></span>scene</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ DESIGN SYSTEM ═══ -->
+  <div class="section-block">
+    <div class="section-block-title">Design System — Tokens & Tipografía</div>
+
+    <!-- 14 Tokens -->
+    <div id="s-tokens" style="margin-bottom:1.8rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:1rem;letter-spacing:.08em">14 · TOKENS CSS</p>
+      <p style="font:.75rem var(--sans);color:var(--muted);margin-bottom:1rem;max-width:52ch">Todos los colores, nunca literales en componentes. Un cambio en <code style="font-family:var(--mono);font-size:.85em;color:var(--accent)">:root</code> propaga a todo.</p>
+
+      <div class="tokens-colors">
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#06070B"></div>
+          <div class="token-swatch-name">--ground</div>
+          <div class="token-swatch-val">#06070B</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#0D0F17"></div>
+          <div class="token-swatch-name">--ground-raised</div>
+          <div class="token-swatch-val">#0D0F17</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#F0EEE9"></div>
+          <div class="token-swatch-name">--ink</div>
+          <div class="token-swatch-val">#F0EEE9</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#C8C6C2"></div>
+          <div class="token-swatch-name">--ink-dim</div>
+          <div class="token-swatch-val">#C8C6C2</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#7A7B8C"></div>
+          <div class="token-swatch-name">--muted</div>
+          <div class="token-swatch-val">#7A7B8C</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#E8A051"></div>
+          <div class="token-swatch-name">--accent</div>
+          <div class="token-swatch-val">#E8A051</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:#5B4FCF"></div>
+          <div class="token-swatch-name">--accent-alt</div>
+          <div class="token-swatch-val">#5B4FCF</div>
+        </div>
+        <div class="token-swatch">
+          <div class="token-swatch-color" style="background:rgba(240,238,233,0.10);border:1px solid rgba(240,238,233,.2)"></div>
+          <div class="token-swatch-name">--line</div>
+          <div class="token-swatch-val">rgba(…,10%)</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:.5rem">
+        <table class="timing-table">
+          <thead><tr><th>Token semántico</th><th>Valor</th><th>Uso</th></tr></thead>
+          <tbody>
+            <tr><td>--color-bg</td><td>var(--ground)</td><td>Fondo de página</td></tr>
+            <tr><td>--color-surface</td><td>var(--ground-raised)</td><td>Cards, panels</td></tr>
+            <tr><td>--color-text</td><td>var(--ink)</td><td>Texto principal</td></tr>
+            <tr><td>--color-text-secondary</td><td>var(--ink-dim)</td><td>Subtítulos, descripciones</td></tr>
+            <tr><td>--color-border</td><td>var(--line)</td><td>Separadores</td></tr>
+            <tr><td>--color-interactive</td><td>var(--accent)</td><td>CTAs, links, thumb</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 15 Tipografías -->
+    <div id="s-typography" style="margin-bottom:1.8rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:1rem;letter-spacing:.08em">15 · TIPOGRAFÍAS CON CARÁCTER — anti-Inter</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.9rem">
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">Display / Serif</div>
+          <div style="font:400 2rem/1 'Instrument Serif',Georgia,serif;margin-bottom:.5rem">Instrumento</div>
+          <div style="font:.68rem var(--mono);color:var(--muted)">Instrument Serif · Titulares, hero, quotes</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">Alto contraste</div>
+          <div style="font:400 2rem/1 Georgia,serif;margin-bottom:.5rem;letter-spacing:-.02em">Bodoni</div>
+          <div style="font:.68rem var(--mono);color:var(--muted)">Bodoni Moda · Editorial, moda, luxury</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">Funcional</div>
+          <div style="font:500 2rem/1 'Archivo',system-ui,sans-serif;margin-bottom:.5rem">Archivo</div>
+          <div style="font:.68rem var(--mono);color:var(--muted)">Archivo · Body text, UI, labels</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">Grotesca neutra</div>
+          <div style="font:400 2rem/1 system-ui,sans-serif;margin-bottom:.5rem;letter-spacing:-.03em">Söhne</div>
+          <div style="font:.68rem var(--mono);color:var(--muted)">Söhne · Alternativa premium a Inter</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16 Type Scale -->
+    <div id="s-typescale" style="margin-bottom:1.8rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:1rem;letter-spacing:.08em">16 · ESCALA TIPOGRÁFICA CON clamp()</p>
+      <div class="type-scale type-serif">
+        <div class="type-sample">
+          <div class="type-sample-label">Display XL</div>
+          <div class="type-sample-text" style="font-size:clamp(3rem,8vw,5.5rem);line-height:.95;letter-spacing:-.03em">Grande</div>
+          <div class="type-sample-meta">clamp(3rem, 8vw, 5.5rem)</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Display</div>
+          <div class="type-sample-text" style="font-size:clamp(2rem,5vw,3.5rem);line-height:1;letter-spacing:-.025em">Headline</div>
+          <div class="type-sample-meta">clamp(2rem, 5vw, 3.5rem)</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Heading 1</div>
+          <div class="type-sample-text" style="font-size:clamp(1.5rem,3.5vw,2.2rem);line-height:1.1">Section title</div>
+          <div class="type-sample-meta">clamp(1.5rem, 3.5vw, 2.2rem)</div>
+        </div>
+      </div>
+      <div class="type-scale type-sans" style="margin-top:.8rem">
+        <div class="type-sample">
+          <div class="type-sample-label">Body</div>
+          <div class="type-sample-text" style="font-size:clamp(.9rem,1.2vw,1.05rem);line-height:1.65">Texto de cuerpo cómodo de leer en pantalla.</div>
+          <div class="type-sample-meta">clamp(.9rem, 1.2vw, 1.05rem)</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Label</div>
+          <div class="type-sample-text" style="font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;font-family:var(--mono)">EYEBROW LABEL</div>
+          <div class="type-sample-meta">.65rem · mono · uppercase</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17 Spacing -->
+    <div id="s-spacing" style="margin-bottom:1rem">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">17 · ESPACIADO EN ESCALA DE 8px</p>
+      <div class="spacing-scale">
+        <div class="space-block">
+          <div class="space-visual" style="height:4px"></div>
+          <div class="space-label">--s-1<br>4px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:8px"></div>
+          <div class="space-label">--s-2<br>8px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:16px"></div>
+          <div class="space-label">--s-3<br>16px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:24px"></div>
+          <div class="space-label">--s-4<br>24px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:32px"></div>
+          <div class="space-label">--s-5<br>32px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:48px"></div>
+          <div class="space-label">--s-6<br>48px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:64px"></div>
+          <div class="space-label">--s-7<br>64px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:96px"></div>
+          <div class="space-label">--s-8<br>96px</div>
+        </div>
+        <div class="space-block">
+          <div class="space-visual" style="height:128px;background:var(--accent)"></div>
+          <div class="space-label">--s-9<br>128px</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ REACT COMPONENTS ═══ -->
+  <div class="section-block">
+    <div class="section-block-title">Componentes & Wrappers React</div>
+
+    <div id="s-react-components">
+      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-bottom:1rem">
+
+        <div class="tool-card">
+          <div class="tool-cmd">&lt;ParticlesMorph /&gt;</div>
+          <div class="tool-title">Wrapper SSR-safe</div>
+          <div class="tool-desc">StrictMode resuelto con mountOnFreshCanvas. Three.js por prop — no fija versión ni duplica bundle.</div>
+          <div style="margin-top:.8rem;font:.62rem var(--mono);color:var(--muted)">deps: [count, shapes] · updateDeps: [colorA, colorB, post]</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-cmd">&lt;GradientBackdrop /&gt;</div>
+          <div class="tool-title">Fondo como componente</div>
+          <div class="tool-desc">Monta el canvas en un div posicionado fixed. Limpiar en unmount. Acepta colores y velocidad en props.</div>
+          <div style="margin-top:.8rem;font:.62rem var(--mono);color:var(--muted)">position: fixed · z-index: 0 · pointer-events: none</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-cmd">&lt;ImageDisplacement /&gt;</div>
+          <div class="tool-title">Transición como componente</div>
+          <div class="tool-desc">from y to como src de imagen. hoverTarget opcional. Fallback: opacity crossfade si WebGL no está.</div>
+          <div style="margin-top:.8rem;font:.62rem var(--mono);color:var(--muted)">from, to: string | HTMLCanvasElement</div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-cmd">&lt;NarrativeSection /&gt;</div>
+          <div class="tool-title">+ Step + Stage</div>
+          <div class="tool-desc">Composición declarativa del scroll narrativo. NarrativeStage recibe el estado interpolado por onState callback.</div>
+          <div style="margin-top:.8rem;font:.62rem var(--mono);color:var(--muted)">pin: 'external' | 'sticky' · indicator: boolean</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 22 Hooks -->
+    <div id="s-hooks">
+      <p style="font:.75rem var(--mono);color:var(--muted);margin-bottom:.8rem;letter-spacing:.08em">22 · HOOKS</p>
+      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+        <div class="pipeline-card">
+          <div style="font:.62rem var(--mono);color:var(--accent);margin-bottom:.4rem">useSmoothScroll</div>
+          <div style="font:.75rem var(--sans);color:var(--muted)">Retorna progress (0→1) y offset. Limpia el listener en unmount.</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.62rem var(--mono);color:var(--accent);margin-bottom:.4rem">useTextReveal</div>
+          <div style="font:.75rem var(--sans);color:var(--muted)">Observa IntersectionObserver y activa el split de palabras al entrar en view.</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.62rem var(--mono);color:var(--accent);margin-bottom:.4rem">useMagnetic</div>
+          <div style="font:.75rem var(--sans);color:var(--muted)">Ref → elemento imantado. Acepta strength, radius, ease.</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.62rem var(--mono);color:var(--accent);margin-bottom:.4rem">useCustomCursor</div>
+          <div style="font:.75rem var(--sans);color:var(--muted)">Monta el SVG cursor y devuelve destroy(). Auto-limpiar con useEffect.</div>
+        </div>
+        <div class="pipeline-card">
+          <div style="font:.62rem var(--mono);color:var(--accent);margin-bottom:.4rem">useFx</div>
+          <div style="font:.75rem var(--sans);color:var(--muted)">Orquesta ParticlesMorph + PostFX + NarrativeSection como efecto unificado.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ CURSOR & SCROLL ═══ -->
+  <div class="section-block">
+    <div class="section-block-title">Cursor & Scroll Avanzado</div>
+    <div class="grid">
+
+      <!-- 23 Custom Cursor -->
+      <div class="card" id="s-cursor">
+        <div class="card-preview">
+          <div class="cursor-demo">
+            <div class="fake-cursor"><div class="fake-cursor-dot"></div></div>
+            <div class="cursor-target">Hover me</div>
+            <div class="cursor-target" style="border-color:var(--accent);color:var(--accent)">CTA</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">23</div>
+          <div class="card-title">Custom Cursor</div>
+          <div class="card-desc">Anillo SVG con lag suave, reemplaza cursor del sistema. Se expande sobre links/botones. Toggle con un click.</div>
+          <span class="card-tag dom">DOM · SVG · pointer</span>
+        </div>
+      </div>
+
+      <!-- 24 Magnetic Expanded -->
+      <div class="card" id="s-magnetic-expanded">
+        <div class="card-preview">
+          <div style="padding:1.2rem;height:100%;display:flex;flex-direction:column;justify-content:center;gap:.7rem">
+            <div style="font:.58rem var(--mono);color:var(--muted);letter-spacing:.12em;text-transform:uppercase">Configuración</div>
+            <div style="font:.7rem var(--mono);color:var(--ink-dim)">strength: <span style="color:var(--accent)">0.35</span></div>
+            <div style="font:.7rem var(--mono);color:var(--ink-dim)">radius: <span style="color:var(--accent)">80px</span></div>
+            <div style="font:.7rem var(--mono);color:var(--ink-dim)">ease: <span style="color:var(--accent)">0.12</span></div>
+            <div style="font:.7rem var(--mono);color:var(--ink-dim)">influence: <span style="color:var(--accent)">'both'</span></div>
+            <button class="mag-btn" style="width:fit-content;animation:magPull2 2s ease-in-out infinite">data-magnetic="0.6"</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">24</div>
+          <div class="card-title">Magnetic Expandido</div>
+          <div class="card-desc">Configurable por fuerza, radio e influencia (elemento, cursor o ambos). Acepta data-attribute o config JS.</div>
+          <span class="card-tag dom">DOM · pointer</span>
+        </div>
+      </div>
+
+      <!-- 25 Scroll Narrativo -->
+      <div class="card" id="s-scroll-narrative">
+        <div class="card-preview">
+          <div style="height:100%;display:grid;grid-template-columns:1fr 1px 1fr">
+            <div style="display:flex;align-items:center;justify-content:center;font:400 1.8rem/1 var(--serif);color:var(--accent-2);animation:narrBg 4s infinite">☯</div>
+            <div style="background:var(--line)"></div>
+            <div style="padding:.8rem;display:flex;flex-direction:column;justify-content:center;gap:.5rem">
+              <div style="font:.6rem var(--mono);color:var(--accent);letter-spacing:.1em;text-transform:uppercase">Canvas sticky</div>
+              <div style="font:.7rem var(--sans);color:var(--ink-dim)">El fondo interpola colores, bloom y cualquier valor numérico entre pasos de scroll.</div>
+              <div style="font:.6rem var(--mono);color:var(--muted)">pin: 'external' si usás smooth-scroll</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">25</div>
+          <div class="card-title">Scroll Narrativo</div>
+          <div class="card-desc">Canvas fijo + bloques de texto que pasan encima interpolando estados. Compatible con smooth-scroll vía pin:external.</div>
+          <span class="card-tag dom">scroll · interpolación</span>
+        </div>
+      </div>
+
+      <!-- 26 Parallax -->
+      <div class="card" id="s-parallax">
+        <div class="card-preview">
+          <div class="parallax-demo">
+            <div class="parallax-layer parallax-layer-bg">
+              <div class="plx-circle" style="width:80px;height:80px;background:rgba(91,79,207,.2);top:20%;left:20%"></div>
+            </div>
+            <div class="parallax-layer parallax-layer-mid">
+              <div class="plx-circle" style="width:50px;height:50px;background:rgba(232,160,81,.25);top:35%;right:25%"></div>
+            </div>
+            <div class="parallax-layer parallax-layer-fg" style="display:flex;align-items:center;justify-content:center">
+              <div style="font:.65rem var(--mono);color:var(--ink-dim);letter-spacing:.1em;text-align:center">data-parallax="0.5"<br><span style="color:var(--muted);font-size:.58rem">en cualquier elemento</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-num">26</div>
+          <div class="card-title">Parallax por atributo</div>
+          <div class="card-desc">Agregar data-parallax="0.5" a cualquier elemento. El módulo detecta todos al init y calcula el offset en scroll.</div>
+          <span class="card-tag dom">data-attribute · scroll</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ ASSETS PIPELINE ═══ -->
+  <div class="section-block" id="s-pipeline">
+    <div class="section-block-title">Assets & Pipeline</div>
+    <div class="grid">
+
+      <div class="pipeline-card">
+        <div style="font:.58rem var(--mono);color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">27 · Imagen IA</div>
+        <div style="font:400 .95rem var(--serif);margin-bottom:.8rem">Midjourney / Flux → Web</div>
+        <div class="pipeline-flow">
+          <span class="pf-step">Prompt</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">MJ/Flux</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">PNG/JPG</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">Squoosh</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-result">AVIF &lt;250 KB</span>
+        </div>
+        <div style="font:.7rem var(--sans);color:var(--muted)">Quality 60–75, progressive. &lt;picture&gt; con fallback WebP.</div>
+      </div>
+
+      <div class="pipeline-card">
+        <div style="font:.58rem var(--mono);color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">28 · Video IA</div>
+        <div style="font:400 .95rem var(--serif);margin-bottom:.8rem">Veo / Kling / Runway → Web</div>
+        <div class="pipeline-flow">
+          <span class="pf-step">Prompt</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">Veo/Kling</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">MP4</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">ffmpeg VP9</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-result">WebM &lt;3 MB</span>
+        </div>
+        <div style="font:.7rem var(--sans);color:var(--muted)">autoplay muted loop playsinline. Poster AVIF obligatorio.</div>
+      </div>
+
+      <div class="pipeline-card">
+        <div style="font:.58rem var(--mono);color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">29 · 3D</div>
+        <div style="font:400 .95rem var(--serif);margin-bottom:.8rem">Meshy / Tripo → Scene</div>
+        <div class="pipeline-flow">
+          <span class="pf-step">Prompt/img</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">Meshy</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">GLB/FBX</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">gltf-pipeline</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-result">.glb Draco</span>
+        </div>
+        <div style="font:.7rem var(--sans);color:var(--muted)">Draco comprimido. Poly &lt;50k para mobile. LOD opcional.</div>
+      </div>
+
+      <div class="pipeline-card">
+        <div style="font:.58rem var(--mono);color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem">30 · Fonts</div>
+        <div style="font:400 .95rem var(--serif);margin-bottom:.8rem">Subset WOFF2</div>
+        <div class="pipeline-flow">
+          <span class="pf-step">TTF</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">glyphhanger</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-step">unicode-range</span>
+          <span class="pf-arrow">→</span>
+          <span class="pf-result">WOFF2 ~30 KB</span>
+        </div>
+        <div style="font:.7rem var(--sans);color:var(--muted)">font-display: swap. Preload el peso principal. Variable si disponible.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ HERRAMIENTAS ═══ -->
+  <div class="section-block" id="s-tools">
+    <div class="section-block-title">Herramientas de Proceso</div>
+    <div class="tools-grid">
+
+      <div class="tool-card">
+        <div class="tool-cmd">/audit-landing</div>
+        <div class="tool-title">Diagnóstico completo</div>
+        <div class="tool-desc">Analiza la landing y devuelve issues con formato archivo:línea y severidad (critical / major / minor). Priorizado por impacto visual.</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-cmd">/design-tokens</div>
+        <div class="tool-title">Consolidar tokens</div>
+        <div class="tool-desc">Detecta literales de color y espaciado hardcodeados en componentes. Genera el :root con tokens semánticos y refactoriza automáticamente.</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-cmd">/rebuild-section</div>
+        <div class="tool-title">Reconstruir sección</div>
+        <div class="tool-desc">Toma screenshot vía Playwright de la sección actual, la analiza, aplica los tokens del sistema y entrega HTML/CSS mejorado.</div>
+      </div>
+
+      <div class="tool-card" style="grid-column: span 1">
+        <div class="tool-cmd">7 Prompts por tipo</div>
+        <div class="tool-title">Templates de sitio</div>
+        <div class="tool-desc">Prompts preconfigurados para: hero con partículas, editorial, portfolio, scroll narrative, SaaS dark, e-commerce luxury, startup bold.</div>
+        <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.4rem">
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">hero-particles</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">editorial</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">portfolio</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">scroll-narrative</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">saas-dark</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">e-commerce</span>
+          <span style="font:.58rem var(--mono);background:var(--ground-3);border:1px solid var(--line);border-radius:4px;padding:.2rem .5rem;color:var(--muted)">startup-bold</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ ANTI-PATTERNS ═══ -->
+  <div class="section-block" id="s-antipatterns">
+    <div class="section-block-title">35 · Anti-Patterns Detectables</div>
+    <div class="antipattern-list">
+
+      <div class="ap-item">
+        <span class="ap-num">AP-01</span>
+        <div>
+          <div class="ap-bad">Héroe con height:100vh exacto</div>
+          <div class="ap-good">min-height: 100svh + padding generoso — el 100vh estático corta en mobile con barra de browser</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-02</span>
+        <div>
+          <div class="ap-bad">Todo centrado — align y justify center en todos los bloques</div>
+          <div class="ap-good">Centrado solo en bloques cortos. Texto largo alineado a la izquierda, contraste visual por asimetría</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-03</span>
+        <div>
+          <div class="ap-bad">Inter como tipografía principal — la fuente por defecto de todo</div>
+          <div class="ap-good">Instrument Serif / Bodoni para display + Archivo / Söhne para body — carácter propio</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-04</span>
+        <div>
+          <div class="ap-bad">Cards para todo — grid de tarjetas iguales sin jerarquía</div>
+          <div class="ap-good">Cards solo cuando el contenido es equivalente y scaneable. Alternar con listas, featured items, narrativa</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-05</span>
+        <div>
+          <div class="ap-bad">Numeración 01/02/03 sin secuencia narrativa</div>
+          <div class="ap-good">Los números decorativos funcionan solo si hay progresión real — process steps, timeline, ranked list</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-06</span>
+        <div>
+          <div class="ap-bad">Literales de color en componentes — #E8A051 repetido 40 veces</div>
+          <div class="ap-good">100% tokens CSS en :root — un cambio propaga a todo el sistema</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-07</span>
+        <div>
+          <div class="ap-bad">Animaciones sin prefers-reduced-motion</div>
+          <div class="ap-good">@media (prefers-reduced-motion: reduce) — desactivar o simplificar todos los efectos de movimiento</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-08</span>
+        <div>
+          <div class="ap-bad">WebGL que bloquea el contenido si falla</div>
+          <div class="ap-good">Siempre graceful degradation — CSS fallback visible antes de que cargue el shader</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-09</span>
+        <div>
+          <div class="ap-bad">Efectos sin destroy() — fugas de memoria en SPAs</div>
+          <div class="ap-good">Todo efecto expone destroy() — listeners, rAF, contexto WebGL — limpiado en unmount</div>
+        </div>
+      </div>
+
+      <div class="ap-item">
+        <span class="ap-num">AP-10</span>
+        <div>
+          <div class="ap-bad">Fuentes sin subset — 400 KB de WOFF2 para 3 pesos</div>
+          <div class="ap-good">glyphhanger + unicode-range subset — ~30 KB por peso, solo los glifos que usás</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer style="border-top:1px solid var(--line);padding:2rem 0 3rem;font:.65rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+    <span>web-fx-kit showcase · 35 módulos</span>
+    <a href="../web-fx-kit/demo/index.html" target="_blank" style="color:var(--accent)">Demo técnica completa →</a>
+  </footer>
+
+</main>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ── Particles mini demo ── */
+(function initParticles() {
+  const canvas = document.getElementById('c-particles');
+  if (!canvas) return;
+  let W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * devicePixelRatio;
+  canvas.height = H * devicePixelRatio;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 100);
+  camera.position.z = 2.8;
+
+  const N = 6000;
+  const pos = new Float32Array(N * 3);
+  const col = new Float32Array(N * 3);
+
+  function sphere(i) {
+    const phi = Math.acos(1 - 2 * (i / N));
+    const theta = Math.sqrt(N * Math.PI) * phi;
+    return [
+      Math.sin(phi) * Math.cos(theta),
+      Math.sin(phi) * Math.sin(theta),
+      Math.cos(phi)
+    ];
+  }
+  function torus(i) {
+    const t = (i / N) * Math.PI * 2;
+    const p = (i * 7.3) % (Math.PI * 2);
+    const R = 1, r = 0.4;
+    return [
+      (R + r * Math.cos(p)) * Math.cos(t),
+      (R + r * Math.cos(p)) * Math.sin(t),
+      r * Math.sin(p)
+    ];
+  }
+
+  let posA = [], posB = [];
+  for (let i = 0; i < N; i++) {
+    posA.push(...sphere(i));
+    posB.push(...torus(i));
+  }
+
+  for (let i = 0; i < N; i++) {
+    const t = i / N;
+    pos[i * 3]     = posA[i * 3];
+    pos[i * 3 + 1] = posA[i * 3 + 1];
+    pos[i * 3 + 2] = posA[i * 3 + 2];
+    const ca = new THREE.Color().setHSL(.65, .8, .5 + t * .3);
+    const cb = new THREE.Color().setHSL(.08, .9, .5 + t * .3);
+    col[i * 3]     = ca.r;
+    col[i * 3 + 1] = ca.g;
+    col[i * 3 + 2] = ca.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+  const mat = new THREE.PointsMaterial({ size: 0.018, vertexColors: true, transparent: true, opacity: 0.85 });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  let t = 0, morphDir = 1;
+  function tick() {
+    requestAnimationFrame(tick);
+    t += 0.004 * morphDir;
+    if (t >= 1) { t = 1; morphDir = -1; }
+    if (t <= 0) { t = 0; morphDir = 1; }
+
+    const p = geo.attributes.position.array;
+    for (let i = 0; i < N; i++) {
+      const alpha = t * t * (3 - 2 * t); // smoothstep
+      p[i * 3]     = posA[i * 3]     + (posB[i * 3]     - posA[i * 3])     * alpha;
+      p[i * 3 + 1] = posA[i * 3 + 1] + (posB[i * 3 + 1] - posA[i * 3 + 1]) * alpha;
+      p[i * 3 + 2] = posA[i * 3 + 2] + (posB[i * 3 + 2] - posA[i * 3 + 2]) * alpha;
+    }
+    geo.attributes.position.needsUpdate = true;
+    points.rotation.y += 0.003;
+    points.rotation.x += 0.001;
+    renderer.render(scene, camera);
+  }
+  tick();
+})();
+
+/* ── Scroll narrative cycle ── */
+(function initNarrativeCycle() {
+  const steps = [document.getElementById('ns-0'), document.getElementById('ns-1'), document.getElementById('ns-2')];
+  const canvas = document.getElementById('narr-canvas');
+  if (!steps[0] || !canvas) return;
+
+  const colors = ['#5B4FCF', '#0E7C6B', '#8A1C4B'];
+  let cur = 0;
+  setInterval(() => {
+    steps[cur].classList.remove('active');
+    cur = (cur + 1) % steps.length;
+    steps[cur].classList.add('active');
+    canvas.style.background = `radial-gradient(ellipse at 50% 50%, ${colors[cur]} 0%, #06070B 70%)`;
+    canvas.style.transition = 'background 1s ease';
+  }, 2000);
+})();
+
+/* ── Stagger animation loop ── */
+(function initStaggers() {
+  const groups = [
+    { id: 'stagger-micro',    delay: 40,  dur: 300 },
+    { id: 'stagger-standard', delay: 80,  dur: 400 },
+    { id: 'stagger-dramatic', delay: 130, dur: 500 },
+  ];
+
+  function animateGroup(g) {
+    const el = document.getElementById(g.id);
+    if (!el) return;
+    const dots = el.querySelectorAll('.stagger-dot');
+    dots.forEach((d, i) => {
+      d.style.opacity = '0';
+      d.style.transition = '';
+      setTimeout(() => {
+        d.style.transition = `opacity ${g.dur}ms ease`;
+        d.style.opacity = '1';
+      }, i * g.delay + 50);
+    });
+  }
+
+  function cycle() {
+    groups.forEach(g => animateGroup(g));
+    setTimeout(() => {
+      groups.forEach(g => {
+        const el = document.getElementById(g.id);
+        if (!el) return;
+        el.querySelectorAll('.stagger-dot').forEach(d => {
+          d.style.transition = 'opacity 200ms ease';
+          d.style.opacity = '0';
+        });
+      });
+      setTimeout(cycle, 600);
+    }, 2200);
+  }
+  setTimeout(cycle, 800);
+})();
+
+/* ── Sidebar active on scroll ── */
+(function initScrollSpy() {
+  const sections = document.querySelectorAll('[id^="s-"]');
+  const links = document.querySelectorAll('.sidebar a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => obs.observe(s));
+})();
+</script>
+
+</body>
+</html>
