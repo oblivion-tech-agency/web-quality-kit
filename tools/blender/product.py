@@ -66,6 +66,34 @@ elif ext == ".blend":
     for o in dst.objects:
         if o is not None:
             scene.collection.objects.link(o)
+elif ext == ".svg":
+    # Un logo o isotipo: las curvas se extruyen con bisel, se paran de frente a la
+    # cámara y pasan a malla con un material de la marca (`svg` en el JSON).
+    bpy.ops.import_curve.svg(filepath=model_path)
+    svg = CFG.get("svg", {})
+    curves = [o for o in bpy.data.objects if o not in before and o.type == "CURVE"]
+    if not curves:
+        sys.exit("El SVG no tiene trazos")
+    bpy.context.view_layer.update()
+    span = max(max(o.dimensions.x, o.dimensions.y) for o in curves)
+    mat = bpy.data.materials.new("svg")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = (*hex_rgb(svg.get("color", "#5f20c5")), 1)
+    bsdf.inputs["Metallic"].default_value = svg.get("metallic", 0.3)
+    bsdf.inputs["Roughness"].default_value = svg.get("roughness", 0.35)
+    for o in curves:
+        o.data.extrude = span * svg.get("extrude", 0.05)
+        o.data.bevel_depth = span * svg.get("bevel", 0.012)
+        o.data.bevel_resolution = 6
+        o.data.materials.clear()
+        o.data.materials.append(mat)
+        o.rotation_euler = (D(90), 0, 0)  # de pie, mirando a la cámara (-Y)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in curves:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = curves[0]
+    bpy.ops.object.convert(target="MESH")
 else:
     sys.exit(f"Formato no soportado: {ext}")
 imported = [o for o in bpy.data.objects if o not in before]
@@ -236,15 +264,18 @@ elif MODE == "stills":
     ground = hex_rgb(CFG.get("background", "#0b0c0e" if PRESET == "dark" else "#f2f2f0"))
     bg.inputs[0].default_value = (*ground, 1)
     bg.inputs[1].default_value = 1
-    # Piso que refleja.
-    bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, -1))
-    floor = bpy.context.active_object
-    fm = bpy.data.materials.new("floor")
-    fm.use_nodes = True
-    p = fm.node_tree.nodes["Principled BSDF"]
-    p.inputs["Base Color"].default_value = (*ground, 1)
-    p.inputs["Roughness"].default_value = 0.28 if PRESET == "dark" else 0.5
-    floor.data.materials.append(fm)
+    scene.view_settings.exposure = CFG.get("exposure", 0.0)
+    bg.inputs[1].default_value = 2 ** -scene.view_settings.exposure  # el fondo queda en su color exacto
+    if CFG.get("floor", True):
+        # Piso que refleja (con `"floor": false`, el objeto flota: logos, mapas de profundidad limpios).
+        bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, -1))
+        floor = bpy.context.active_object
+        fm = bpy.data.materials.new("floor")
+        fm.use_nodes = True
+        p = fm.node_tree.nodes["Principled BSDF"]
+        p.inputs["Base Color"].default_value = (*ground, 1)
+        p.inputs["Roughness"].default_value = 0.28 if PRESET == "dark" else 0.5
+        floor.data.materials.append(fm)
     if PRESET == "dark":
         # Escena oscura: sin luces de área grandes (iluminan la bruma y se reflejan como cuadros).
         for o in list(scene.objects):
