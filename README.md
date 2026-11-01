@@ -11,12 +11,14 @@ Nace de aplicarlo en serio sobre proyectos reales (Oblivion Tech, Transporte Leh
 
 ## Instalación
 
-Este repo es la fuente de verdad. Las skills propias se symlinkean a `~/.claude/skills/`:
+Este repo es la fuente de verdad. `scripts/install.sh` enlaza las skills y los agentes propios en `~/.claude`
+(symlinks: los cambios del repo se reflejan solos):
 
 ```bash
-for skill in audit-landing design-tokens rebuild-section motion-design fx-catalog; do
-  ln -sfn "$(pwd)/skills/$skill" "$HOME/.claude/skills/$skill"
-done
+scripts/install.sh              # skills y agentes propios
+scripts/install.sh --all        # + skills compañeras (Impeccable, Taste, Emil, GSAP, Three.js) + MCP (Chrome DevTools, Spline)
+scripts/install.sh --dry-run    # muestra lo que haría
+export OBLIVION_FX_KIT="$(pwd)" # para que la pasada encuentre el kit
 ```
 
 Para trabajar en el catálogo:
@@ -61,6 +63,30 @@ npx shadcn add https://raw.githubusercontent.com/oblivion-tech-agency/web-qualit
 
 Motor: **GSAP + Lenis** para el movimiento y **Three.js** para el 3D (ver `docs/recipes/librerias-de-componentes.md`
 para Motion, 21st.dev y UI UX Pro Max).
+
+## La pasada: `/oblivion-pass`
+
+Para una landing que ya está diseñada y construida. No toca diseño, copy ni estructura: le suma la capa de motion
+que la hace memorable, propia del cliente y con la huella de la casa.
+
+```
+1. visual-qa        relevamiento: capturas 1440/768/390, secciones, LCP/INP/CLS, consola
+2. fx-director      FX.md: inventario del sujeto → la idea → intensidad → firma + 2 secundarios + base
+                    (chequeado contra docs/SIGNATURES.md)      ← una persona aprueba
+3. asset-producer   solo si la firma lo pide: Blender, Spline MCP, Higgsfield
+4. fx-implementer   instala desde el registry, tokens --fx-*, hooks en componentes cliente chicos
+5. motion-reviewer  + visual-qa: contra la huella y el contrato, hasta 0 bloqueantes
+6. cierre           fila en docs/SIGNATURES.md, antes y después, métricas
+```
+
+| Pieza | Dónde |
+|---|---|
+| La skill | `skills/oblivion-pass/SKILL.md` |
+| Los agentes | `agents/` (`fx-director`, `fx-implementer`, `asset-producer`, `visual-qa`, `motion-reviewer`) |
+| La huella de la casa (reglas medibles) | `docs/SIGNATURE-OBLIVION.md` |
+| El brief de motion | `templates/FX.md.template` |
+
+Intensidades: ● sutil · ●● editorial · ●●● alto impacto · ●●●● show. Variedad entre proyectos, misma huella.
 
 ## El flujo de calidad
 
@@ -135,12 +161,13 @@ leé directo `reference/craft-floor.md` y `reference/new-work.md` dentro de la s
 ## Estructura
 
 ```
-skills/            skills propias (audit-landing, design-tokens, rebuild-section, motion-design, fx-catalog)
+skills/            skills propias (oblivion-pass, fx-catalog, audit-landing, design-tokens, rebuild-section, motion-design)
+agents/            subagentes de la pasada
 packages/fx/       @oblivion/fx: core/, lib/, effects/<efecto>/{index.ts, react.ts, meta.json}, test/
 registry/          registry de shadcn (generado)
-docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, recipes/
+docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, SIGNATURE-OBLIVION.md, recipes/
 apps/demo-static/  demos sin build + speaker/ (pipeline de Blender: render.py, cuadros, .glb)
-scripts/           build-registry.mjs, check-docs.mjs
-templates/         DESIGN.md.template
+scripts/           install.sh, build-registry.mjs, check-docs.mjs
+templates/         DESIGN.md.template, FX.md.template
 reference/         awesome-design-md (submódulo)
 ```
