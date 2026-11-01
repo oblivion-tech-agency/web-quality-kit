@@ -20,7 +20,23 @@
       "type": "registry:lib"
     },
     {
+      "name": "flip-layout",
+      "type": "registry:lib"
+    },
+    {
+      "name": "hover-distort",
+      "type": "registry:lib"
+    },
+    {
       "name": "live-timeline",
+      "type": "registry:lib"
+    },
+    {
+      "name": "magnetic",
+      "type": "registry:lib"
+    },
+    {
+      "name": "marquee",
       "type": "registry:lib"
     },
     {
@@ -36,6 +52,10 @@
       "type": "registry:lib"
     },
     {
+      "name": "scramble",
+      "type": "registry:lib"
+    },
+    {
       "name": "scroll-progress",
       "type": "registry:lib"
     },
@@ -44,11 +64,35 @@
       "type": "registry:lib"
     },
     {
+      "name": "shader-backdrop",
+      "type": "registry:lib"
+    },
+    {
+      "name": "smooth-scroll",
+      "type": "registry:lib"
+    },
+    {
       "name": "split-flap",
       "type": "registry:lib"
     },
     {
+      "name": "split-reveal",
+      "type": "registry:lib"
+    },
+    {
+      "name": "stacked-cards",
+      "type": "registry:lib"
+    },
+    {
       "name": "turntable",
+      "type": "registry:lib"
+    },
+    {
+      "name": "video-scrub",
+      "type": "registry:lib"
+    },
+    {
+      "name": "view-transition",
       "type": "registry:lib"
     }
   ]

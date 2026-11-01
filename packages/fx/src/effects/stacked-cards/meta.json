@@ -1,0 +1,24 @@
+{
+  "name": "stacked-cards",
+  "title": "Cartas que se apilan",
+  "family": "scroll",
+  "intensity": 3,
+  "deps": [
+    "gsap"
+  ],
+  "description": "Cada carta queda fija y se achica y oscurece cuando llega la siguiente. Para servicios, pasos, casos o capítulos.",
+  "goodFor": [
+    "agencia",
+    "saas",
+    "servicios",
+    "estudio"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "scramble"
+  ],
+  "avoidWith": [
+    "pinned-horizontal"
+  ],
+  "signature": true
+}

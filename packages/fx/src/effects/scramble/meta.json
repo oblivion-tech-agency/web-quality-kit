@@ -1,0 +1,23 @@
+{
+  "name": "scramble",
+  "title": "Texto que se decodifica",
+  "family": "texto",
+  "intensity": 2,
+  "deps": [],
+  "description": "Un texto corto pasa por caracteres al azar y se asienta letra por letra. Para etiquetas técnicas, servicios, cifras. Nunca párrafos.",
+  "goodFor": [
+    "software",
+    "ia",
+    "ciberseguridad",
+    "fintech"
+  ],
+  "pairsWith": [
+    "shader-backdrop",
+    "stacked-cards"
+  ],
+  "avoidWith": [
+    "split-flap",
+    "split-reveal"
+  ],
+  "signature": false
+}

@@ -1,0 +1,21 @@
+{
+  "name": "view-transition",
+  "title": "Transiciones de estado nativas",
+  "family": "transiciones",
+  "intensity": 2,
+  "deps": [],
+  "description": "View Transitions API: elementos con el mismo data-fx-vt viajan entre el antes y el después de un cambio de estado.",
+  "goodFor": [
+    "portfolio",
+    "catálogo",
+    "app"
+  ],
+  "pairsWith": [
+    "hover-distort",
+    "split-reveal"
+  ],
+  "avoidWith": [
+    "flip-layout"
+  ],
+  "signature": false
+}

@@ -31,8 +31,11 @@ pnpm registry    # regenera registry/r/ y docs/CATALOG.md desde los meta.json
 pnpm check:docs  # toda ruta citada en la documentación existe
 ```
 
-Demos: `python3 -m http.server 4877` en la raíz y abrir `/apps/demo-static/` (catálogo) y
-`/apps/demo-static/parlante/` (landing completa de ejemplo). Necesitan `pnpm build` antes.
+Demos:
+- **Showcase en Next.js** (`apps/showcase/`): los efectos de la primera ola montados con sus hooks, como en un
+  proyecto real. `pnpm --filter showcase dev` → http://localhost:4878.
+- **Sin build** (`apps/demo-static/`): `pnpm build`, después `python3 -m http.server 4877` en la raíz y abrir
+  `/apps/demo-static/` (catálogo) y `/apps/demo-static/parlante/` (landing completa de ejemplo).
 
 Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`.
 
@@ -47,6 +50,7 @@ Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo
 | Tests del contrato | `packages/fx/test/` |
 | Registry para shadcn | `registry/r/` |
 | Recetas | `docs/recipes/` |
+| Showcase en Next.js | `apps/showcase/` |
 | Demos sin build y pipeline de Blender | `apps/demo-static/` |
 
 Cada efecto es `createX(elemento, opciones)` en vanilla y `useX(ref, opciones)` en React. Todos:
@@ -166,6 +170,7 @@ agents/            subagentes de la pasada
 packages/fx/       @oblivion/fx: core/, lib/, effects/<efecto>/{index.ts, react.ts, meta.json}, test/
 registry/          registry de shadcn (generado)
 docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, SIGNATURE-OBLIVION.md, recipes/
+apps/showcase/     Next.js: los efectos montados con sus hooks
 apps/demo-static/  demos sin build + speaker/ (pipeline de Blender: render.py, cuadros, .glb)
 scripts/           install.sh, build-registry.mjs, check-docs.mjs
 templates/         DESIGN.md.template, FX.md.template

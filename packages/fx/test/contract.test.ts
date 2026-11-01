@@ -15,6 +15,17 @@ import { createPinnedHorizontal } from '../src/effects/pinned-horizontal/index.t
 import { createScrollSequence } from '../src/effects/scroll-sequence/index.ts';
 import { createTurntable } from '../src/effects/turntable/index.ts';
 import { createModelTurntable } from '../src/effects/model-turntable/index.ts';
+import { createSmoothScroll } from '../src/effects/smooth-scroll/index.ts';
+import { createSplitReveal } from '../src/effects/split-reveal/index.ts';
+import { createScramble } from '../src/effects/scramble/index.ts';
+import { createMarquee } from '../src/effects/marquee/index.ts';
+import { createStackedCards } from '../src/effects/stacked-cards/index.ts';
+import { createFlipLayout } from '../src/effects/flip-layout/index.ts';
+import { createVideoScrub } from '../src/effects/video-scrub/index.ts';
+import { createShaderBackdrop } from '../src/effects/shader-backdrop/index.ts';
+import { createHoverDistort } from '../src/effects/hover-distort/index.ts';
+import { createMagnetic } from '../src/effects/magnetic/index.ts';
+import { createViewTransition } from '../src/effects/view-transition/index.ts';
 import type { FxHandle } from '../src/core/types.ts';
 
 const cases: Array<[string, string, (root: HTMLElement) => FxHandle]> = [
@@ -43,6 +54,46 @@ const cases: Array<[string, string, (root: HTMLElement) => FxHandle]> = [
     'model-turntable',
     '<figure id="m"><canvas data-fx-canvas></canvas><img data-fx-fallback alt="x"></figure>',
     (r) => createModelTurntable(r.querySelector('#m') as HTMLElement, { url: 'x.glb' }),
+  ],
+  ['smooth-scroll', '<main>contenido</main>', () => createSmoothScroll(document.documentElement)],
+  ['split-reveal', '<h2 id="t">Toda la sala en una mano</h2>', (r) => createSplitReveal(r.querySelector('#t') as HTMLElement)],
+  ['split-reveal (load)', '<h1 id="t">Hola mundo</h1>', (r) => createSplitReveal(r.querySelector('#t') as HTMLElement, { trigger: 'load', by: 'words' })],
+  ['scramble', '<span id="s">Agentes de IA</span>', (r) => createScramble(r.querySelector('#s') as HTMLElement)],
+  [
+    'marquee',
+    '<div id="mq" style="overflow:hidden"><div data-fx-marquee-track style="display:flex"><span>Uno</span><span>Dos</span></div></div>',
+    (r) => createMarquee(r.querySelector('#mq') as HTMLElement),
+  ],
+  [
+    'stacked-cards',
+    '<div id="st"><article data-fx-stack-card style="--i:0">A</article><article data-fx-stack-card style="--i:1">B</article><article data-fx-stack-card>C</article></div>',
+    (r) => createStackedCards(r.querySelector('#st') as HTMLElement),
+  ],
+  ['flip-layout', '<ul id="g"><li data-fx-flip>1</li><li data-fx-flip>2</li></ul>', (r) => createFlipLayout(r.querySelector('#g') as HTMLElement)],
+  [
+    'video-scrub',
+    '<section id="v"><video data-fx-video muted playsinline></video></section>',
+    (r) => createVideoScrub(r.querySelector('#v') as HTMLElement),
+  ],
+  [
+    'shader-backdrop',
+    '<section id="b"><canvas data-fx-canvas></canvas></section>',
+    (r) => createShaderBackdrop(r.querySelector('#b') as HTMLElement, { variant: 'dither' }),
+  ],
+  [
+    'hover-distort',
+    '<figure id="h"><img alt="" src="x.webp"><canvas data-fx-canvas></canvas></figure>',
+    (r) => createHoverDistort(r.querySelector('#h') as HTMLElement),
+  ],
+  [
+    'magnetic',
+    '<a id="mg" href="#" data-fx-magnetic style="transform: rotate(1deg)"><span data-fx-magnetic-inner>Hablemos</span></a>',
+    (r) => createMagnetic(r),
+  ],
+  [
+    'view-transition',
+    '<img alt="" data-fx-vt="caso-1" style="width:10px">',
+    (r) => createViewTransition(r),
   ],
 ];
 
@@ -88,6 +139,29 @@ describe('reduced motion en vivo', () => {
     expect(root.querySelectorAll('[data-fx-revealed]').length).toBe(2);
     handle.destroy();
     expect(root.querySelectorAll('[data-fx-revealed]').length).toBe(0);
+  });
+});
+
+describe('flip-layout y view-transition', () => {
+  it('flip-layout aplica el cambio también con reduced motion', () => {
+    mockMedia({ reduce: true });
+    const root = mount('<ul id="g"><li data-fx-flip>1</li><li data-fx-flip>2</li></ul>');
+    const g = root.querySelector('#g') as HTMLElement;
+    const flip = createFlipLayout(g);
+    flip.change(() => g.append(g.firstElementChild as Element));
+    expect(g.textContent).toBe('21');
+    flip.destroy();
+  });
+
+  it('view-transition aplica el cambio sin soporte de la API', async () => {
+    mockMedia({ reduce: false });
+    const root = mount('<p id="p">antes</p>');
+    const vt = createViewTransition(root);
+    await vt.swap(() => {
+      (root.querySelector('#p') as HTMLElement).textContent = 'después';
+    });
+    expect(root.textContent).toBe('después');
+    vt.destroy();
   });
 });
 

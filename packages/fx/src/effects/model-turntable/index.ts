@@ -14,7 +14,7 @@
  * materiales emisivos nombrados en `lightMaterials` (con un token del sitio).
  *
  * Reduced motion: no gira solo ni tiene inercia.
- * destroy(): libera geometrías, materiales, texturas y el contexto WebGL, y
+ * destroy(): libera geometrías, materiales, texturas y el renderer, y
  * devuelve canvas y fallback como estaban.
  */
 
@@ -154,8 +154,7 @@ export function createModelTurntable(root: HTMLElement, options: ModelTurntableO
       });
       envTex?.dispose();
       pmrem?.dispose();
-      renderer.dispose();
-      renderer.forceContextLoss();
+      renderer.dispose(); // sin forceContextLoss(): un remount sobre el mismo canvas recibiría el contexto perdido
     };
 
     try {

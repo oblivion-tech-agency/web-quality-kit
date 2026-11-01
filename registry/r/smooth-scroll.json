@@ -1,0 +1,55 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "smooth-scroll",
+  "type": "registry:lib",
+  "title": "Scroll suave",
+  "description": "Lenis sincronizado con ScrollTrigger: suaviza la rueda sin secuestrar el scroll. Base de las pasadas ●●● y ●●●●.",
+  "dependencies": [
+    "lenis",
+    "gsap"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "smooth-scroll",
+    "title": "Scroll suave",
+    "family": "scroll",
+    "intensity": 2,
+    "deps": [
+      "lenis",
+      "gsap"
+    ],
+    "description": "Lenis sincronizado con ScrollTrigger: suaviza la rueda sin secuestrar el scroll. Base de las pasadas ●●● y ●●●●.",
+    "goodFor": [
+      "todos"
+    ],
+    "pairsWith": [
+      "*"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/smooth-scroll/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/smooth-scroll/index.ts",
+      "content": "/**\n * smooth-scroll — scroll suave con Lenis, sincronizado con GSAP ScrollTrigger.\n * Conserva el scroll nativo (no es scroll-jacking): solo suaviza la rueda.\n * Familia: scroll · Intensidad 2 (base de ●●● y ●●●●) · deps: lenis, gsap.\n *\n * Se monta una vez, sobre `document.documentElement`. Lenis agrega las clases\n * `lenis` y `lenis-smooth` al <html>; el CSS que recomienda Lenis:\n *\n *   html.lenis, html.lenis body { height: auto; }\n *   .lenis.lenis-smooth { scroll-behavior: auto !important; }\n *   .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }\n *\n * Según la huella Oblivion va solo en intensidad ●●● o más.\n * Reduced motion: no monta (scroll nativo); cambia en vivo.\n * destroy(): Lenis se destruye (saca sus clases) y GSAP vuelve a su ticker normal.\n */\n\nimport Lenis from 'lenis';\nimport { motionSwitch, type FxHandle } from '../../core/index';\nimport { fxGsap } from '../../lib/gsap';\n\nexport interface SmoothScrollOptions {\n  /** Suavizado por frame (0–1). 0.1 es el punto de la casa. */\n  lerp?: number;\n  wheelMultiplier?: number;\n  /** Los links #ancla scrollean con Lenis. */\n  anchors?: boolean;\n}\n\nexport interface SmoothScrollHandle extends FxHandle {\n  /** La instancia de Lenis activa (null con reduced motion). */\n  readonly lenis: Lenis | null;\n  scrollTo(target: string | number | HTMLElement): void;\n}\n\nexport function createSmoothScroll(_root: HTMLElement = document.documentElement, { lerp = 0.1, wheelMultiplier = 1, anchors = true }: SmoothScrollOptions = {}): SmoothScrollHandle {\n  const { gsap, ScrollTrigger } = fxGsap();\n  let lenis: Lenis | null = null;\n\n  const off = motionSwitch({\n    full: () => {\n      const instance = new Lenis({ lerp, wheelMultiplier, anchors, autoRaf: false });\n      lenis = instance;\n      const onScroll = () => ScrollTrigger.update();\n      instance.on('scroll', onScroll);\n      const tick = (time: number) => instance.raf(time * 1000);\n      gsap.ticker.add(tick);\n      gsap.ticker.lagSmoothing(0);\n      return () => {\n        gsap.ticker.remove(tick);\n        gsap.ticker.lagSmoothing(500, 33);\n        instance.destroy();\n        lenis = null;\n      };\n    },\n  });\n\n  return {\n    get lenis() {\n      return lenis;\n    },\n    scrollTo(target) {\n      if (lenis) lenis.scrollTo(target as never);\n      else if (typeof target === 'number') window.scrollTo({ top: target });\n      else (typeof target === 'string' ? document.querySelector(target) : target)?.scrollIntoView();\n    },\n    destroy: off,\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/smooth-scroll/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/smooth-scroll/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createSmoothScroll, type SmoothScrollOptions, type SmoothScrollHandle } from './index';\n\n/**\n * Hook de `smooth-scroll`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useSmoothScroll<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: SmoothScrollOptions,\n  deps: DependencyList = [],\n): RefObject<SmoothScrollHandle | null> {\n  return useFx(ref, (el) => createSmoothScroll(el, options), deps);\n}\n"
+    },
+    {
+      "path": "packages/fx/src/lib/gsap.ts",
+      "type": "registry:lib",
+      "target": "components/fx/lib/gsap.ts",
+      "content": "/**\n * GSAP para los efectos del kit: registra los plugins una sola vez y envuelve\n * todo lo que crea un efecto en un `gsap.context()`, así `revert()` deshace\n * tweens, ScrollTriggers y SplitText y deja el DOM como estaba (contrato §2).\n *\n * GSAP es 100% gratis (incluidos SplitText, ScrollTrigger y Flip) desde 2025.\n */\n\nimport { gsap } from 'gsap';\nimport { ScrollTrigger } from 'gsap/ScrollTrigger';\nimport { SplitText } from 'gsap/SplitText';\nimport { Flip } from 'gsap/Flip';\n\nlet registered = false;\n\nexport function fxGsap() {\n  if (!registered && typeof window !== 'undefined') {\n    gsap.registerPlugin(ScrollTrigger, SplitText, Flip);\n    registered = true;\n  }\n  return { gsap, ScrollTrigger, SplitText, Flip };\n}\n\n/** Curva de la casa como ease de GSAP (equivale a cubic-bezier(0.16, 1, 0.3, 1)). */\nexport const HOUSE_EASE = 'expo.out';\n"
+    }
+  ]
+}

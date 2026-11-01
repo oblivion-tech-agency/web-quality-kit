@@ -1,0 +1,59 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "flip-layout",
+  "type": "registry:lib",
+  "title": "Cambios de layout animados (Flip)",
+  "description": "Filtrar, abrir, reordenar o pasar de lista a grilla se anima solo del antes al después con GSAP Flip.",
+  "dependencies": [
+    "gsap"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "flip-layout",
+    "title": "Cambios de layout animados (Flip)",
+    "family": "transiciones",
+    "intensity": 2,
+    "deps": [
+      "gsap"
+    ],
+    "description": "Filtrar, abrir, reordenar o pasar de lista a grilla se anima solo del antes al después con GSAP Flip.",
+    "goodFor": [
+      "portfolio",
+      "catálogo",
+      "ecommerce",
+      "inmobiliaria"
+    ],
+    "pairsWith": [
+      "hover-distort",
+      "cursor-label"
+    ],
+    "avoidWith": [
+      "view-transition"
+    ],
+    "signature": false,
+    "weightKb": 4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/flip-layout/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/flip-layout/index.ts",
+      "content": "/**\n * flip-layout — cualquier cambio de layout se anima solo: filtrar una grilla,\n * abrir un caso a pantalla completa, reordenar, pasar de lista a grilla. Se\n * mide el antes, se aplica el cambio y GSAP Flip anima del antes al después\n * (FLIP). El cambio lo hace el host; el efecto solo lo anima.\n * Familia: transiciones · Intensidad 2 · deps: gsap.\n *\n *   <ul data-fx-flip-root> <li data-fx-flip>…</li> … </ul>\n *\n *   const flip = createFlipLayout(grid);\n *   flip.change(() => grid.classList.toggle('is-list'));          // vanilla\n *   flip.change(() => setFilter('3d'));  // en React: dentro de flushSync o con un effect sobre el estado\n *\n * Los elementos que aparecen o desaparecen entran y salen con fundido y escala.\n * Reduced motion: el cambio se aplica al instante.\n * destroy(): mata las animaciones en curso.\n */\n\nimport { prefersReducedMotion, type FxHandle } from '../../core/index';\nimport { fxGsap, HOUSE_EASE } from '../../lib/gsap';\n\nexport interface FlipLayoutOptions {\n  selector?: string;\n  duration?: number;\n  stagger?: number;\n}\n\nexport interface FlipLayoutHandle extends FxHandle {\n  /** Aplica `mutate` (cambio de DOM o de estado) y anima del layout anterior al nuevo. */\n  change(mutate: () => void): void;\n}\n\nexport function createFlipLayout(\n  root: HTMLElement,\n  { selector = '[data-fx-flip]', duration = 0.7, stagger = 0.02 }: FlipLayoutOptions = {},\n): FlipLayoutHandle {\n  const { gsap, Flip } = fxGsap();\n  const ctx = gsap.context(() => {}, root);\n\n  return {\n    change(mutate) {\n      if (prefersReducedMotion()) {\n        mutate();\n        return;\n      }\n      const targets = root.querySelectorAll(selector);\n      const state = Flip.getState(targets);\n      mutate();\n      ctx.add(() => {\n        Flip.from(state, {\n          targets: root.querySelectorAll(selector),\n          duration,\n          stagger,\n          ease: HOUSE_EASE,\n          absolute: true,\n          nested: true,\n          onEnter: (els: Element[]) => gsap.fromTo(els, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: duration * 0.8, ease: HOUSE_EASE }),\n          onLeave: (els: Element[]) => gsap.to(els, { opacity: 0, scale: 0.94, duration: duration * 0.5, ease: 'power2.in' }),\n        });\n      });\n    },\n    destroy() {\n      ctx.kill();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/flip-layout/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/flip-layout/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createFlipLayout, type FlipLayoutOptions, type FlipLayoutHandle } from './index';\n\n/**\n * Hook de `flip-layout`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useFlipLayout<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: FlipLayoutOptions,\n  deps: DependencyList = [],\n): RefObject<FlipLayoutHandle | null> {\n  return useFx(ref, (el) => createFlipLayout(el, options), deps);\n}\n"
+    },
+    {
+      "path": "packages/fx/src/lib/gsap.ts",
+      "type": "registry:lib",
+      "target": "components/fx/lib/gsap.ts",
+      "content": "/**\n * GSAP para los efectos del kit: registra los plugins una sola vez y envuelve\n * todo lo que crea un efecto en un `gsap.context()`, así `revert()` deshace\n * tweens, ScrollTriggers y SplitText y deja el DOM como estaba (contrato §2).\n *\n * GSAP es 100% gratis (incluidos SplitText, ScrollTrigger y Flip) desde 2025.\n */\n\nimport { gsap } from 'gsap';\nimport { ScrollTrigger } from 'gsap/ScrollTrigger';\nimport { SplitText } from 'gsap/SplitText';\nimport { Flip } from 'gsap/Flip';\n\nlet registered = false;\n\nexport function fxGsap() {\n  if (!registered && typeof window !== 'undefined') {\n    gsap.registerPlugin(ScrollTrigger, SplitText, Flip);\n    registered = true;\n  }\n  return { gsap, ScrollTrigger, SplitText, Flip };\n}\n\n/** Curva de la casa como ease de GSAP (equivale a cubic-bezier(0.16, 1, 0.3, 1)). */\nexport const HOUSE_EASE = 'expo.out';\n"
+    }
+  ]
+}

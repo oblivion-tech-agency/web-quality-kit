@@ -1,0 +1,19 @@
+{
+  "name": "smooth-scroll",
+  "title": "Scroll suave",
+  "family": "scroll",
+  "intensity": 2,
+  "deps": [
+    "lenis",
+    "gsap"
+  ],
+  "description": "Lenis sincronizado con ScrollTrigger: suaviza la rueda sin secuestrar el scroll. Base de las pasadas ●●● y ●●●●.",
+  "goodFor": [
+    "todos"
+  ],
+  "pairsWith": [
+    "*"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

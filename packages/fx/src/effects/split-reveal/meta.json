@@ -1,0 +1,21 @@
+{
+  "name": "split-reveal",
+  "title": "Titular que sube por líneas",
+  "family": "texto",
+  "intensity": 2,
+  "deps": [
+    "gsap"
+  ],
+  "description": "SplitText con máscara: cada línea (o palabra, o letra) sube desde atrás de su propia línea. Re-parte al cargar fuentes y conserva el texto para lectores de pantalla.",
+  "goodFor": [
+    "todos"
+  ],
+  "pairsWith": [
+    "clip-reveal",
+    "smooth-scroll"
+  ],
+  "avoidWith": [
+    "scramble"
+  ],
+  "signature": false
+}

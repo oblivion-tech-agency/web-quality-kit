@@ -1,0 +1,24 @@
+{
+  "name": "flip-layout",
+  "title": "Cambios de layout animados (Flip)",
+  "family": "transiciones",
+  "intensity": 2,
+  "deps": [
+    "gsap"
+  ],
+  "description": "Filtrar, abrir, reordenar o pasar de lista a grilla se anima solo del antes al después con GSAP Flip.",
+  "goodFor": [
+    "portfolio",
+    "catálogo",
+    "ecommerce",
+    "inmobiliaria"
+  ],
+  "pairsWith": [
+    "hover-distort",
+    "cursor-label"
+  ],
+  "avoidWith": [
+    "view-transition"
+  ],
+  "signature": false
+}

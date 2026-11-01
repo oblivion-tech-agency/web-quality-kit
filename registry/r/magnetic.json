@@ -1,0 +1,59 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "magnetic",
+  "type": "registry:lib",
+  "title": "Botones magnéticos",
+  "description": "Botones y links que se dejan atraer por el puntero y vuelven con inercia. En uno o dos elementos clave.",
+  "dependencies": [
+    "gsap"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "magnetic",
+    "title": "Botones magnéticos",
+    "family": "interacción",
+    "intensity": 1,
+    "deps": [
+      "gsap"
+    ],
+    "description": "Botones y links que se dejan atraer por el puntero y vuelven con inercia. En uno o dos elementos clave.",
+    "goodFor": [
+      "agencia",
+      "portfolio",
+      "saas"
+    ],
+    "pairsWith": [
+      "marquee",
+      "shader-backdrop"
+    ],
+    "avoidWith": [
+      "cursor-label",
+      "hover-distort"
+    ],
+    "signature": false,
+    "weightKb": 4.2
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/magnetic/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/magnetic/index.ts",
+      "content": "/**\n * magnetic — botones y links que se dejan atraer por el puntero cuando pasa\n * cerca, y vuelven con inercia. Un hijo `data-fx-magnetic-inner` (el texto o el\n * ícono) se mueve un poco más, para dar profundidad. Microinteracción de\n * detalle: en uno o dos elementos clave, no en todos los links.\n * Familia: interacción · Intensidad 1 · deps: gsap.\n *\n *   <a data-fx-magnetic href=\"#contacto\"><span data-fx-magnetic-inner>Hablemos</span></a>\n *\n * Solo con puntero fino. Reduced motion: no se mueve (en vivo).\n * destroy(): saca listeners y devuelve el transform original.\n */\n\nimport { bundle, finePointer, motionSwitch, preserve, type FxHandle } from '../../core/index';\nimport { fxGsap } from '../../lib/gsap';\n\nexport interface MagneticOptions {\n  selector?: string;\n  /** Fracción de la distancia al puntero que se mueve el elemento. */\n  strength?: number;\n  /** Radio extra alrededor del elemento donde ya atrae (px). */\n  radius?: number;\n}\n\nexport function createMagnetic(\n  root: HTMLElement,\n  { selector = '[data-fx-magnetic]', strength = 0.3, radius = 40 }: MagneticOptions = {},\n): FxHandle {\n  if (!finePointer()) return { destroy() {} };\n  const { gsap } = fxGsap();\n  const els = Array.from(root.querySelectorAll<HTMLElement>(selector));\n\n  const off = motionSwitch({\n    full: () => {\n      const restore = bundle(\n        ...els.flatMap((el) => [el, el.querySelector('[data-fx-magnetic-inner]')]).filter((e): e is Element => !!e).map((e) => preserve(e, { styles: ['transform', 'translate', 'rotate', 'scale'] })),\n      );\n      const ctx = gsap.context(() => {}, root);\n      const movers = els.map((el) => {\n        const inner = el.querySelector<HTMLElement>('[data-fx-magnetic-inner]');\n        return {\n          el,\n          x: gsap.quickTo(el, 'x', { duration: 0.5, ease: 'expo.out' }),\n          y: gsap.quickTo(el, 'y', { duration: 0.5, ease: 'expo.out' }),\n          ix: inner ? gsap.quickTo(inner, 'x', { duration: 0.6, ease: 'expo.out' }) : null,\n          iy: inner ? gsap.quickTo(inner, 'y', { duration: 0.6, ease: 'expo.out' }) : null,\n        };\n      });\n      const onMove = (e: PointerEvent) => {\n        for (const m of movers) {\n          const r = m.el.getBoundingClientRect();\n          const cx = r.left + r.width / 2;\n          const cy = r.top + r.height / 2;\n          const dx = e.clientX - cx;\n          const dy = e.clientY - cy;\n          const near = Math.abs(dx) < r.width / 2 + radius && Math.abs(dy) < r.height / 2 + radius;\n          m.x(near ? dx * strength : 0);\n          m.y(near ? dy * strength : 0);\n          m.ix?.(near ? dx * strength * 0.5 : 0);\n          m.iy?.(near ? dy * strength * 0.5 : 0);\n        }\n      };\n      window.addEventListener('pointermove', onMove, { passive: true });\n      return () => {\n        window.removeEventListener('pointermove', onMove);\n        ctx.revert();\n        for (const m of movers) {\n          const targets = [m.el, m.el.querySelector('[data-fx-magnetic-inner]')].filter(Boolean);\n          gsap.killTweensOf(targets);\n          gsap.set(targets, { clearProps: 'transform' }); // limpia también la caché de GSAP\n        }\n        restore();\n      };\n    },\n  });\n\n  return { destroy: off };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/magnetic/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/magnetic/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createMagnetic, type MagneticOptions } from './index';\n\n/**\n * Hook de `magnetic`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useMagnetic<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: MagneticOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createMagnetic(el, options), deps);\n}\n"
+    },
+    {
+      "path": "packages/fx/src/lib/gsap.ts",
+      "type": "registry:lib",
+      "target": "components/fx/lib/gsap.ts",
+      "content": "/**\n * GSAP para los efectos del kit: registra los plugins una sola vez y envuelve\n * todo lo que crea un efecto en un `gsap.context()`, así `revert()` deshace\n * tweens, ScrollTriggers y SplitText y deja el DOM como estaba (contrato §2).\n *\n * GSAP es 100% gratis (incluidos SplitText, ScrollTrigger y Flip) desde 2025.\n */\n\nimport { gsap } from 'gsap';\nimport { ScrollTrigger } from 'gsap/ScrollTrigger';\nimport { SplitText } from 'gsap/SplitText';\nimport { Flip } from 'gsap/Flip';\n\nlet registered = false;\n\nexport function fxGsap() {\n  if (!registered && typeof window !== 'undefined') {\n    gsap.registerPlugin(ScrollTrigger, SplitText, Flip);\n    registered = true;\n  }\n  return { gsap, ScrollTrigger, SplitText, Flip };\n}\n\n/** Curva de la casa como ease de GSAP (equivale a cubic-bezier(0.16, 1, 0.3, 1)). */\nexport const HOUSE_EASE = 'expo.out';\n"
+    }
+  ]
+}
