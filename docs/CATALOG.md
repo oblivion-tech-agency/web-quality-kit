@@ -30,7 +30,7 @@ Intensidad: ● sutil · ●● editorial · ●●● alto impacto · ●●●
 | `route-draw` | Recorrido que se dibuja · **firma posible** | ●●●○ | 4.5 KB | logística, turismo, energía, historia de marca | count-up, live-timeline | scroll-sequence |
 | `scroll-progress` | Avance de scroll en CSS | ●○○○ | 3.9 KB | todos | * | – |
 | `smooth-scroll` | Scroll suave | ●●○○ | 4.1 KB + lenis ≈ 5 KB gz, gsap ≈ 25 KB gz | todos | * | – |
-| `stacked-cards` | Cartas que se apilan · **firma posible** | ●●●○ | 4.2 KB + gsap ≈ 25 KB gz | agencia, saas, servicios, estudio | split-reveal, scramble | pinned-horizontal |
+| `stacked-cards` | Cartas que se apilan · **firma posible** | ●●●○ | 4.3 KB + gsap ≈ 25 KB gz | agencia, saas, servicios, estudio | split-reveal, scramble | pinned-horizontal |
 | `video-scrub` | Video que avanza con el scroll · **firma posible** | ●●●○ | 4 KB | producto físico, arquitectura, automotriz, turismo | split-reveal, count-up | scroll-sequence |
 
 ## 3d

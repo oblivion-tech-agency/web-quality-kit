@@ -16,6 +16,9 @@
  *     background: var(--fx-ground); opacity: calc(var(--fx-covered, 0) * 0.6); }
  *   @media (prefers-reduced-motion: reduce) { [data-fx-stack-card] { position: relative; top: auto; } }
  *
+ * Composición: el contenido de cada carta va ARRIBA (la siguiente tapa la parte
+ * de abajo) y en celular conviene una columna simple, sin sticky ni efecto.
+ *
  * Reduced motion: no escala ni oscurece (en vivo).
  * destroy(): mata los ScrollTriggers y saca escala y `--fx-covered`.
  */
