@@ -86,6 +86,8 @@ que la hace memorable, propia del cliente y con la huella de la casa.
 | Pieza | Dónde |
 |---|---|
 | La skill | `skills/oblivion-pass/SKILL.md` |
+| Assets (Blender, Spline, Higgsfield) | `skills/asset-pipeline/SKILL.md`, `tools/blender/product.py`, `scripts/assets/` |
+| Proyectos sin shadcn | `node scripts/vendor.mjs <destino> <efecto…>` |
 | Los agentes | `agents/` (`fx-director`, `fx-implementer`, `asset-producer`, `visual-qa`, `motion-reviewer`) |
 | La huella de la casa (reglas medibles) | `docs/SIGNATURE-OBLIVION.md` |
 | El brief de motion | `templates/FX.md.template` |
@@ -165,14 +167,15 @@ leé directo `reference/craft-floor.md` y `reference/new-work.md` dentro de la s
 ## Estructura
 
 ```
-skills/            skills propias (oblivion-pass, fx-catalog, audit-landing, design-tokens, rebuild-section, motion-design)
+skills/            skills propias (oblivion-pass, fx-catalog, asset-pipeline, audit-landing, design-tokens, rebuild-section, motion-design)
 agents/            subagentes de la pasada
 packages/fx/       @oblivion/fx: core/, lib/, effects/<efecto>/{index.ts, react.ts, meta.json}, test/
 registry/          registry de shadcn (generado)
 docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, SIGNATURE-OBLIVION.md, recipes/
 apps/showcase/     Next.js: los efectos montados con sus hooks
 apps/demo-static/  demos sin build + speaker/ (pipeline de Blender: render.py, cuadros, .glb)
-scripts/           install.sh, build-registry.mjs, check-docs.mjs
+scripts/           install.sh, vendor.mjs, build-registry.mjs, check-docs.mjs, assets/ (cuadros, scrub, hoja de contacto)
+tools/blender/     product.py: el modelo del cliente → secuencias, vuelta, fotos en escena y .glb
 templates/         DESIGN.md.template, FX.md.template
 reference/         awesome-design-md (submódulo)
 ```

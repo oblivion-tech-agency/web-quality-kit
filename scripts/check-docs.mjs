@@ -14,7 +14,7 @@ import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TOP = ['skills/', 'docs/', 'packages/', 'apps/', 'registry/', 'scripts/', 'templates/', 'reference/', 'agents/'];
+const TOP = ['skills/', 'docs/', 'packages/', 'apps/', 'registry/', 'scripts/', 'templates/', 'reference/', 'agents/', 'tools/'];
 // Rutas viejas o relativas: siempre se citan completas desde la raíz del repo.
 const LEGACY = ['web-fx-kit/', 'effects/', 'recipes/', 'react/', 'prompts/', 'assets-pipeline/', 'demo/'];
 // Archivos de skills de terceros (viven en ~/.claude/skills, no en este repo).

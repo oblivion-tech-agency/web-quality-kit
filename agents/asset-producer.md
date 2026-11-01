@@ -8,6 +8,11 @@ genera para él: nunca bancos de stock ni assets de otro proyecto.
 
 ## Herramientas
 
+El procedimiento completo, con comandos y presupuestos, está en la skill `asset-pipeline` (`skills/asset-pipeline/SKILL.md`):
+`tools/blender/product.py` (modelo del cliente → cuadros, vuelta, fotos en escena o `.glb`) y `scripts/assets/`
+(`encode-frames.sh`, `video-to-frames.sh`, `contact-sheet.sh`).
+
+
 - **Blender** (`blender -b -P …`, sin interfaz). Base: `apps/demo-static/speaker/render.py` del kit, que modela,
   anima por capítulos, renderiza cuadros transparentes, fotos en escena y exporta `.glb` con texturas horneadas.
   Para otro producto, partí de ese script y cambiá el modelado o importá el modelo del cliente.

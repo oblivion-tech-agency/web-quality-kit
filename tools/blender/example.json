@@ -1,0 +1,16 @@
+{
+  "model": "../../apps/demo-static/speaker/speaker.glb",
+  "out": "../../render-tmp/speaker-chapters",
+  "mode": "chapters",
+  "frames": 72,
+  "resolution": [1000, 1250],
+  "lighting": "dark",
+  "rimColor": [0.62, 0.78, 1.0],
+  "poses": [
+    { "yaw": 0, "pitch": 8, "roll": 10 },
+    { "yaw": -55, "pitch": 36, "roll": 6, "height": 1.0 },
+    { "yaw": -95, "pitch": 4 },
+    { "yaw": -10, "pitch": 4, "roll": 4, "distance": 0.8 }
+  ],
+  "samples": 64
+}
