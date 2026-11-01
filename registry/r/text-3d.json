@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "text-3d",
+  "type": "registry:lib",
+  "title": "Tipografía que entra en 3D",
+  "description": "Cada línea de un titular gira desde atrás como una persiana y se asienta al llegar a su lugar, con el scroll.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "text-3d",
+    "title": "Tipografía que entra en 3D",
+    "family": "texto",
+    "intensity": 3,
+    "deps": [],
+    "description": "Cada línea de un titular gira desde atrás como una persiana y se asienta al llegar a su lugar, con el scroll.",
+    "goodFor": [
+      "agencia",
+      "moda",
+      "editorial",
+      "eventos"
+    ],
+    "pairsWith": [
+      "marquee",
+      "shader-backdrop"
+    ],
+    "avoidWith": [
+      "split-reveal"
+    ],
+    "signature": false,
+    "weightKb": 4.1
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/text-3d/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/text-3d/index.ts",
+      "content": "/**\n * text-3d — tipografía que entra en 3D con el scroll: cada línea gira desde\n * atrás (como una persiana que se abre hacia el lector) y se asienta al llegar\n * a su lugar. Para titulares enormes que funcionan como layout.\n * Familia: texto · Intensidad 3 · 0 deps.\n *\n *   <h2 data-fx-3d>\n *     <span data-fx-3d-line>Ocho brazos,</span>\n *     <span data-fx-3d-line>una sola cabeza</span>\n *   </h2>\n *\n *   [data-fx-3d] { perspective: 900px; }\n *   [data-fx-3d-line] { display: block; transform-origin: 50% 100%; backface-visibility: hidden; }\n *\n * Cada línea anima en su propio cruce de la pantalla (de 95% a 55% del alto),\n * con el avance suavizado. Las líneas se marcan a mano: el corte es una\n * decisión de diseño, no de ancho.\n * Reduced motion: las líneas quedan quietas (en vivo).\n * destroy(): saca listeners y frame y devuelve los transforms originales.\n */\n\nimport { bundle, clamp01, createLoop, damp, motionSwitch, parts, preserve, progress, type FxHandle } from '../../core/index';\n\nexport interface Text3DOptions {\n  /** Ángulo inicial en grados (positivo: la línea viene acostada hacia atrás). */\n  angle?: number;\n  /** Profundidad inicial en px. */\n  depth?: number;\n  /** Fracciones del alto de pantalla donde empieza y termina cada línea. */\n  from?: number;\n  to?: number;\n}\n\nexport function createText3D(root: HTMLElement, { angle = 75, depth = -120, from = 0.95, to = 0.55 }: Text3DOptions = {}): FxHandle {\n  const lines = parts(root, '3d-line');\n  if (!lines.length) return { destroy() {} };\n  const restore = bundle(...lines.map((l) => preserve(l, { styles: ['transform', 'opacity'] })));\n\n  const off = motionSwitch({\n    full: () => {\n      const target = lines.map(() => 0);\n      const value = lines.map(() => 0);\n      const paint = () => {\n        lines.forEach((l, i) => {\n          const k = value[i] ?? 0;\n          const a = (1 - k) * angle;\n          const z = (1 - k) * depth;\n          l.style.transform = `translate3d(0, ${((1 - k) * 0.35).toFixed(3)}em, ${z.toFixed(1)}px) rotateX(${a.toFixed(2)}deg)`;\n          l.style.opacity = String(clamp01(0.15 + k * 0.85).toFixed(3));\n        });\n      };\n      const read = () => {\n        const vh = window.innerHeight;\n        lines.forEach((l, i) => {\n          const r = l.getBoundingClientRect();\n          // 0 cuando el pie de la línea está en `from`, 1 cuando llega a `to`.\n          target[i] = 1 - progress(r.bottom / vh, to, from);\n        });\n      };\n      const loop = createLoop((dt) => {\n        let moving = false;\n        lines.forEach((_, i) => {\n          const t = target[i] ?? 0;\n          let v = damp(value[i] ?? 0, t, 0.0008, dt);\n          if (Math.abs(t - v) < 0.0005) v = t;\n          else moving = true;\n          value[i] = v;\n        });\n        paint();\n        return moving;\n      });\n      const kick = () => {\n        read();\n        loop.wake();\n      };\n      read();\n      lines.forEach((_, i) => (value[i] = target[i] ?? 0));\n      paint();\n      addEventListener('scroll', kick, { passive: true });\n      addEventListener('resize', kick, { passive: true });\n      return () => {\n        removeEventListener('scroll', kick);\n        removeEventListener('resize', kick);\n        loop.stop();\n        restore();\n      };\n    },\n  });\n\n  return {\n    destroy() {\n      off();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/text-3d/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/text-3d/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createText3D, type Text3DOptions } from './index';\n\n/**\n * Hook de `text-3d`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useText3D<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: Text3DOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createText3D(el, options), deps);\n}\n"
+    }
+  ]
+}

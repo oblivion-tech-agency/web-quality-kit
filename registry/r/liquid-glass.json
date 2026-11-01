@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-glass",
+  "type": "registry:lib",
+  "title": "Vidrio líquido",
+  "description": "Una superficie de vidrio que refracta el fondo en sus bordes (Chromium) o lo esmerila (resto), con brillo que sigue al puntero.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "liquid-glass",
+    "title": "Vidrio líquido",
+    "family": "interacción",
+    "intensity": 2,
+    "deps": [],
+    "description": "Una superficie de vidrio que refracta el fondo en sus bordes (Chromium) o lo esmerila (resto), con brillo que sigue al puntero.",
+    "goodFor": [
+      "software",
+      "ia",
+      "producto",
+      "app"
+    ],
+    "pairsWith": [
+      "video-scrub",
+      "shader-backdrop"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 4.8
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/liquid-glass/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/liquid-glass/index.ts",
+      "content": "/**\n * liquid-glass — una superficie de vidrio que refracta lo que tiene detrás\n * (bordes que doblan el fondo como una lente) con un brillo que sigue al\n * puntero. Para una barra de navegación, un botón protagonista o una tarjeta\n * que flota sobre una foto o un video.\n * Familia: interacción / fondo · Intensidad 2 · 0 deps.\n *\n *   <nav data-fx-glass style=\"border-radius: 999px\">…</nav>\n *\n * Mejora progresiva: en Chromium la refracción es real (`backdrop-filter` con\n * un filtro SVG de desplazamiento); en el resto queda un vidrio esmerilado\n * (desenfoque y saturación). El brillo se lee de `--fx-glass-x/y` en el CSS:\n *\n *   [data-fx-glass] { background: color-mix(in oklab, var(--fx-ink) 6%, transparent); }\n *   [data-fx-glass]::after { content: \"\"; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;\n *     background: radial-gradient(120px at var(--fx-glass-x, 30%) var(--fx-glass-y, 0%), color-mix(in oklab, var(--fx-ink) 18%, transparent), transparent); }\n *\n * Un vidrio sobre fondo liso no se nota: va encima de algo con imagen.\n * Reduced motion: el brillo queda quieto (la refracción no es movimiento).\n * destroy(): saca el filtro SVG, los estilos y los listeners.\n */\n\nimport { finePointer, motionSwitch, preserve, type FxHandle } from '../../core/index';\n\nexport interface LiquidGlassOptions {\n  /** Cuánto dobla el borde (px de desplazamiento). */\n  refraction?: number;\n  /** Desenfoque del fondo en px. */\n  blur?: number;\n}\n\nlet uid = 0;\n\n/** Mapa de desplazamiento: un borde que empuja hacia afuera, el centro quieto. */\nfunction displacementMap(w: number, h: number, radius: number): string {\n  const c = document.createElement('canvas');\n  c.width = w;\n  c.height = h;\n  const ctx = c.getContext('2d');\n  if (!ctx) return '';\n  const img = ctx.createImageData(w, h);\n  const band = Math.max(8, Math.min(w, h) * 0.22);\n  for (let y = 0; y < h; y++) {\n    for (let x = 0; x < w; x++) {\n      // Distancia al borde del rectángulo redondeado.\n      const qx = Math.max(Math.abs(x - w / 2) - (w / 2 - radius), 0);\n      const qy = Math.max(Math.abs(y - h / 2) - (h / 2 - radius), 0);\n      const inside = Math.min(Math.max(Math.abs(x - w / 2) - (w / 2 - radius), Math.abs(y - h / 2) - (h / 2 - radius)), 0);\n      const dist = radius - (Math.hypot(qx, qy) + inside);\n      const k = Math.max(0, 1 - dist / band) ** 2;\n      const nx = (x - w / 2) / (w / 2);\n      const ny = (y - h / 2) / (h / 2);\n      const i = (y * w + x) * 4;\n      img.data[i] = 128 - nx * k * 127;\n      img.data[i + 1] = 128 - ny * k * 127;\n      img.data[i + 2] = 128;\n      img.data[i + 3] = 255;\n    }\n  }\n  ctx.putImageData(img, 0, 0);\n  return c.toDataURL();\n}\n\nexport function createLiquidGlass(el: HTMLElement, { refraction = 28, blur = 2 }: LiquidGlassOptions = {}): FxHandle {\n  const restore = preserve(el, { styles: ['backdrop-filter', '-webkit-backdrop-filter', '--fx-glass-x', '--fx-glass-y'] });\n  const id = `fx-glass-${++uid}`;\n  const NS = 'http://www.w3.org/2000/svg';\n  const svg = document.createElementNS(NS, 'svg');\n  svg.setAttribute('aria-hidden', 'true');\n  svg.setAttribute('width', '0');\n  svg.setAttribute('height', '0');\n  svg.style.position = 'absolute';\n\n  const supportsUrl = typeof CSS !== 'undefined' && CSS.supports?.('backdrop-filter', `url(#${id})`) && /Chrome|Chromium|Edg\\//.test(navigator.userAgent);\n  const apply = () => {\n    const r = el.getBoundingClientRect();\n    const w = Math.max(2, Math.round(r.width));\n    const h = Math.max(2, Math.round(r.height));\n    if (supportsUrl) {\n      const radius = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, Math.min(w, h) / 2);\n      svg.innerHTML = `<filter id=\"${id}\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" color-interpolation-filters=\"sRGB\">\n        <feImage href=\"${displacementMap(w, h, radius)}\" x=\"0\" y=\"0\" width=\"${w}\" height=\"${h}\" result=\"map\"/>\n        <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"${blur}\" result=\"soft\"/>\n        <feDisplacementMap in=\"soft\" in2=\"map\" scale=\"${refraction}\" xChannelSelector=\"R\" yChannelSelector=\"G\"/>\n      </filter>`;\n      el.style.setProperty('backdrop-filter', `url(#${id}) saturate(1.4)`);\n    } else {\n      el.style.setProperty('backdrop-filter', `blur(${blur * 6}px) saturate(1.5)`);\n      el.style.setProperty('-webkit-backdrop-filter', `blur(${blur * 6}px) saturate(1.5)`);\n    }\n  };\n  document.body.append(svg);\n  apply();\n  const ro = new ResizeObserver(apply);\n  ro.observe(el);\n\n  const off = motionSwitch({\n    full: () => {\n      if (!finePointer()) return;\n      const onMove = (e: PointerEvent) => {\n        const r = el.getBoundingClientRect();\n        el.style.setProperty('--fx-glass-x', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);\n        el.style.setProperty('--fx-glass-y', `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);\n      };\n      window.addEventListener('pointermove', onMove, { passive: true });\n      return () => window.removeEventListener('pointermove', onMove);\n    },\n  });\n\n  return {\n    destroy() {\n      off();\n      ro.disconnect();\n      svg.remove();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/liquid-glass/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/liquid-glass/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createLiquidGlass, type LiquidGlassOptions } from './index';\n\n/**\n * Hook de `liquid-glass`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useLiquidGlass<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: LiquidGlassOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createLiquidGlass(el, options), deps);\n}\n"
+    }
+  ]
+}

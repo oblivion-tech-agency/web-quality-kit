@@ -8,6 +8,10 @@
       "type": "registry:lib"
     },
     {
+      "name": "carousel-3d",
+      "type": "registry:lib"
+    },
+    {
       "name": "clip-reveal",
       "type": "registry:lib"
     },
@@ -20,11 +24,27 @@
       "type": "registry:lib"
     },
     {
+      "name": "cursor-lens",
+      "type": "registry:lib"
+    },
+    {
+      "name": "depth-relight",
+      "type": "registry:lib"
+    },
+    {
       "name": "flip-layout",
       "type": "registry:lib"
     },
     {
       "name": "hover-distort",
+      "type": "registry:lib"
+    },
+    {
+      "name": "infinite-gallery",
+      "type": "registry:lib"
+    },
+    {
+      "name": "liquid-glass",
       "type": "registry:lib"
     },
     {
@@ -41,6 +61,10 @@
     },
     {
       "name": "model-turntable",
+      "type": "registry:lib"
+    },
+    {
+      "name": "particle-morph",
       "type": "registry:lib"
     },
     {
@@ -72,6 +96,10 @@
       "type": "registry:lib"
     },
     {
+      "name": "spline-scene",
+      "type": "registry:lib"
+    },
+    {
       "name": "split-flap",
       "type": "registry:lib"
     },
@@ -81,6 +109,10 @@
     },
     {
       "name": "stacked-cards",
+      "type": "registry:lib"
+    },
+    {
+      "name": "text-3d",
       "type": "registry:lib"
     },
     {

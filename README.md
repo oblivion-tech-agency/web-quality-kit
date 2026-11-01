@@ -32,7 +32,7 @@ pnpm check:docs  # toda ruta citada en la documentación existe
 ```
 
 Demos:
-- **Showcase en Next.js** (`apps/showcase/`): los efectos de la primera ola montados con sus hooks, como en un
+- **Showcase en Next.js** (`apps/showcase/`): los efectos de la primera y la segunda ola montados con sus hooks, como en un
   proyecto real. `pnpm --filter showcase dev` → http://localhost:4878.
 - **Sin build** (`apps/demo-static/`): `pnpm build`, después `python3 -m http.server 4877` en la raíz y abrir
   `/apps/demo-static/` (catálogo) y `/apps/demo-static/parlante/` (landing completa de ejemplo).

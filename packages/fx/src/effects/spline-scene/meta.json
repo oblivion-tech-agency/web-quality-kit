@@ -1,0 +1,24 @@
+{
+  "name": "spline-scene",
+  "title": "Escena de Spline diferida",
+  "family": "3d",
+  "intensity": 4,
+  "deps": [
+    "@splinetool/runtime"
+  ],
+  "description": "Una escena de Spline que carga recién a una pantalla, con foto de respaldo y pausa fuera de pantalla.",
+  "goodFor": [
+    "producto",
+    "startup",
+    "app",
+    "marca"
+  ],
+  "pairsWith": [
+    "split-reveal"
+  ],
+  "avoidWith": [
+    "model-turntable",
+    "particle-morph"
+  ],
+  "signature": true
+}

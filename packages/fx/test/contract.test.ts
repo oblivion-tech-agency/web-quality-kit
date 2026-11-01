@@ -26,6 +26,14 @@ import { createShaderBackdrop } from '../src/effects/shader-backdrop/index.ts';
 import { createHoverDistort } from '../src/effects/hover-distort/index.ts';
 import { createMagnetic } from '../src/effects/magnetic/index.ts';
 import { createViewTransition } from '../src/effects/view-transition/index.ts';
+import { createText3D } from '../src/effects/text-3d/index.ts';
+import { createCarousel3D } from '../src/effects/carousel-3d/index.ts';
+import { createInfiniteGallery } from '../src/effects/infinite-gallery/index.ts';
+import { createCursorLens } from '../src/effects/cursor-lens/index.ts';
+import { createDepthRelight } from '../src/effects/depth-relight/index.ts';
+import { createLiquidGlass } from '../src/effects/liquid-glass/index.ts';
+import { createParticleMorph } from '../src/effects/particle-morph/index.ts';
+import { createSplineScene } from '../src/effects/spline-scene/index.ts';
 import type { FxHandle } from '../src/core/types.ts';
 
 const cases: Array<[string, string, (root: HTMLElement) => FxHandle]> = [
@@ -89,6 +97,34 @@ const cases: Array<[string, string, (root: HTMLElement) => FxHandle]> = [
     'magnetic',
     '<a id="mg" href="#" data-fx-magnetic style="transform: rotate(1deg)"><span data-fx-magnetic-inner>Hablemos</span></a>',
     (r) => createMagnetic(r),
+  ],
+  ['text-3d', '<h2 id="t3"><span data-fx-3d-line style="color: red">Ocho brazos,</span><span data-fx-3d-line>una sola cabeza</span></h2>', (r) => createText3D(r.querySelector('#t3') as HTMLElement)],
+  [
+    'carousel-3d',
+    '<section id="c3"><div><ul data-fx-ring><li data-fx-ring-item>1</li><li data-fx-ring-item>2</li><li data-fx-ring-item>3</li><li data-fx-ring-item>4</li></ul></div></section>',
+    (r) => createCarousel3D(r.querySelector('#c3') as HTMLElement),
+  ],
+  [
+    'infinite-gallery',
+    '<div id="ig" style="height:400px"><figure data-fx-gallery-item>A</figure><figure data-fx-gallery-item>B</figure></div>',
+    (r) => createInfiniteGallery(r.querySelector('#ig') as HTMLElement),
+  ],
+  ['cursor-lens', '<figure id="cl"><img alt="" src="x.webp"><canvas data-fx-canvas></canvas></figure>', (r) => createCursorLens(r.querySelector('#cl') as HTMLElement)],
+  [
+    'depth-relight',
+    '<figure id="dr"><img data-fx-fallback alt="" src="x.webp" data-fx-depth="d.webp"><canvas data-fx-canvas></canvas></figure>',
+    (r) => createDepthRelight(r.querySelector('#dr') as HTMLElement),
+  ],
+  ['liquid-glass', '<nav id="lg" style="border-radius: 20px">Menú</nav>', (r) => createLiquidGlass(r.querySelector('#lg') as HTMLElement)],
+  [
+    'particle-morph',
+    '<div id="pm"><canvas data-fx-canvas></canvas><img data-fx-fallback alt="" src="iso.svg"></div>',
+    (r) => createParticleMorph(r.querySelector('#pm') as HTMLElement, { targets: [{ text: 'OBLIVION' }] }),
+  ],
+  [
+    'spline-scene',
+    '<figure id="sp" data-fx-scene="https://example.com/scene.splinecode"><canvas data-fx-canvas></canvas><img data-fx-fallback alt=""></figure>',
+    (r) => createSplineScene(r.querySelector('#sp') as HTMLElement),
   ],
   [
     'view-transition',

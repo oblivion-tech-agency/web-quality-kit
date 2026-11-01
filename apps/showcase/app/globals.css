@@ -120,3 +120,34 @@ footer { margin-top: var(--gap); padding: 48px var(--margin); border-top: 1px so
   .scrub { height: auto; }
   .scrub-stage { position: relative; height: auto; padding-block: 10vh; }
 }
+
+/* Segunda ola */
+.type3d { font-size: clamp(56px, 11vw, 180px); perspective: 900px; max-width: none; }
+.type3d span { display: block; transform-origin: 50% 100%; backface-visibility: hidden; }
+.ring-section { height: 260svh; margin-top: var(--gap); }
+.ring-stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; align-content: center; gap: 32px; perspective: 1400px; overflow: hidden; }
+.ring-stage h2 { font-size: clamp(32px, 4vw, 56px); }
+.ring { position: relative; width: 240px; height: 300px; margin: 0; padding: 0; list-style: none; transform-style: preserve-3d; }
+.ring-item { position: absolute; inset: 0; border-radius: 18px; overflow: hidden; backface-visibility: hidden; transition: filter 400ms; filter: brightness(0.55); }
+.ring-item[data-fx-front] { filter: none; }
+.ring-item img { width: 100%; height: 100%; object-fit: cover; }
+.ring-section:not([data-fx-ring-on]) .ring { display: flex; gap: 12px; width: auto; overflow-x: auto; }
+.ring-section:not([data-fx-ring-on]) .ring-item { position: relative; flex: 0 0 200px; height: 250px; filter: none; }
+.gallery { position: relative; height: 80svh; margin-top: 32px; overflow: hidden; border-radius: 24px; background: var(--color-raised); touch-action: none; cursor: grab; }
+.gallery:active { cursor: grabbing; }
+.gallery-item { margin: 0; padding: 8px; }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; user-select: none; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
+.tile.lens, .tile.relight { aspect-ratio: 16/10; }
+.tile.relight canvas { opacity: 1; }
+.tile.relight img[hidden] { display: none; }
+.tile.lens[data-fx-active] canvas { opacity: 1; }
+.glass-section { position: relative; height: 70svh; display: grid; place-items: center; border-radius: 24px; overflow: hidden; padding: 0; margin-inline: var(--margin); }
+.glass-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.glass { position: relative; display: grid; gap: 6px; padding: 28px 36px; border-radius: 32px; max-width: 420px;
+  background: color-mix(in oklab, var(--fx-ink) 8%, transparent); color: var(--fx-ink); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--fx-ink) 18%, transparent); }
+.glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(160px at var(--fx-glass-x, 30%) var(--fx-glass-y, 0%), color-mix(in oklab, var(--fx-ink) 22%, transparent), transparent); }
+.particles { position: relative; aspect-ratio: 16/9; margin-top: 32px; border-radius: 24px; background: var(--color-raised); cursor: pointer; }
+.particles canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+@media (max-width: 760px) { .pair { grid-template-columns: 1fr; } }

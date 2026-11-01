@@ -1,0 +1,22 @@
+{
+  "name": "infinite-gallery",
+  "title": "Galería infinita que se arrastra",
+  "family": "imagen",
+  "intensity": 3,
+  "deps": [],
+  "description": "Una grilla sin bordes que se recorre arrastrando en cualquier dirección, con inercia; las celdas se reciclan.",
+  "goodFor": [
+    "portfolio",
+    "fotografía",
+    "archivo",
+    "moda"
+  ],
+  "pairsWith": [
+    "cursor-label",
+    "hover-distort"
+  ],
+  "avoidWith": [
+    "smooth-scroll"
+  ],
+  "signature": true
+}

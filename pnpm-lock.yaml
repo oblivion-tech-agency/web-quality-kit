@@ -208,6 +208,9 @@ importers:
 
   packages/fx:
     devDependencies:
+      '@splinetool/runtime':
+        specifier: '>=1.9'
+        version: 2.0.126
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -575,6 +578,9 @@ packages:
 
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
+
+  '@splinetool/runtime@2.0.126':
+    resolution: {integrity: sha512-IREDZJhi0vJmsRGzKjmYSYCwVxrWY4t/EzD81wUw+mejkNQ8kGo24bx+Fciw/Zi8Ij/CPXMWhQY3xfF9S8ANDw==}
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -946,6 +952,10 @@ packages:
     resolution: {integrity: sha512-5vvB5+W7ePv+p3uqxi+RcW1XAzLW0/hxt3/4X4Lc4qHudzOhmBiBwOY6DRob4WnanAEGvNcLjF+KNOufrUoEQw==}
     engines: {node: '>=12.20.0'}
 
+  on-change@4.0.0:
+    resolution: {integrity: sha512-PTu7C9Jsz4b+sNMDpH0eZFTr7uxdOtoDWRnhaVNK50bgrrnW5nvbWI0jm5DG9qOoTnIhBzE9xoKVFPD9xgtbdg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -977,6 +987,9 @@ packages:
 
   scheduler@0.28.0:
     resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
+
+  semver-compare@1.0.0:
+    resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
 
   semver@7.8.5:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
@@ -1346,6 +1359,11 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
+  '@splinetool/runtime@2.0.126':
+    dependencies:
+      on-change: 4.0.0
+      semver-compare: 1.0.0
+
   '@swc/helpers@0.5.23':
     dependencies:
       tslib: 2.9.1
@@ -1607,6 +1625,8 @@ snapshots:
 
   obug@3.0.0: {}
 
+  on-change@4.0.0: {}
+
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
@@ -1652,6 +1672,8 @@ snapshots:
       '@rolldown/binding-win32-x64-msvc': 1.2.16
 
   scheduler@0.28.0: {}
+
+  semver-compare@1.0.0: {}
 
   semver@7.8.5:
     optional: true

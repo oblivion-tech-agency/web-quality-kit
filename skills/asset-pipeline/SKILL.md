@@ -32,7 +32,7 @@ Ejemplo completo: `tools/blender/example.json`. Las rutas del JSON son relativas
 |---|---|---|
 | `chapters` | `frame-NNN.png` con alfa | `frames`, `poses` (yaw, pitch, roll, distance, height, lookAt) |
 | `spin` | una vuelta en `frames` cuadros | `spinPose` |
-| `stills` | fotos opacas en escena | `stills` (name, size, lens + pose), `background`, `haze` |
+| `stills` | fotos opacas en escena | `stills` (name, size, lens + pose, `"depth": true` suma `{name}-depth.png` para `depth-relight`), `background`, `haze` |
 | `glb` | `.glb` normalizado | `name` |
 
 - `lighting: "dark"` arma la escena oscura de la casa (contraluces fríos, haz cenital y bruma en `stills`);

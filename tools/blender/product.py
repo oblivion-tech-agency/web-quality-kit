@@ -259,11 +259,44 @@ elif MODE == "stills":
             scene.eevee.use_raytracing = True
         except (AttributeError, TypeError):
             pass
+    def depth_material(near, far):
+        """Emisión = profundidad normalizada (blanco = cerca), para `depth-relight`."""
+        m = bpy.data.materials.new("fx-depth")
+        m.use_nodes = True
+        nt = m.node_tree
+        for n in list(nt.nodes):
+            nt.nodes.remove(n)
+        cam_data = nt.nodes.new("ShaderNodeCameraData")
+        rng = nt.nodes.new("ShaderNodeMapRange")
+        rng.inputs["From Min"].default_value = near
+        rng.inputs["From Max"].default_value = far
+        rng.inputs["To Min"].default_value = 1.0
+        rng.inputs["To Max"].default_value = 0.0
+        emit = nt.nodes.new("ShaderNodeEmission")
+        out = nt.nodes.new("ShaderNodeOutputMaterial")
+        nt.links.new(cam_data.outputs["View Z Depth"], rng.inputs["Value"])
+        nt.links.new(rng.outputs["Result"], emit.inputs["Color"])
+        nt.links.new(emit.outputs[0], out.inputs["Surface"])
+        return m
+
     for still in CFG.get("stills", [{"name": "hero", "size": [2400, 1350], "lens": 50, "yaw": -18, "height": -0.15}]):
         r.resolution_x, r.resolution_y = still.get("size", res)
         cam.data.lens = still.get("lens", 50)
         place(still, cam.data.lens, r.resolution_x / r.resolution_y)
         render_to(os.path.join(OUT, f"{still['name']}.png"))
+        if still.get("depth"):
+            # Segunda pasada: solo profundidad, sin luz ni bruma.
+            dist = (cam.location - Vector(target.location)).length
+            layer = bpy.context.view_layer
+            layer.material_override = depth_material(dist - 0.5, dist + 0.15)  # el producto usa toda la escala
+            vol_link = [l for l in world.node_tree.links if l.to_socket.name == "Volume"]
+            for l in vol_link:
+                world.node_tree.links.remove(l)
+            strength = bg.inputs[1].default_value
+            bg.inputs[1].default_value = 0
+            render_to(os.path.join(OUT, f"{still['name']}-depth.png"))
+            layer.material_override = None
+            bg.inputs[1].default_value = strength
     print("listo stills", OUT)
 else:
     sys.exit(f"Modo desconocido: {MODE}")
