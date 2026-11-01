@@ -17,6 +17,7 @@
  */
 
 import { prefersReducedMotion, type FxHandle } from '../../core/index.ts';
+import { Flip } from 'gsap/Flip';
 import { fxGsap, HOUSE_EASE } from '../../lib/gsap.ts';
 
 export interface FlipLayoutOptions {
@@ -34,7 +35,7 @@ export function createFlipLayout(
   root: HTMLElement,
   { selector = '[data-fx-flip]', duration = 0.7, stagger = 0.02 }: FlipLayoutOptions = {},
 ): FlipLayoutHandle {
-  const { gsap, Flip } = fxGsap();
+  const { gsap } = fxGsap(Flip);
   const ctx = gsap.context(() => {}, root);
 
   return {

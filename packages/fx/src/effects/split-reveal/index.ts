@@ -17,6 +17,7 @@
  */
 
 import { motionSwitch, preserve, type FxHandle } from '../../core/index.ts';
+import { SplitText } from 'gsap/SplitText';
 import { fxGsap, HOUSE_EASE } from '../../lib/gsap.ts';
 
 export interface SplitRevealOptions {
@@ -35,7 +36,7 @@ export function createSplitReveal(
   el: HTMLElement,
   { by = 'lines', duration = 0.9, stagger = 0.08, trigger = 'view', start = 'top 85%', delay = 0 }: SplitRevealOptions = {},
 ): FxHandle {
-  const { gsap, SplitText } = fxGsap();
+  const { gsap } = fxGsap(SplitText);
   const restore = preserve(el, { attributes: ['data-fx-ready'] });
 
   const off = motionSwitch({

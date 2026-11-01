@@ -28,6 +28,7 @@ Este registro es esa regla, y se completa en cada proyecto nuevo **antes** de co
 |---|---|---|---|---|
 | Transporte Lehman | La Ruta 3 de noche, bajo control | `route-draw` (corredor Buenos Aires → Ushuaia con el scroll, marcador GPS) + `live-timeline` en el hero (camión propio animado) | foto que se abre (`scroll-progress` + CSS, bitren), columnas con parallax (`scroll-progress` + CSS, flota) | Rígida, sin rebote, como un instrumento |
 | Oblivion Ecommerce | sin registrar | sin registrar | Fondo de gradiente animado, reveal de texto, botones magnéticos y glow de puntero (escritos en el proyecto, anteriores al catálogo) | sin registrar |
+| Oblivion Tech (pasada 2026-11) | Los tentáculos del pulpo orquestador son los servicios: cada brazo es un frente de trabajo con agentes de IA | `route-draw` ×8 (tentáculos que salen del isotipo y encienden cada servicio, en una sección fijada) | `scramble` (estado de cada agente al encenderse), `stacked-cards` (proceso) | Orgánica y fluida, como un brazo que se estira; curva de la casa, sin rebote |
 | Ondra Pulse (demo del kit, marca ficticia) | El aro de luz del parlante es el único color de la página, y lo elige el visitante | `scroll-sequence` en capítulos, delante de tipografía enorme | `model-turntable` con `setLight()` (live thing), `count-up` | Lenta y pesada, como un objeto caro que gira en una vitrina |
 
 ## Ideas de firma por rubro (para arrancar, no para copiar)
