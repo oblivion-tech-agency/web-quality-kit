@@ -1,0 +1,57 @@
+# FX.md — brief de motion de [Proyecto]
+
+> Lo escribe `fx-director` en la pasada (`/oblivion-pass`). **Se aprueba antes de implementar.**
+> Reglas de la casa: `docs/SIGNATURE-OBLIVION.md` del kit. Catálogo: `docs/CATALOG.md`.
+
+## 1. El sujeto
+
+Inventario de lo que es solo de este cliente (8 a 12 cosas: su nombre y lo que significa, su lugar, sus números,
+su objeto, su ritual, sus materiales, lo impreso de su mundo):
+
+1.
+2.
+3.
+
+## 2. La idea
+
+> En esta página, **[algo del inventario]** se vuelve **[un recurso de movimiento]**.
+
+Prueba del competidor: con el nombre del competidor más cercano en la frase, ¿sigue funcionando? Si sí, no es idea.
+
+## 3. Intensidad
+
+`sutil ● | editorial ●● | alto impacto ●●● | show ●●●●` → **[elegida]**, acordada con el cliente porque [razón].
+
+## 4. Selección
+
+| Rol | Efecto | Dónde | Por qué sale del sujeto |
+|---|---|---|---|
+| Firma | | | |
+| Secundario | | | |
+| Secundario | | | |
+| Base | entradas por sección, microinteracciones[, smooth scroll] | todo el sitio | huella Oblivion |
+
+- Chequeo contra `docs/SIGNATURES.md`: [ninguna fila tiene esta firma ni este par de secundarios / qué cambia respecto de X].
+- Personalidad del movimiento: [rígida como un instrumento / lenta y pesada / ágil y liviana / …].
+
+## 5. Sección por sección
+
+| Sección (archivo) | Qué se mueve | Efecto o receta | Reduced motion | Peso |
+|---|---|---|---|---|
+| Hero (`app/(home)/hero.tsx`) | | | | |
+
+## 6. Assets necesarios
+
+- [ ] [secuencia de producto / escena 3D / clip de hero / ninguno] — con qué herramienta (Blender, Spline, Higgsfield).
+
+## 7. Presupuesto
+
+| Métrica | Antes (medido) | Tope después |
+|---|---|---|
+| LCP (mobile) | | ≤ antes + 10% |
+| INP | | < 200 ms |
+| JS de efectos (gz) | 0 | [suma de pesos del catálogo] |
+
+## 8. Aprobación
+
+- [ ] Cliente o responsable aprobó la idea, la intensidad y la selección. Fecha:

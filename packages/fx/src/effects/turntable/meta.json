@@ -1,0 +1,19 @@
+{
+  "name": "turntable",
+  "title": "360° con cuadros",
+  "family": "3d",
+  "intensity": 2,
+  "deps": [],
+  "description": "Una vuelta de 360° hecha con cuadros, con fundido; se arrastra con inercia. Para giro protagonista usar model-turntable.",
+  "goodFor": [
+    "producto físico",
+    "ecommerce"
+  ],
+  "pairsWith": [
+    "scroll-sequence"
+  ],
+  "avoidWith": [
+    "model-turntable"
+  ],
+  "signature": false
+}

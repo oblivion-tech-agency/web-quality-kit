@@ -1,0 +1,23 @@
+{
+  "name": "carousel-3d",
+  "title": "Carrusel 3D con el scroll",
+  "family": "scroll",
+  "intensity": 3,
+  "deps": [],
+  "description": "Las piezas de una colección giran en un anillo 3D mientras la sección está fijada; la de frente se marca. En mobile, fila nativa.",
+  "goodFor": [
+    "ecommerce",
+    "colección",
+    "flota",
+    "portfolio"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "cursor-label"
+  ],
+  "avoidWith": [
+    "pinned-horizontal",
+    "stacked-cards"
+  ],
+  "signature": true
+}

@@ -1,0 +1,24 @@
+{
+  "name": "magnetic",
+  "title": "Botones magnéticos",
+  "family": "interacción",
+  "intensity": 1,
+  "deps": [
+    "gsap"
+  ],
+  "description": "Botones y links que se dejan atraer por el puntero y vuelven con inercia. En uno o dos elementos clave.",
+  "goodFor": [
+    "agencia",
+    "portfolio",
+    "saas"
+  ],
+  "pairsWith": [
+    "marquee",
+    "shader-backdrop"
+  ],
+  "avoidWith": [
+    "cursor-label",
+    "hover-distort"
+  ],
+  "signature": false
+}

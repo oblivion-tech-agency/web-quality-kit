@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "video-scrub",
+  "type": "registry:lib",
+  "title": "Video que avanza con el scroll",
+  "description": "Un clip (producto, obra, recorrido de cámara) avanza con el scroll en una sección fijada. Exportado con un keyframe por cuadro.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "video-scrub",
+    "title": "Video que avanza con el scroll",
+    "family": "scroll",
+    "intensity": 3,
+    "deps": [],
+    "description": "Un clip (producto, obra, recorrido de cámara) avanza con el scroll en una sección fijada. Exportado con un keyframe por cuadro.",
+    "goodFor": [
+      "producto físico",
+      "arquitectura",
+      "automotriz",
+      "turismo"
+    ],
+    "pairsWith": [
+      "split-reveal",
+      "count-up"
+    ],
+    "avoidWith": [
+      "scroll-sequence"
+    ],
+    "signature": true,
+    "weightKb": 4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/video-scrub/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/video-scrub/index.ts",
+      "content": "/**\n * video-scrub — un video que avanza con el scroll mientras la sección está\n * fijada: el clip del producto, la obra que se arma, el recorrido de cámara.\n * Es la variante del reel \"imagen de IA → video de IA\": el clip se exporta con\n * un keyframe en cada cuadro para que saltar a cualquier tiempo sea instantáneo:\n *\n *   ffmpeg -i clip.mp4 -an -c:v libx264 -crf 24 -g 1 -pix_fmt yuv420p -movflags +faststart scrub.mp4\n *\n * Familia: scroll / 3D · Intensidad 3 · 0 deps · Firma posible.\n *\n *   <section data-fx-video-scrub class=\"h-[260svh]\">\n *     <div class=\"sticky top-0 h-svh\">\n *       <video data-fx-video muted playsinline preload=\"auto\" poster=\"poster.webp\" src=\"scrub.mp4\"></video>\n *\n * Con muchos cuadros y poco peso conviene `scroll-sequence`; con un clip largo o\n * de cámara en movimiento, este.\n * Reduced motion: queda el cuadro de `stillAt` (en vivo).\n * destroy(): saca listeners y pausa el video en su primer cuadro.\n */\n\nimport { clamp01, createLoop, damp, motionSwitch, part, progress, type FxHandle } from '../../core/index';\n\nexport interface VideoScrubOptions {\n  video?: HTMLVideoElement | null;\n  range?: [number, number];\n  /** Fracción del clip que queda quieta con reduced motion. */\n  stillAt?: number;\n  onProgress?: (p: number) => void;\n}\n\nexport function createVideoScrub(section: HTMLElement, options: VideoScrubOptions = {}): FxHandle {\n  const video = options.video ?? part<HTMLVideoElement>(section, 'video');\n  if (!video) return { destroy() {} };\n  const [r0, r1] = options.range ?? [0, 1];\n  const stillAt = options.stillAt ?? 0.5;\n  video.pause();\n\n  const seek = (p: number) => {\n    if (!video.duration || Number.isNaN(video.duration)) return;\n    video.currentTime = clamp01(p) * Math.max(0, video.duration - 0.05);\n  };\n  const whenReady = (cb: () => void) => {\n    if (video.readyState >= 1) cb();\n    else video.addEventListener('loadedmetadata', cb, { once: true });\n  };\n\n  const off = motionSwitch({\n    full: () => {\n      let target = 0;\n      let value = 0;\n      const read = () => {\n        const r = section.getBoundingClientRect();\n        target = progress(clamp01(-r.top / Math.max(1, r.height - window.innerHeight)), r0, r1);\n      };\n      const loop = createLoop((dt) => {\n        value = damp(value, target, 0.002, dt);\n        if (Math.abs(target - value) < 0.0005) value = target;\n        seek(value);\n        options.onProgress?.(value);\n        return value !== target;\n      });\n      const kick = () => {\n        read();\n        loop.wake();\n      };\n      whenReady(() => {\n        read();\n        value = target;\n        seek(value);\n      });\n      addEventListener('scroll', kick, { passive: true });\n      addEventListener('resize', kick, { passive: true });\n      return () => {\n        removeEventListener('scroll', kick);\n        removeEventListener('resize', kick);\n        loop.stop();\n      };\n    },\n    reduced: () => whenReady(() => seek(stillAt)),\n  });\n\n  return {\n    destroy() {\n      off();\n      video.pause();\n      if (video.readyState >= 1) video.currentTime = 0;\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/video-scrub/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/video-scrub/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createVideoScrub, type VideoScrubOptions } from './index';\n\n/**\n * Hook de `video-scrub`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useVideoScrub<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: VideoScrubOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createVideoScrub(el, options), deps);\n}\n"
+    }
+  ]
+}

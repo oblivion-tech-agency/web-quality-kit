@@ -1,0 +1,48 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "view-transition",
+  "type": "registry:lib",
+  "title": "Transiciones de estado nativas",
+  "description": "View Transitions API: elementos con el mismo data-fx-vt viajan entre el antes y el después de un cambio de estado.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "view-transition",
+    "title": "Transiciones de estado nativas",
+    "family": "transiciones",
+    "intensity": 2,
+    "deps": [],
+    "description": "View Transitions API: elementos con el mismo data-fx-vt viajan entre el antes y el después de un cambio de estado.",
+    "goodFor": [
+      "portfolio",
+      "catálogo",
+      "app"
+    ],
+    "pairsWith": [
+      "hover-distort",
+      "split-reveal"
+    ],
+    "avoidWith": [
+      "flip-layout"
+    ],
+    "signature": false,
+    "weightKb": 3.8
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/view-transition/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/view-transition/index.ts",
+      "content": "/**\n * view-transition — cambios de estado que se animan solos con la View\n * Transitions API del navegador (Baseline desde octubre de 2025): filtrar,\n * abrir un caso, cambiar de pestaña. Los elementos con el mismo\n * `data-fx-vt=\"nombre\"` antes y después viajan de un lugar al otro.\n * Familia: transiciones · Intensidad 2 · 0 deps.\n *\n *   <img data-fx-vt=\"caso-12\" …>       ← en la grilla\n *   <img data-fx-vt=\"caso-12\" …>       ← en el detalle (después del cambio)\n *\n *   const vt = createViewTransition(document.body);\n *   vt.swap(() => setOpen(12));   // en React, envolvé el setState con flushSync\n *\n * Entre páginas de Next.js usá el soporte de React/Next para View Transitions\n * (`<ViewTransition>` con `experimental.viewTransition` en next.config); entre\n * páginas de un sitio multipágina sin framework: `@view-transition { navigation: auto; }`.\n *\n * Curva y duración desde los tokens:\n *   ::view-transition-group(*) { animation-duration: var(--fx-duration); animation-timing-function: var(--fx-ease); }\n *\n * Reduced motion: el cambio se aplica al instante. Sin soporte: también.\n * destroy(): saca los `view-transition-name` que puso.\n */\n\nimport { prefersReducedMotion, preserve, bundle, type FxHandle, type Restore } from '../../core/index';\n\nexport interface ViewTransitionHandle extends FxHandle {\n  /** Aplica `update` dentro de una transición (o al instante si no corresponde). */\n  swap(update: () => void | Promise<void>): Promise<void>;\n  /** Vuelve a leer los `data-fx-vt` (después de montar contenido nuevo). */\n  refresh(): void;\n}\n\ntype DocWithVT = Document & { startViewTransition?: (cb: () => void | Promise<void>) => { finished: Promise<void> } };\n\nexport function createViewTransition(root: HTMLElement): ViewTransitionHandle {\n  let restores: Restore[] = [];\n  const name = () => {\n    bundle(...restores)();\n    restores = [];\n    root.querySelectorAll<HTMLElement>('[data-fx-vt]').forEach((el) => {\n      restores.push(preserve(el, { styles: ['view-transition-name'] }));\n      el.style.setProperty('view-transition-name', el.getAttribute('data-fx-vt') ?? 'none');\n    });\n  };\n  name();\n\n  return {\n    async swap(update) {\n      const doc = document as DocWithVT;\n      if (!doc.startViewTransition || prefersReducedMotion()) {\n        await update();\n        name();\n        return;\n      }\n      const t = doc.startViewTransition(async () => {\n        await update();\n        name();\n      });\n      await t.finished.catch(() => {});\n    },\n    refresh: name,\n    destroy() {\n      bundle(...restores)();\n      restores = [];\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/view-transition/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/view-transition/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createViewTransition, type ViewTransitionHandle } from './index';\n\n/** Hook de `view-transition`. Usá `handle.current?.swap(() => flushSync(() => setState(x)))`. */\nexport function useViewTransition<E extends HTMLElement>(ref: RefObject<E | null>, deps: DependencyList = []): RefObject<ViewTransitionHandle | null> {\n  return useFx(ref, (el) => createViewTransition(el), deps);\n}\n"
+    }
+  ]
+}

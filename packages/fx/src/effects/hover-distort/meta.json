@@ -1,0 +1,22 @@
+{
+  "name": "hover-distort",
+  "title": "Foto que se deforma al pasar",
+  "family": "imagen",
+  "intensity": 2,
+  "deps": [],
+  "description": "Onda de agua y corrimiento de color alrededor del cursor sobre una foto, en WebGL2. Solo puntero fino.",
+  "goodFor": [
+    "portfolio",
+    "estudio",
+    "moda",
+    "arquitectura"
+  ],
+  "pairsWith": [
+    "cursor-label",
+    "flip-layout"
+  ],
+  "avoidWith": [
+    "magnetic"
+  ],
+  "signature": false
+}

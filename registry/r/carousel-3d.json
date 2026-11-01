@@ -1,0 +1,50 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "carousel-3d",
+  "type": "registry:lib",
+  "title": "Carrusel 3D con el scroll",
+  "description": "Las piezas de una colección giran en un anillo 3D mientras la sección está fijada; la de frente se marca. En mobile, fila nativa.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "carousel-3d",
+    "title": "Carrusel 3D con el scroll",
+    "family": "scroll",
+    "intensity": 3,
+    "deps": [],
+    "description": "Las piezas de una colección giran en un anillo 3D mientras la sección está fijada; la de frente se marca. En mobile, fila nativa.",
+    "goodFor": [
+      "ecommerce",
+      "colección",
+      "flota",
+      "portfolio"
+    ],
+    "pairsWith": [
+      "split-reveal",
+      "cursor-label"
+    ],
+    "avoidWith": [
+      "pinned-horizontal",
+      "stacked-cards"
+    ],
+    "signature": true,
+    "weightKb": 4.4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/carousel-3d/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/carousel-3d/index.ts",
+      "content": "/**\n * carousel-3d — las piezas de una colección giran en un anillo 3D mientras la\n * sección está fijada: el scroll hace girar el anillo y la pieza de frente se\n * marca con `data-fx-front`. Para colecciones, flota, productos, casos.\n * Familia: scroll · Intensidad 3 · 0 deps.\n *\n *   <section data-fx-carousel class=\"h-[260svh]\">\n *     <div class=\"sticky top-0 h-svh\" data-fx-ring-stage>\n *       <ul data-fx-ring> <li data-fx-ring-item>…</li> … </ul>\n *\n *   [data-fx-ring-stage] { perspective: 1400px; display: grid; place-items: center; overflow: hidden; }\n *   [data-fx-ring] { position: relative; transform-style: preserve-3d; width: var(--card-w); height: var(--card-h); }\n *   [data-fx-ring-item] { position: absolute; inset: 0; backface-visibility: hidden; }\n *   [data-fx-ring-item][data-fx-front] { … resaltado … }\n *\n * Sin JS (y con reduced motion) el CSS debería mostrar las piezas en una fila\n * con scroll horizontal: el módulo solo pone `data-fx-ring-on` en la sección\n * cuando el anillo está activo, para que el CSS 3D aplique solo entonces.\n * Debajo de `minWidth` no gira (queda la fila).\n * destroy(): devuelve transforms y atributos.\n */\n\nimport { bundle, clamp01, createLoop, damp, motionSwitch, part, parts, preserve, progress, type FxHandle } from '../../core/index';\n\nexport interface Carousel3DOptions {\n  /** Vueltas completas que da el anillo en todo el pin. */\n  turns?: number;\n  range?: [number, number];\n  minWidth?: number;\n  onFront?: (index: number) => void;\n}\n\nexport function createCarousel3D(section: HTMLElement, { turns = 1, range = [0.05, 0.95], minWidth = 768, onFront }: Carousel3DOptions = {}): FxHandle {\n  const ring = part(section, 'ring');\n  const items = parts(section, 'ring-item');\n  if (!ring || items.length < 3) return { destroy() {} };\n  const restore = bundle(\n    preserve(section, { attributes: ['data-fx-ring-on'] }),\n    preserve(ring, { styles: ['transform'] }),\n    ...items.map((it) => preserve(it, { styles: ['transform'], attributes: ['data-fx-front', 'aria-hidden'] })),\n  );\n  const wide = window.matchMedia(`(min-width: ${minWidth}px)`);\n  const n = items.length;\n  const step = 360 / n;\n\n  let teardown: (() => void) | null = null;\n  const mount = () => {\n    section.setAttribute('data-fx-ring-on', '');\n    const radius = () => Math.round((ring.offsetWidth / 2) / Math.tan(Math.PI / n)) + 24;\n    const layout = () => {\n      const r = radius();\n      items.forEach((it, i) => (it.style.transform = `rotateY(${i * step}deg) translateZ(${r}px)`));\n      return r;\n    };\n    let r = layout();\n    let target = 0;\n    let value = 0;\n    let front = -1;\n    const paint = () => {\n      const deg = -value * turns * 360;\n      ring.style.transform = `translateZ(${-r}px) rotateY(${deg.toFixed(2)}deg)`;\n      const idx = ((Math.round(-deg / step) % n) + n) % n;\n      if (idx !== front) {\n        front = idx;\n        items.forEach((it, i) => it.toggleAttribute('data-fx-front', i === idx));\n        onFront?.(idx);\n      }\n    };\n    const read = () => {\n      const b = section.getBoundingClientRect();\n      target = progress(clamp01(-b.top / Math.max(1, b.height - window.innerHeight)), range[0], range[1]);\n    };\n    const loop = createLoop((dt) => {\n      value = damp(value, target, 0.002, dt);\n      if (Math.abs(target - value) < 0.0002) value = target;\n      paint();\n      return value !== target;\n    });\n    const kick = () => {\n      read();\n      loop.wake();\n    };\n    const onResize = () => {\n      r = layout();\n      kick();\n    };\n    read();\n    value = target;\n    paint();\n    addEventListener('scroll', kick, { passive: true });\n    addEventListener('resize', onResize, { passive: true });\n    teardown = () => {\n      removeEventListener('scroll', kick);\n      removeEventListener('resize', onResize);\n      loop.stop();\n      restore();\n    };\n  };\n  const unmount = () => {\n    teardown?.();\n    teardown = null;\n  };\n\n  const off = motionSwitch({\n    full: () => {\n      const sync = () => (wide.matches ? !teardown && mount() : unmount());\n      sync();\n      wide.addEventListener('change', sync);\n      return () => {\n        wide.removeEventListener('change', sync);\n        unmount();\n      };\n    },\n  });\n\n  return {\n    destroy() {\n      off();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/carousel-3d/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/carousel-3d/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createCarousel3D, type Carousel3DOptions } from './index';\n\n/**\n * Hook de `carousel-3d`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useCarousel3D<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: Carousel3DOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createCarousel3D(el, options), deps);\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "oblivion-fx-kit",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "test": "pnpm --filter @oblivion/fx test",
+    "typecheck": "pnpm --filter @oblivion/fx typecheck",
+    "build": "pnpm --filter @oblivion/fx build",
+    "registry": "node scripts/build-registry.mjs",
+    "check:docs": "node scripts/check-docs.mjs"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "marquee",
+  "type": "registry:lib",
+  "title": "Tira infinita que responde al scroll",
+  "description": "Una tira sin fin que acelera con el scroll y cambia de sentido con la dirección. Copias con aria-hidden.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "marquee",
+    "title": "Tira infinita que responde al scroll",
+    "family": "texto",
+    "intensity": 2,
+    "deps": [],
+    "description": "Una tira sin fin que acelera con el scroll y cambia de sentido con la dirección. Copias con aria-hidden.",
+    "goodFor": [
+      "agencia",
+      "moda",
+      "eventos",
+      "gastronomía"
+    ],
+    "pairsWith": [
+      "split-reveal",
+      "magnetic"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 4.2
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/marquee/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/marquee/index.ts",
+      "content": "/**\n * marquee — una tira que corre sin fin (clientes, servicios, una frase) y\n * responde al scroll: acelera cuando se scrollea rápido y cambia de sentido\n * con la dirección. Los elementos se duplican solo lo necesario para cubrir el\n * ancho, con `aria-hidden` (el lector de pantalla lee la tira una sola vez).\n * Familia: texto · Intensidad 2 · 0 deps.\n *\n *   <div data-fx-marquee style=\"overflow: hidden\">\n *     <div data-fx-marquee-track style=\"display: flex; width: max-content\">…</div>\n *\n * Se pausa fuera de pantalla y, si `pauseOnHover`, con el puntero encima.\n * Reduced motion: quieta y sin copias (en vivo).\n * destroy(): saca las copias, el transform y los listeners.\n */\n\nimport { createLoop, damp, motionSwitch, onVisibility, part, preserve, type FxHandle } from '../../core/index';\n\nexport interface MarqueeOptions {\n  /** Velocidad base en px/s. Negativa: hacia la derecha. */\n  speed?: number;\n  /** Cuánto suma la velocidad del scroll (0 = nada). */\n  scrollBoost?: number;\n  /** Invierte el sentido cuando se scrollea hacia arriba. */\n  followScroll?: boolean;\n  pauseOnHover?: boolean;\n}\n\nexport function createMarquee(\n  root: HTMLElement,\n  { speed = 60, scrollBoost = 0.25, followScroll = true, pauseOnHover = false }: MarqueeOptions = {},\n): FxHandle {\n  const track = part(root, 'marquee-track');\n  if (!track) return { destroy() {} };\n  const restore = preserve(track, { children: true, styles: ['transform'] });\n  const originals = Array.from(track.children);\n\n  const off = motionSwitch({\n    full: () => {\n      // Copias hasta cubrir dos anchos de pantalla, para que el bucle no muestre el corte.\n      const width = () => originals.reduce((w, c) => w + (c as HTMLElement).offsetWidth, 0) || root.clientWidth || 1;\n      const base = width();\n      const copies = Math.max(1, Math.ceil((root.clientWidth * 2) / base));\n      for (let i = 0; i < copies; i++) {\n        for (const c of originals) {\n          const clone = c.cloneNode(true) as Element;\n          clone.setAttribute('aria-hidden', 'true');\n          clone.querySelectorAll('a, button, input').forEach((n) => n.setAttribute('tabindex', '-1'));\n          track.append(clone);\n        }\n      }\n\n      let x = 0;\n      let dir = 1;\n      let boost = 0;\n      let hover = false;\n      let lastY = window.scrollY;\n      let scrollVel = 0;\n      const loop = createLoop((dt) => {\n        boost = damp(boost, scrollVel * scrollBoost, 0.001, dt);\n        scrollVel = damp(scrollVel, 0, 0.0005, dt);\n        const v = hover ? 0 : (speed + Math.abs(boost)) * dir;\n        x -= v * dt;\n        const span = width();\n        if (x <= -span) x += span;\n        if (x > 0) x -= span;\n        track.style.transform = `translate3d(${x.toFixed(2)}px, 0, 0)`;\n      });\n      const onScroll = () => {\n        const y = window.scrollY;\n        const dy = y - lastY;\n        lastY = y;\n        scrollVel = dy * 60; // px/frame → px/s aprox.\n        if (followScroll && dy !== 0) dir = dy > 0 ? 1 : -1;\n      };\n      const enter = () => (hover = true);\n      const leave = () => (hover = false);\n      addEventListener('scroll', onScroll, { passive: true });\n      if (pauseOnHover) {\n        root.addEventListener('pointerenter', enter);\n        root.addEventListener('pointerleave', leave);\n      }\n      const offVisible = onVisibility(root, (visible) => (visible ? loop.wake() : loop.stop()));\n      return () => {\n        offVisible();\n        loop.stop();\n        removeEventListener('scroll', onScroll);\n        root.removeEventListener('pointerenter', enter);\n        root.removeEventListener('pointerleave', leave);\n        restore();\n      };\n    },\n    reduced: () => restore(),\n  });\n\n  return {\n    destroy() {\n      off();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/marquee/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/marquee/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createMarquee, type MarqueeOptions } from './index';\n\n/**\n * Hook de `marquee`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useMarquee<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: MarqueeOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createMarquee(el, options), deps);\n}\n"
+    }
+  ]
+}

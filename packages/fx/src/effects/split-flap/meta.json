@@ -1,0 +1,22 @@
+{
+  "name": "split-flap",
+  "title": "Cartel de aeropuerto",
+  "family": "texto",
+  "intensity": 2,
+  "deps": [],
+  "description": "Valores cortos que cambian letra por letra como un cartel de estación: destinos, estados, horarios.",
+  "goodFor": [
+    "logística",
+    "transporte",
+    "eventos",
+    "turismo"
+  ],
+  "pairsWith": [
+    "live-timeline",
+    "count-up"
+  ],
+  "avoidWith": [
+    "scramble"
+  ],
+  "signature": false
+}

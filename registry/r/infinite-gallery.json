@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "infinite-gallery",
+  "type": "registry:lib",
+  "title": "Galería infinita que se arrastra",
+  "description": "Una grilla sin bordes que se recorre arrastrando en cualquier dirección, con inercia; las celdas se reciclan.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "infinite-gallery",
+    "title": "Galería infinita que se arrastra",
+    "family": "imagen",
+    "intensity": 3,
+    "deps": [],
+    "description": "Una grilla sin bordes que se recorre arrastrando en cualquier dirección, con inercia; las celdas se reciclan.",
+    "goodFor": [
+      "portfolio",
+      "fotografía",
+      "archivo",
+      "moda"
+    ],
+    "pairsWith": [
+      "cursor-label",
+      "hover-distort"
+    ],
+    "avoidWith": [
+      "smooth-scroll"
+    ],
+    "signature": true,
+    "weightKb": 4.8
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/infinite-gallery/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/infinite-gallery/index.ts",
+      "content": "/**\n * infinite-gallery — una grilla de imágenes sin bordes que se recorre\n * arrastrando en cualquier dirección (mouse, dedo, rueda o flechas), con\n * inercia. Las celdas se reciclan al salir por un borde y entran por el otro:\n * no se termina nunca. Para portfolios, archivos, moodboards.\n * Familia: imagen · Intensidad 3 · 0 deps.\n *\n *   <div data-fx-gallery style=\"height: 100svh; overflow: hidden; position: relative; touch-action: none\">\n *     <figure data-fx-gallery-item>…</figure> …\n *\n * El módulo posiciona las celdas en absoluto y suma copias (`aria-hidden`,\n * sin foco) hasta cubrir la pantalla. Sin JS, el CSS debería mostrar una\n * grilla común con scroll.\n * Reduced motion: sin inercia (el arrastre sigue funcionando, es del usuario).\n * destroy(): saca copias, posiciones y listeners.\n */\n\nimport { createLoop, onVisibility, parts, preserve, prefersReducedMotion, bundle, type FxHandle } from '../../core/index';\n\nexport interface InfiniteGalleryOptions {\n  /** Tamaño de cada celda en px (ancho, alto) incluido el espacio entre celdas. */\n  cell?: [number, number];\n  /** Las columnas impares se corren media celda para que no parezca planilla. */\n  stagger?: boolean;\n  label?: string;\n}\n\nexport function createInfiniteGallery(root: HTMLElement, { cell = [320, 400], stagger = true, label = 'Galería: arrastrá o usá las flechas para recorrerla' }: InfiniteGalleryOptions = {}): FxHandle {\n  const originals = parts(root, 'gallery-item');\n  if (!originals.length) return { destroy() {} };\n  const restoreRoot = preserve(root, { children: true, attributes: ['tabindex', 'role', 'aria-label', 'data-fx-gallery-on'] });\n  const restoreItems = bundle(...originals.map((o) => preserve(o, { styles: ['position', 'left', 'top', 'width', 'height', 'transform'] })));\n  const [cw, ch] = cell;\n\n  root.setAttribute('data-fx-gallery-on', '');\n  root.tabIndex = 0;\n  root.setAttribute('role', 'region');\n  root.setAttribute('aria-label', label);\n\n  // Celdas suficientes para cubrir la pantalla más un borde.\n  const cols = Math.ceil(root.clientWidth / cw) + 2;\n  const rows = Math.ceil(root.clientHeight / ch) + 2;\n  const cells: HTMLElement[] = [];\n  for (let i = 0; i < cols * rows; i++) {\n    const src = originals[i % originals.length] as HTMLElement;\n    const el = i < originals.length ? src : (src.cloneNode(true) as HTMLElement);\n    if (i >= originals.length) {\n      el.setAttribute('aria-hidden', 'true');\n      el.querySelectorAll('a, button').forEach((n) => n.setAttribute('tabindex', '-1'));\n      root.append(el);\n    }\n    el.style.position = 'absolute';\n    el.style.left = '0';\n    el.style.top = '0';\n    el.style.width = `${cw}px`;\n    el.style.height = `${ch}px`;\n    cells.push(el);\n  }\n  const W = cols * cw;\n  const H = rows * ch;\n\n  let x = 0;\n  let y = 0;\n  let vx = 0;\n  let vy = 0;\n  let dragging = false;\n  let lastX = 0;\n  let lastY = 0;\n  let lastT = 0;\n  const wrap = (v: number, size: number) => ((v % size) + size) % size;\n  const paint = () => {\n    cells.forEach((el, i) => {\n      const c = i % cols;\n      const r = Math.floor(i / cols);\n      const ox = wrap(c * cw + x, W) - cw;\n      const oy = wrap(r * ch + y + (stagger && c % 2 ? ch / 2 : 0), H) - ch;\n      el.style.transform = `translate3d(${ox.toFixed(1)}px, ${oy.toFixed(1)}px, 0)`;\n    });\n  };\n  const loop = createLoop((dt) => {\n    if (!dragging) {\n      x += vx * dt;\n      y += vy * dt;\n      const k = Math.pow(0.04, dt);\n      vx *= k;\n      vy *= k;\n    }\n    paint();\n    return dragging || Math.abs(vx) > 2 || Math.abs(vy) > 2;\n  });\n  const onDown = (e: PointerEvent) => {\n    dragging = true;\n    vx = vy = 0;\n    [lastX, lastY, lastT] = [e.clientX, e.clientY, e.timeStamp];\n    root.setPointerCapture?.(e.pointerId);\n    loop.wake();\n  };\n  const onMove = (e: PointerEvent) => {\n    if (!dragging) return;\n    const dt = Math.max(1, e.timeStamp - lastT) / 1000;\n    const dx = e.clientX - lastX;\n    const dy = e.clientY - lastY;\n    x += dx;\n    y += dy;\n    if (!prefersReducedMotion()) {\n      vx = vx * 0.5 + (dx / dt) * 0.5;\n      vy = vy * 0.5 + (dy / dt) * 0.5;\n    }\n    [lastX, lastY, lastT] = [e.clientX, e.clientY, e.timeStamp];\n  };\n  const onUp = () => {\n    dragging = false;\n    if (prefersReducedMotion()) vx = vy = 0;\n    loop.wake();\n  };\n  const onWheel = (e: WheelEvent) => {\n    e.preventDefault();\n    x -= e.deltaX;\n    y -= e.deltaY;\n    paint();\n  };\n  const onKey = (e: KeyboardEvent) => {\n    const map: Record<string, [number, number]> = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };\n    const d = map[e.key];\n    if (!d) return;\n    e.preventDefault();\n    x += d[0] * cw * 0.5;\n    y += d[1] * ch * 0.5;\n    paint();\n  };\n\n  paint();\n  root.addEventListener('pointerdown', onDown);\n  root.addEventListener('pointermove', onMove);\n  root.addEventListener('pointerup', onUp);\n  root.addEventListener('pointercancel', onUp);\n  root.addEventListener('wheel', onWheel, { passive: false });\n  root.addEventListener('keydown', onKey);\n  const offVisible = onVisibility(root, (v) => (v ? loop.wake() : loop.stop()));\n\n  return {\n    destroy() {\n      offVisible();\n      loop.stop();\n      root.removeEventListener('pointerdown', onDown);\n      root.removeEventListener('pointermove', onMove);\n      root.removeEventListener('pointerup', onUp);\n      root.removeEventListener('pointercancel', onUp);\n      root.removeEventListener('wheel', onWheel);\n      root.removeEventListener('keydown', onKey);\n      restoreItems();\n      restoreRoot();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/infinite-gallery/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/infinite-gallery/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createInfiniteGallery, type InfiniteGalleryOptions } from './index';\n\n/**\n * Hook de `infinite-gallery`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useInfiniteGallery<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: InfiniteGalleryOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createInfiniteGallery(el, options), deps);\n}\n"
+    }
+  ]
+}

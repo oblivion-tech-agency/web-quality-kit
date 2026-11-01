@@ -1,0 +1,20 @@
+{
+  "name": "liquid-glass",
+  "title": "Vidrio líquido",
+  "family": "interacción",
+  "intensity": 2,
+  "deps": [],
+  "description": "Una superficie de vidrio que refracta el fondo en sus bordes (Chromium) o lo esmerila (resto), con brillo que sigue al puntero.",
+  "goodFor": [
+    "software",
+    "ia",
+    "producto",
+    "app"
+  ],
+  "pairsWith": [
+    "video-scrub",
+    "shader-backdrop"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

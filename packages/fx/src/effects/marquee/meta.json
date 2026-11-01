@@ -1,0 +1,20 @@
+{
+  "name": "marquee",
+  "title": "Tira infinita que responde al scroll",
+  "family": "texto",
+  "intensity": 2,
+  "deps": [],
+  "description": "Una tira sin fin que acelera con el scroll y cambia de sentido con la dirección. Copias con aria-hidden.",
+  "goodFor": [
+    "agencia",
+    "moda",
+    "eventos",
+    "gastronomía"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "magnetic"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

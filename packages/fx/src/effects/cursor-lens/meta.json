@@ -1,0 +1,22 @@
+{
+  "name": "cursor-lens",
+  "title": "Lente que sigue al cursor",
+  "family": "imagen",
+  "intensity": 3,
+  "deps": [],
+  "description": "Una lente amplía lo que tiene debajo, con borde refractado y corrimiento de color. Círculo o cuadrado.",
+  "goodFor": [
+    "producto físico",
+    "arte",
+    "arquitectura",
+    "joyería"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "clip-reveal"
+  ],
+  "avoidWith": [
+    "hover-distort"
+  ],
+  "signature": false
+}

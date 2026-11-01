@@ -1,0 +1,48 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "cursor-label",
+  "type": "registry:lib",
+  "title": "Etiqueta junto al puntero",
+  "description": "Una etiqueta sigue al puntero sobre lo que se abre (\"Ver caso\"). Solo puntero fino.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "cursor-label",
+    "title": "Etiqueta junto al puntero",
+    "family": "interacción",
+    "intensity": 2,
+    "deps": [],
+    "description": "Una etiqueta sigue al puntero sobre lo que se abre (\"Ver caso\"). Solo puntero fino.",
+    "goodFor": [
+      "portfolio",
+      "estudio",
+      "catálogo"
+    ],
+    "pairsWith": [
+      "pinned-horizontal",
+      "clip-reveal"
+    ],
+    "avoidWith": [
+      "magnetic"
+    ],
+    "signature": false,
+    "weightKb": 4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/cursor-label/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/cursor-label/index.ts",
+      "content": "/**\n * cursor-label — etiqueta que acompaña al puntero sobre lo que se abre:\n * `data-fx-cursor=\"Ver caso\"`. Un solo nodo flotante para todo el contenedor.\n * Familia: interacción · Intensidad 2 · 0 deps.\n *\n * No esconde el cursor del sistema ni reemplaza el texto del link: es un\n * refuerzo visual. CSS (colores desde tokens):\n *\n *   .fx-cursor { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none;\n *     padding: 8px 12px; background: var(--fx-accent); color: var(--fx-on-accent);\n *     opacity: 0; scale: 0.6; transition: opacity 160ms, scale 220ms var(--fx-ease); }\n *   .fx-cursor[data-fx-active] { opacity: 1; scale: 1; }\n *\n * Solo con puntero fino; en touch no hace nada.\n * Reduced motion: la etiqueta sigue al puntero sin inercia (cambia en vivo).\n * destroy(): saca el nodo, los listeners y el frame.\n */\n\nimport { createLoop, damp, finePointer, prefersReducedMotion, type FxHandle } from '../../core/index';\n\nexport interface CursorLabelOptions {\n  attribute?: string;\n  className?: string;\n  offset?: [number, number];\n}\n\nexport function createCursorLabel(\n  root: HTMLElement,\n  { attribute = 'data-fx-cursor', className = 'fx-cursor', offset = [16, 18] }: CursorLabelOptions = {},\n): FxHandle {\n  if (!finePointer()) return { destroy() {} };\n\n  const label = document.createElement('div');\n  label.className = className;\n  label.setAttribute('aria-hidden', 'true');\n  document.body.append(label);\n\n  let tx = 0;\n  let ty = 0;\n  let x = 0;\n  let y = 0;\n  const place = () => {\n    label.style.transform = `translate3d(${(x + offset[0]).toFixed(1)}px, ${(y + offset[1]).toFixed(1)}px, 0)`;\n  };\n  const loop = createLoop((dt) => {\n    x = damp(x, tx, 0.0001, dt);\n    y = damp(y, ty, 0.0001, dt);\n    if (Math.abs(tx - x) < 0.1 && Math.abs(ty - y) < 0.1) [x, y] = [tx, ty];\n    place();\n    return x !== tx || y !== ty;\n  });\n\n  const onMove = (e: PointerEvent) => {\n    [tx, ty] = [e.clientX, e.clientY];\n    const target = (e.target as Element | null)?.closest?.(`[${attribute}]`);\n    if (target) {\n      const text = target.getAttribute(attribute) ?? '';\n      if (label.textContent !== text) label.textContent = text;\n      if (!label.hasAttribute('data-fx-active')) {\n        [x, y] = [tx, ty]; // aparece donde está el puntero, no viajando\n        label.setAttribute('data-fx-active', '');\n      }\n    } else label.removeAttribute('data-fx-active');\n\n    if (prefersReducedMotion()) {\n      [x, y] = [tx, ty];\n      place();\n    } else loop.wake();\n  };\n  const onLeave = () => label.removeAttribute('data-fx-active');\n\n  root.addEventListener('pointermove', onMove, { passive: true });\n  document.documentElement.addEventListener('pointerleave', onLeave);\n\n  return {\n    destroy() {\n      root.removeEventListener('pointermove', onMove);\n      document.documentElement.removeEventListener('pointerleave', onLeave);\n      loop.stop();\n      label.remove();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/cursor-label/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/cursor-label/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createCursorLabel, type CursorLabelOptions } from './index';\n\n/**\n * Hook de `cursor-label`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useCursorLabel<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: CursorLabelOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createCursorLabel(el, options), deps);\n}\n"
+    }
+  ]
+}

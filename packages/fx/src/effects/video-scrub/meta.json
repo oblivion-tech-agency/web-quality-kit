@@ -1,0 +1,22 @@
+{
+  "name": "video-scrub",
+  "title": "Video que avanza con el scroll",
+  "family": "scroll",
+  "intensity": 3,
+  "deps": [],
+  "description": "Un clip (producto, obra, recorrido de cámara) avanza con el scroll en una sección fijada. Exportado con un keyframe por cuadro.",
+  "goodFor": [
+    "producto físico",
+    "arquitectura",
+    "automotriz",
+    "turismo"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "count-up"
+  ],
+  "avoidWith": [
+    "scroll-sequence"
+  ],
+  "signature": true
+}

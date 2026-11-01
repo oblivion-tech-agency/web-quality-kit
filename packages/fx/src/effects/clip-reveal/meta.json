@@ -1,0 +1,20 @@
+{
+  "name": "clip-reveal",
+  "title": "Revelado con máscara",
+  "family": "imagen",
+  "intensity": 1,
+  "deps": [],
+  "description": "Cada foto sube desde abajo con clip-path mientras se asienta un zoom leve. Reemplaza al fade genérico.",
+  "goodFor": [
+    "portfolio",
+    "editorial",
+    "inmobiliaria",
+    "gastronomía"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "smooth-scroll"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

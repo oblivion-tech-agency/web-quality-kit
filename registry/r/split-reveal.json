@@ -1,0 +1,56 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-reveal",
+  "type": "registry:lib",
+  "title": "Titular que sube por líneas",
+  "description": "SplitText con máscara: cada línea (o palabra, o letra) sube desde atrás de su propia línea. Re-parte al cargar fuentes y conserva el texto para lectores de pantalla.",
+  "dependencies": [
+    "gsap"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "split-reveal",
+    "title": "Titular que sube por líneas",
+    "family": "texto",
+    "intensity": 2,
+    "deps": [
+      "gsap"
+    ],
+    "description": "SplitText con máscara: cada línea (o palabra, o letra) sube desde atrás de su propia línea. Re-parte al cargar fuentes y conserva el texto para lectores de pantalla.",
+    "goodFor": [
+      "todos"
+    ],
+    "pairsWith": [
+      "clip-reveal",
+      "smooth-scroll"
+    ],
+    "avoidWith": [
+      "scramble"
+    ],
+    "signature": false,
+    "weightKb": 4.1
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/split-reveal/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/split-reveal/index.ts",
+      "content": "/**\n * split-reveal — un titular entra línea por línea (o palabra, o letra), cada\n * una subiendo desde atrás de su propia máscara. GSAP SplitText con `mask`,\n * `autoSplit` (re-parte al cargar fuentes o cambiar el ancho) y `aria`.\n * Familia: texto · Intensidad 2 · deps: gsap.\n *\n *   <h2 data-fx-split>Toda la sala en una mano</h2>\n *\n * Para que no se vea el texto antes de partir, ocultalo solo con JS y con una\n * salida si el script falla (se muestra a los 2,5 s igual):\n *\n *   .js [data-fx-split]:not([data-fx-ready]) { opacity: 0; animation: fx-show 0s 2.5s forwards; }\n *   @keyframes fx-show { to { opacity: 1; } }\n *\n * Reduced motion: el texto queda entero y visible (en vivo).\n * destroy(): SplitText.revert() devuelve el texto original y los tweens se matan.\n */\n\nimport { motionSwitch, preserve, type FxHandle } from '../../core/index';\nimport { SplitText } from 'gsap/SplitText';\nimport { fxGsap, HOUSE_EASE } from '../../lib/gsap';\n\nexport interface SplitRevealOptions {\n  by?: 'lines' | 'words' | 'chars';\n  /** Segundos por parte. */\n  duration?: number;\n  stagger?: number;\n  /** 'view' espera a que entre en pantalla; 'load' arranca ya (para el hero). */\n  trigger?: 'view' | 'load';\n  /** Posición de ScrollTrigger para `view`. */\n  start?: string;\n  delay?: number;\n}\n\nexport function createSplitReveal(\n  el: HTMLElement,\n  { by = 'lines', duration = 0.9, stagger = 0.08, trigger = 'view', start = 'top 85%', delay = 0 }: SplitRevealOptions = {},\n): FxHandle {\n  const { gsap } = fxGsap(SplitText);\n  const restore = preserve(el, { attributes: ['data-fx-ready'] });\n\n  const off = motionSwitch({\n    full: () => {\n      const ctx = gsap.context(() => {\n        SplitText.create(el, {\n          type: by === 'lines' ? 'lines' : `${by},lines`,\n          mask: by,\n          autoSplit: true,\n          aria: 'auto',\n          onSplit(self: { lines: Element[]; words: Element[]; chars: Element[] }) {\n            el.setAttribute('data-fx-ready', '');\n            const parts = by === 'lines' ? self.lines : by === 'words' ? self.words : self.chars;\n            return gsap.from(parts, {\n              yPercent: 110,\n              duration,\n              stagger,\n              delay,\n              ease: HOUSE_EASE,\n              ...(trigger === 'view' ? { scrollTrigger: { trigger: el, start, once: true } } : {}),\n            });\n          },\n        });\n      }, el);\n      return () => ctx.revert();\n    },\n    reduced: () => {\n      el.setAttribute('data-fx-ready', '');\n    },\n  });\n\n  return {\n    destroy() {\n      off();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/split-reveal/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/split-reveal/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createSplitReveal, type SplitRevealOptions } from './index';\n\n/**\n * Hook de `split-reveal`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useSplitReveal<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: SplitRevealOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createSplitReveal(el, options), deps);\n}\n"
+    },
+    {
+      "path": "packages/fx/src/lib/gsap.ts",
+      "type": "registry:lib",
+      "target": "components/fx/lib/gsap.ts",
+      "content": "/**\n * GSAP para los efectos del kit. Cada efecto registra solo los plugins que usa\n * (`fxGsap(SplitText)`), así un sitio que usa stacked-cards no carga SplitText\n * ni Flip. Todo lo que crea un efecto va en un `gsap.context()`, y `revert()`\n * deja el DOM como estaba (contrato §2).\n *\n * GSAP es 100% gratis (incluidos SplitText, ScrollTrigger y Flip) desde 2025.\n */\n\nimport { gsap } from 'gsap';\nimport { ScrollTrigger } from 'gsap/ScrollTrigger';\n\nconst registered = new Set<unknown>();\n\n/** Registra ScrollTrigger y los plugins pedidos (una sola vez cada uno). */\nexport function fxGsap(...plugins: object[]) {\n  if (typeof window !== 'undefined') {\n    for (const plugin of [ScrollTrigger, ...plugins]) {\n      if (registered.has(plugin)) continue;\n      gsap.registerPlugin(plugin);\n      registered.add(plugin);\n    }\n  }\n  return { gsap, ScrollTrigger };\n}\n\n/** Curva de la casa como ease de GSAP (equivale a cubic-bezier(0.16, 1, 0.3, 1)). */\nexport const HOUSE_EASE = 'expo.out';\n"
+    }
+  ]
+}

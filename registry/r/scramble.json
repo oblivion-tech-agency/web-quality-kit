@@ -1,0 +1,50 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scramble",
+  "type": "registry:lib",
+  "title": "Texto que se decodifica",
+  "description": "Un texto corto pasa por caracteres al azar y se asienta letra por letra. Para etiquetas técnicas, servicios, cifras. Nunca párrafos.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "scramble",
+    "title": "Texto que se decodifica",
+    "family": "texto",
+    "intensity": 2,
+    "deps": [],
+    "description": "Un texto corto pasa por caracteres al azar y se asienta letra por letra. Para etiquetas técnicas, servicios, cifras. Nunca párrafos.",
+    "goodFor": [
+      "software",
+      "ia",
+      "ciberseguridad",
+      "fintech"
+    ],
+    "pairsWith": [
+      "shader-backdrop",
+      "stacked-cards"
+    ],
+    "avoidWith": [
+      "split-flap",
+      "split-reveal"
+    ],
+    "signature": false,
+    "weightKb": 4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/scramble/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/scramble/index.ts",
+      "content": "/**\n * scramble — un texto corto se \"decodifica\": pasa por caracteres al azar y se\n * asienta letra por letra de izquierda a derecha al entrar en vista. Para\n * etiquetas técnicas, números de versión, nombres de servicios, cifras: texto\n * corto de un sujeto con algo de máquina. Nunca en párrafos.\n * Familia: texto · Intensidad 2 · 0 deps.\n *\n *   <span data-fx-scramble>Agentes de IA</span>\n *\n * Accesible: el valor real vive en un span oculto visualmente; lo que se mezcla\n * va con `aria-hidden`. Usá una fuente con cifras tabulares si hay números.\n *\n * Reduced motion: no anima (en vivo). Se reproduce una vez, al entrar en vista;\n * `play()` lo repite (por ejemplo en hover).\n * destroy(): corta el frame y devuelve el contenido original.\n */\n\nimport { motionSwitch, onVisibility, preserve, prefersReducedMotion, type FxHandle } from '../../core/index';\n\nconst GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/';\nconst HIDDEN = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';\n\nexport interface ScrambleOptions {\n  /** Duración total en ms. */\n  duration?: number;\n  glyphs?: string;\n}\n\nexport interface ScrambleHandle extends FxHandle {\n  play(): void;\n}\n\nexport function createScramble(el: HTMLElement, { duration = 900, glyphs = GLYPHS }: ScrambleOptions = {}): ScrambleHandle {\n  const restore = preserve(el, { children: true });\n  const text = el.textContent ?? '';\n  const real = document.createElement('span');\n  real.style.cssText = HIDDEN;\n  real.textContent = text;\n  const shown = document.createElement('span');\n  shown.setAttribute('aria-hidden', 'true');\n  shown.textContent = text;\n  el.replaceChildren(real, shown);\n\n  let raf = 0;\n  const play = () => {\n    cancelAnimationFrame(raf);\n    if (prefersReducedMotion()) {\n      shown.textContent = text;\n      return;\n    }\n    const start = performance.now();\n    const frame = (now: number) => {\n      const k = Math.min(1, (now - start) / duration);\n      const settled = Math.floor(k * text.length);\n      let out = text.slice(0, settled);\n      for (let i = settled; i < text.length; i++) {\n        const c = text[i] ?? '';\n        out += c === ' ' ? ' ' : (glyphs[Math.floor(Math.random() * glyphs.length)] ?? c);\n      }\n      shown.textContent = out;\n      raf = k < 1 ? requestAnimationFrame(frame) : 0;\n    };\n    raf = requestAnimationFrame(frame);\n  };\n\n  const off = motionSwitch({\n    full: () => {\n      let done = false;\n      const offVisible = onVisibility(el, (visible) => {\n        if (visible && !done) {\n          done = true;\n          play();\n        }\n      });\n      return () => {\n        offVisible();\n        cancelAnimationFrame(raf);\n        shown.textContent = text;\n      };\n    },\n  });\n\n  return {\n    play,\n    destroy() {\n      off();\n      cancelAnimationFrame(raf);\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/scramble/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/scramble/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createScramble, type ScrambleOptions, type ScrambleHandle } from './index';\n\n/**\n * Hook de `scramble`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useScramble<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: ScrambleOptions,\n  deps: DependencyList = [],\n): RefObject<ScrambleHandle | null> {\n  return useFx(ref, (el) => createScramble(el, options), deps);\n}\n"
+    }
+  ]
+}

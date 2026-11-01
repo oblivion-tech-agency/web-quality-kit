@@ -1,0 +1,23 @@
+{
+  "name": "particle-morph",
+  "title": "Partículas que forman tu marca",
+  "family": "3d",
+  "intensity": 4,
+  "deps": [],
+  "description": "Miles de partículas en Canvas 2D forman la silueta de un isotipo, una imagen o un texto y se transforman entre formas.",
+  "goodFor": [
+    "marca con isotipo",
+    "software",
+    "ia",
+    "eventos"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "stacked-cards"
+  ],
+  "avoidWith": [
+    "shader-backdrop",
+    "spline-scene"
+  ],
+  "signature": true
+}

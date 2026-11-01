@@ -1,54 +1,100 @@
-# Web Quality Kit
+# Oblivion FX Kit
 
-Skills de Claude Code para llevar un sitio web de "funcional" a "alta gama" — auditoría técnica, sistema de
-tokens de diseño, reconstrucción de secciones con verificación visual real, y principios de motion design.
-Nace de aplicar este flujo en serio sobre un proyecto real (Oblivion Tech), no de teoría.
+El kit con el que Oblivion lleva un sitio de "funcional" a "deslumbra en el primer scroll". Tiene dos mitades:
+
+1. **Calidad:** skills de Claude Code para auditar, consolidar tokens y reconstruir secciones con verificación visual.
+2. **Alto impacto:** `@oblivion/fx`, un catálogo de efectos (scroll, 3D, tipografía, interacción) con un contrato
+   común, instalable en cualquier proyecto Next.js con `npx shadcn add`, y las reglas para elegirlos sin que
+   todos los sitios terminen pareciéndose.
+
+Nace de aplicarlo en serio sobre proyectos reales (Oblivion Tech, Transporte Lehman), no de teoría.
 
 ## Instalación
 
-Este repo es la fuente de verdad. Las skills se activan symlinkeándolas a `~/.claude/skills/` (disponibles
-en todo proyecto) o copiándolas a `.claude/skills/` dentro de un repo puntual.
+Este repo es la fuente de verdad. `scripts/install.sh` enlaza las skills y los agentes propios en `~/.claude`
+(symlinks: los cambios del repo se reflejan solos):
 
 ```bash
-# Global (recomendado) — un symlink por skill, así los cambios en este repo se reflejan solos
-for skill in audit-landing design-tokens rebuild-section motion-design fx-effects; do
-  ln -s "$(pwd)/skills/$skill" "$HOME/.claude/skills/$skill"
-done
-
-# Por proyecto (si preferís copiarlas sueltas a un repo puntual)
-cp -r skills/{audit-landing,design-tokens,rebuild-section,motion-design,fx-effects} /ruta/al/proyecto/.claude/skills/
+scripts/install.sh              # skills y agentes propios
+scripts/install.sh --all        # + skills compañeras (Impeccable, Taste, Emil, GSAP, Three.js) + MCP (Chrome DevTools, Spline)
+scripts/install.sh --dry-run    # muestra lo que haría
+export OBLIVION_FX_KIT="$(pwd)" # para que la pasada encuentre el kit
 ```
 
-Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`, y completalo
-con los datos reales de esa marca (secciones 0-5). Las secciones 6-9 no se tocan — son las reglas que evitan
-el "look de IA genérica".
-
-Submódulos — inicializalos después de clonar:
+Para trabajar en el catálogo:
 
 ```bash
-git submodule update --init --recursive
+pnpm install
+pnpm test        # contrato de cada efecto (destroy, reduced motion, StrictMode)
+pnpm build       # compila packages/fx a dist/ (lo usan los demos sin build)
+pnpm registry    # regenera registry/r/ y docs/CATALOG.md desde los meta.json
+pnpm check:docs  # toda ruta citada en la documentación existe
 ```
 
-## Herramientas compañeras (no vendoreadas acá, se instalan aparte)
+Demos:
+- **Showcase en Next.js** (`apps/showcase/`): los efectos de la primera y la segunda ola montados con sus hooks, como en un
+  proyecto real. `pnpm --filter showcase dev` → http://localhost:4878.
+- **Sin build** (`apps/demo-static/`): `pnpm build`, después `python3 -m http.server 4877` en la raíz y abrir
+  `/apps/demo-static/` (catálogo) y `/apps/demo-static/parlante/` (landing completa de ejemplo).
 
-Son plugins completos de Claude Code (marketplace propio), no un `SKILL.md` suelto — no tiene sentido
-forkearlos adentro de este repo, se instalan directo y quedan actualizables solos:
+Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`.
+
+## El catálogo: `@oblivion/fx`
+
+| Qué | Dónde |
+|---|---|
+| Efectos disponibles, por familia e intensidad (generado) | `docs/CATALOG.md` |
+| Contrato de todo efecto | `docs/CONTRACT.md` |
+| Firmas usadas por proyecto (leer antes de elegir) | `docs/SIGNATURES.md` |
+| Código fuente en TypeScript | `packages/fx/src/` (`core/`, `lib/`, `effects/<efecto>/`) |
+| Tests del contrato | `packages/fx/test/` |
+| Registry para shadcn | `registry/r/` |
+| Recetas | `docs/recipes/` |
+| Showcase en Next.js | `apps/showcase/` |
+| Demos sin build y pipeline de Blender | `apps/demo-static/` |
+
+Cada efecto es `createX(elemento, opciones)` en vanilla y `useX(ref, opciones)` en React. Todos:
+- dejan el DOM como estaba al destruirse (sobreviven StrictMode);
+- respetan reduced motion en vivo, con un estado final legible;
+- leen colores y curvas de tokens `--fx-*`;
+- cargan lo pesado (Three.js) recién cuando hace falta.
+
+En un proyecto Next.js:
 
 ```bash
-# Taste Skill — anti-slop de diseño frontend (88k★, github.com/Leonxlnx/taste-skill)
-/plugin marketplace add Leonxlnx/taste-skill
-/plugin install taste-skill@taste-skill
-
-# Humanizer — saca el tono "IA" de cualquier texto (50k★, github.com/blader/humanizer)
-/plugin marketplace add blader/humanizer
-/plugin install humanizer@humanizer
+npx shadcn add https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/scroll-sequence.json
 ```
 
-Usalos así: `taste-skill` antes/junto con `/rebuild-section` para que el resultado no caiga en los defaults
-típicos de IA (gradientes morados, Inter para todo, shadcn sin tocar); `humanizer` al final, sobre cualquier
-copy que haya escrito un agente (hero, casos, contacto) para que no suene a IA.
+Motor: **GSAP + Lenis** para el movimiento y **Three.js** para el 3D (ver `docs/recipes/librerias-de-componentes.md`
+para Motion, 21st.dev y UI UX Pro Max).
 
-## El flujo
+## La pasada: `/oblivion-pass`
+
+Para una landing que ya está diseñada y construida. No toca diseño, copy ni estructura: le suma la capa de motion
+que la hace memorable, propia del cliente y con la huella de la casa.
+
+```
+1. visual-qa        relevamiento: capturas 1440/768/390, secciones, LCP/INP/CLS, consola
+2. fx-director      FX.md: inventario del sujeto → la idea → intensidad → firma + 2 secundarios + base
+                    (chequeado contra docs/SIGNATURES.md)      ← una persona aprueba
+3. asset-producer   solo si la firma lo pide: Blender, Spline MCP, Higgsfield
+4. fx-implementer   instala desde el registry, tokens --fx-*, hooks en componentes cliente chicos
+5. motion-reviewer  + visual-qa: contra la huella y el contrato, hasta 0 bloqueantes
+6. cierre           fila en docs/SIGNATURES.md, antes y después, métricas
+```
+
+| Pieza | Dónde |
+|---|---|
+| La skill | `skills/oblivion-pass/SKILL.md` |
+| Assets (Blender, Spline, Higgsfield) | `skills/asset-pipeline/SKILL.md`, `tools/blender/product.py`, `scripts/assets/` |
+| Proyectos sin shadcn | `node scripts/vendor.mjs <destino> <efecto…>` |
+| Los agentes | `agents/` (`fx-director`, `fx-implementer`, `asset-producer`, `visual-qa`, `motion-reviewer`) |
+| La huella de la casa (reglas medibles) | `docs/SIGNATURE-OBLIVION.md` |
+| El brief de motion | `templates/FX.md.template` |
+
+Intensidades: ● sutil · ●● editorial · ●●● alto impacto · ●●●● show. Variedad entre proyectos, misma huella.
+
+## El flujo de calidad
 
 ```
 /audit-landing            →  qué está roto, con archivo y línea
@@ -56,76 +102,80 @@ copy que haya escrito un agente (hero, casos, contacto) para que no suene a IA.
 /rebuild-section [x]      →  reconstruye una sección, verificada con Playwright
 ```
 
-Corré `/audit-landing` primero siempre — sin diagnóstico, `/rebuild-section` reconstruye a ciegas. El orden
-importa: saltearse `/design-tokens` es la forma más común de terminar con una sección linda que no combina
-con el resto del sitio.
+Corré `/audit-landing` primero siempre: sin diagnóstico, `/rebuild-section` reconstruye a ciegas. Saltearse
+`/design-tokens` es la forma más común de terminar con una sección linda que no combina con el resto del sitio.
 
-`motion-design` (skill de LottieFiles, MIT, ver `skills/motion-design/LICENSE`) no se invoca por comando —
-se activa sola cuando se está armando cualquier animación, transición o reveal, y aporta timing/easing/
-choreography basados en principios de animación de Disney adaptados a UI.
+`motion-design` (skill de LottieFiles, MIT, ver `skills/motion-design/LICENSE`) se activa sola cuando se arma una
+animación y aporta timing, easing y coreografía. `fx-catalog` se usa cuando una sección necesita un efecto del catálogo.
 
-### Efectos visuales y prompts (`fx-effects`)
-
-La skill `fx-effects` es el puente entre el diagnóstico/tokens y la construcción visual de alto impacto.
-Se activa automáticamente desde `/rebuild-section` cuando una sección necesita un efecto WebGL, scroll
-narrativo, partículas, o cualquier tratamiento que va más allá de CSS puro.
-
-Incluye:
-- **8 módulos ES** en `web-fx-kit/effects/` — partículas, gradientes, scroll, text-reveal, magnetic, etc.
-- **Wrappers React** en `web-fx-kit/react/` — para proyectos React/Next.js
-- **7 prompts** en `web-fx-kit/prompts/` — plantillas por tipo de sitio (hero 3D, editorial, portfolio, etc.)
-- **Recipes** en `web-fx-kit/recipes/` — guías de performance, stack, integración React
-- **Assets pipeline** en `web-fx-kit/assets-pipeline/` — generar imagen/video/3D con IA
-
-### Flujo con efectos
+### Flujo completo de un proyecto nuevo
 
 ```
-1. Copiar DESIGN.md.template al proyecto, llenar secciones 0-5
-2. /audit-landing  (si ya hay algo armado)
-3. /design-tokens
-4. Elegir un prompt de web-fx-kit/prompts/ que matchee el tipo de sitio
-5. /rebuild-section [sección]  →  lee el prompt + usa efectos del fx-kit
-6. Verificar con checklist de DESIGN.md sección 9
+1. templates/DESIGN.md.template → DESIGN.md. Completar Overview: idea, live thing, modo y escena.
+   Elegir la firma de motion con docs/SIGNATURES.md (una firma + hasta dos secundarios, sin repetir).
+2. /audit-landing                  (si ya hay algo armado)
+3. /design-tokens                  → los tokens del front matter, aplicados al CSS real
+4. /rebuild-section [sección]      → con fx-catalog y las reglas de craft-floor de Impeccable
+5. Motion: /animate (Emil) o /impeccable animate, una orquestación por región
+6. Gates:  taste lint.mjs (0 FAIL) → taste inspect.mjs (1440/768/390) → /impeccable critique → polish
+7. Lighthouse desktop y mobile; checklist del DESIGN.md; sumar la fila a docs/SIGNATURES.md
 ```
+
+## Skills compañeras (de terceros, se instalan aparte)
+
+Tienen su propia licencia y se actualizan desde su repo original.
+
+| Skill | Para qué | Licencia |
+|---|---|---|
+| [Impeccable](https://github.com/pbakaus/impeccable) | Vocabulario de diseño, `critique` / `audit` / `polish` / `bolder` / `animate`, y reglas que detectan UI con cara de IA (`reference/craft-floor.md`) | Apache-2.0 |
+| [Taste Skill](https://github.com/Leonxlnx/taste-skill) | Dirección de arte, la "idea" y el "live thing", más `lint.mjs` e `inspect.mjs` para medir el render real a 1440, 768 y 390 | MIT |
+| [Emil Kowalski skills](https://github.com/emilkowalski/skills) | Animación e interacción de detalle: `animate`, `improve-animations`, `review-animations`, `animation-performance` | MIT |
+| [GSAP skills](https://github.com/greensock/gsap-skills) | Uso correcto de GSAP: timelines, ScrollTrigger, SplitText, Flip, React | MIT |
+| [Three.js skills](https://github.com/cloudai-x/threejs-skills) | Three.js: materiales, shaders, post-procesado | MIT |
+| [Humanizer](https://github.com/blader/humanizer) | Saca el tono "IA" del copy | MIT |
+| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Solo como consulta: paletas por rubro y pares tipográficos para un `DESIGN.md` sin marca | MIT |
+
+El launcher de Impeccable (`scripts/impeccable`) descarga un binario la primera vez que corre. Si no querés eso,
+leé directo `reference/craft-floor.md` y `reference/new-work.md` dentro de la skill.
+
+**Formato de DESIGN.md:** el template sigue la [especificación de Google](https://github.com/google-labs-code/design.md)
+(tokens en YAML arriba y prosa por sección abajo).
 
 ## Lecciones que quedaron adentro de las skills (no las repitas)
 
 - **Un mockup visual real gana siempre sobre un `DESIGN.md` en prosa.** Si alguien aprobó un diseño visual
-  (Figma, un artifact, una captura), esos son los tokens reales — la prosa se desactualiza.
+  (Figma, un artifact, una captura), esos son los tokens reales: la prosa se desactualiza.
 - **Detectá la arquitectura CSS antes de tocar nada.** Tailwind v4 con `@theme` inline no tiene
-  `tailwind.config.js` — no lo inventes.
-- **Nunca borres/renombres un token sin grepear todos sus usos primero.** Un `var()` colgante rompe layout
+  `tailwind.config.js`: no lo inventes.
+- **Nunca borres o renombres un token sin grepear todos sus usos primero.** Un `var()` colgante rompe layout
   en silencio.
-- **`'use client'` es el último recurso, no el default.** Aislá el estado/la animación en un componente
+- **`'use client'` es el último recurso, no el default.** Aislá el estado o la animación en un componente
   chico en vez de convertir toda una sección.
 - **Un `IntersectionObserver` de reveal que solo escanea una vez al montar se pierde el contenido que
-  aparece después de un fetch client-side.** Si una sección depende de datos asíncronos, el observer necesita
-  reaccionar a nodos nuevos (`MutationObserver` o equivalente), o esa sección queda invisible para siempre.
-- **Nunca corras `next build` con `next dev` vivo sobre el mismo `.next`.** Se corrompe la caché
-  (`MODULE_NOT_FOUND` típico en `webpack-runtime.js`). Matá el dev, `rm -rf .next`, build, recién ahí
-  volvé a levantar dev.
-- **Verificá visual, no solo build verde.** Playwright + screenshot de estados reales (modal abierto,
-  mobile, `prefers-reduced-motion`) antes de dar algo por terminado.
-- **No copies assets de bancos de stock (Etsy, Shutterstock, etc.) a un sitio comercial.** Sirven como
-  referencia de estilo para dibujar algo original, nunca como archivo final.
+  aparece después de un fetch client-side.**
+- **Nunca corras `next build` con `next dev` vivo sobre el mismo `.next`.** Se corrompe la caché.
+- **Verificá visual, no solo build verde.** Capturas de estados reales (mobile, reduced motion) antes de dar algo
+  por terminado.
+- **Un `IntersectionObserver` no dispara sobre un elemento recortado al 100% con `clip-path`.** El revelado con
+  máscara recorta a los hijos y observa al padre.
+- **Un efecto de otro proyecto no es identidad.** La identidad sale de la idea del sujeto, y los efectos se
+  derivan de ahí.
+- **Con cuadros, un giro automático lento se ve a saltos aunque haya fundido.** Si el giro es protagonista, 3D en vivo.
+- **Las paletas se eligen viéndolas sobre el sitio real.**
+- **No copies assets de bancos de stock a un sitio comercial.** Sirven como referencia, nunca como archivo final.
 
 ## Estructura
 
 ```
-skills/
-  audit-landing/SKILL.md
-  design-tokens/SKILL.md
-  rebuild-section/SKILL.md
-  motion-design/              (upstream: github.com/LottieFiles/motion-design-skill, MIT)
-  fx-effects/SKILL.md         ← puente a web-fx-kit
-templates/
-  DESIGN.md.template           (secciones 0-9, con tokens, anti-slop y checklist)
-reference/
-  awesome-design-md/          (submódulo git — github.com/VoltAgent/awesome-design-md, MIT)
-web-fx-kit/                    módulos de efectos, prompts, recipes y assets pipeline
-  effects/                     8 módulos ES sin build
-  react/                       wrappers React de effects/
-  prompts/                     7 prompts por tipo de sitio
-  recipes/                     guías de combinación y performance
-  assets-pipeline/             generar imagen/video/3D con IA
+skills/            skills propias (oblivion-pass, fx-catalog, asset-pipeline, audit-landing, design-tokens, rebuild-section, motion-design)
+agents/            subagentes de la pasada
+packages/fx/       @oblivion/fx: core/, lib/, effects/<efecto>/{index.ts, react.ts, meta.json}, test/
+registry/          registry de shadcn (generado)
+docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, SIGNATURE-OBLIVION.md, recipes/
+apps/showcase/     Next.js: los efectos montados con sus hooks
+apps/demo-static/  demos sin build + speaker/ (pipeline de Blender: render.py, cuadros, .glb)
+scripts/           install.sh, vendor.mjs, build-registry.mjs, check-docs.mjs, assets/ (cuadros, scrub, hoja de contacto)
+tools/blender/     product.py: el modelo del cliente → secuencias, vuelta, fotos en escena y .glb
+templates/         DESIGN.md.template, FX.md.template
+reference/         awesome-design-md (submódulo)
 ```

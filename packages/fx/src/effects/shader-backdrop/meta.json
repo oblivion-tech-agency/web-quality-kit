@@ -1,0 +1,23 @@
+{
+  "name": "shader-backdrop",
+  "title": "Fondo con shader (mesh, grain, dither)",
+  "family": "fondo",
+  "intensity": 2,
+  "deps": [],
+  "description": "Un fondo vivo en WebGL2 sin Three.js: gradiente de ruido, grano de película o tramado Bayer, con los colores de los tokens.",
+  "goodFor": [
+    "software",
+    "ia",
+    "música",
+    "moda"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "scramble",
+    "magnetic"
+  ],
+  "avoidWith": [
+    "model-turntable"
+  ],
+  "signature": false
+}

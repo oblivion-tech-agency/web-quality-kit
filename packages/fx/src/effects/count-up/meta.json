@@ -1,0 +1,20 @@
+{
+  "name": "count-up",
+  "title": "Cifras que suben",
+  "family": "texto",
+  "intensity": 1,
+  "deps": [],
+  "description": "Números reales que suben hasta su valor al entrar en vista. No toca lo que ya está en pantalla al montar.",
+  "goodFor": [
+    "industria",
+    "logística",
+    "saas",
+    "institucional"
+  ],
+  "pairsWith": [
+    "route-draw",
+    "live-timeline"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

@@ -1,0 +1,22 @@
+{
+  "name": "depth-relight",
+  "title": "Foto que se vuelve a iluminar",
+  "family": "imagen",
+  "intensity": 3,
+  "deps": [],
+  "description": "Con un mapa de profundidad, una luz sigue al cursor (o gira sola) y le da relieve real a una foto, con paralaje leve.",
+  "goodFor": [
+    "producto físico",
+    "arquitectura",
+    "gastronomía",
+    "turismo"
+  ],
+  "pairsWith": [
+    "split-reveal",
+    "scroll-sequence"
+  ],
+  "avoidWith": [
+    "shader-backdrop"
+  ],
+  "signature": true
+}

@@ -1,0 +1,22 @@
+{
+  "name": "text-3d",
+  "title": "Tipografía que entra en 3D",
+  "family": "texto",
+  "intensity": 3,
+  "deps": [],
+  "description": "Cada línea de un titular gira desde atrás como una persiana y se asienta al llegar a su lugar, con el scroll.",
+  "goodFor": [
+    "agencia",
+    "moda",
+    "editorial",
+    "eventos"
+  ],
+  "pairsWith": [
+    "marquee",
+    "shader-backdrop"
+  ],
+  "avoidWith": [
+    "split-reveal"
+  ],
+  "signature": false
+}

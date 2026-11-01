@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pinned-horizontal",
+  "type": "registry:lib",
+  "title": "Galería horizontal fijada",
+  "description": "La sección se fija y la tira avanza de costado con el scroll vertical. En mobile, carrusel nativo.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "pinned-horizontal",
+    "title": "Galería horizontal fijada",
+    "family": "scroll",
+    "intensity": 2,
+    "deps": [],
+    "description": "La sección se fija y la tira avanza de costado con el scroll vertical. En mobile, carrusel nativo.",
+    "goodFor": [
+      "portfolio",
+      "flota",
+      "colección",
+      "menú"
+    ],
+    "pairsWith": [
+      "cursor-label",
+      "clip-reveal"
+    ],
+    "avoidWith": [
+      "stacked-cards"
+    ],
+    "signature": false,
+    "weightKb": 4.4
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/pinned-horizontal/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/pinned-horizontal/index.ts",
+      "content": "/**\n * pinned-horizontal — galería horizontal que avanza con el scroll vertical: la\n * sección se fija y la tira se desliza. Para flota, proyectos, menú,\n * colección: cosas del sujeto que se miran de a una, en orden.\n * Familia: scroll y narrativa · Intensidad 2 · 0 deps.\n *\n *   <section data-fx-pin>\n *     <div data-fx-pin-viewport>         ← el que se fija\n *       <ul data-fx-pin-track>…</ul>     ← el que se desliza\n *\n * El módulo le da a la sección la altura justa y escribe `data-fx-pinned`. El\n * CSS fija solo con ese atributo; sin él la tira es un carrusel nativo:\n *\n *   [data-fx-pin-track] { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }\n *   [data-fx-pinned] [data-fx-pin-viewport] { position: sticky; top: 0; height: 100svh; overflow: hidden; }\n *   [data-fx-pinned] [data-fx-pin-track] { overflow: visible; will-change: transform; }\n *\n * Debajo de `minWidth` y con reduced motion no fija: queda el carrusel nativo.\n * Teclado: si el foco entra a un elemento fuera de vista, la página scrollea\n * hasta donde ese elemento queda a la vista. Escribe el avance como `--fx-p`.\n * destroy(): devuelve la sección a su altura y saca listeners y atributos.\n */\n\nimport { clamp01, part, preserve, type FxHandle } from '../../core/index';\n\nexport interface PinnedHorizontalOptions {\n  viewport?: HTMLElement | null;\n  track?: HTMLElement | null;\n  minWidth?: number;\n}\n\nexport function createPinnedHorizontal(section: HTMLElement, options: PinnedHorizontalOptions = {}): FxHandle {\n  const viewport = options.viewport ?? part(section, 'pin-viewport');\n  const track = options.track ?? part(section, 'pin-track');\n  if (!viewport || !track) return { destroy() {} };\n  const wide = window.matchMedia(`(min-width: ${options.minWidth ?? 768}px)`);\n  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');\n  const restoreSection = preserve(section, { attributes: ['data-fx-pinned'], styles: ['height', '--fx-p'] });\n  const restoreTrack = preserve(track, { styles: ['transform'] });\n\n  let maxX = 0;\n  let frame = 0;\n  let on = false;\n\n  const layout = () => {\n    maxX = Math.max(0, track.scrollWidth - viewport.clientWidth);\n    section.style.height = `${maxX + window.innerHeight}px`;\n  };\n  const paint = () => {\n    frame = 0;\n    const r = section.getBoundingClientRect();\n    const p = clamp01(-r.top / Math.max(1, r.height - window.innerHeight));\n    track.style.transform = `translate3d(${(-p * maxX).toFixed(1)}px, 0, 0)`;\n    section.style.setProperty('--fx-p', p.toFixed(4));\n  };\n  const schedule = () => {\n    if (!frame) frame = requestAnimationFrame(paint);\n  };\n  const onResize = () => {\n    layout();\n    schedule();\n  };\n  // Al enfocar algo fuera de vista, el navegador scrollea el viewport fijado en\n  // vez de la página: se deshace y se mueve la página al punto del pin donde el\n  // elemento queda a la vista.\n  const unscroll = () => {\n    if (viewport.scrollLeft) viewport.scrollLeft = 0;\n  };\n  const onFocus = (e: FocusEvent) => {\n    const item = (e.target as Element).closest('[data-fx-pin-track] > *') as HTMLElement | null;\n    if (!item || maxX === 0) return;\n    requestAnimationFrame(() => {\n      unscroll();\n      const start = item.offsetLeft - track.offsetLeft;\n      const x = clamp01((start + item.offsetWidth - viewport.clientWidth) / maxX);\n      const top = section.getBoundingClientRect().top + window.scrollY;\n      window.scrollTo({ top: top + x * (section.offsetHeight - window.innerHeight), behavior: 'instant' as ScrollBehavior });\n      paint();\n    });\n  };\n\n  const enable = () => {\n    on = true;\n    section.setAttribute('data-fx-pinned', '');\n    layout();\n    paint();\n    addEventListener('scroll', schedule, { passive: true });\n    addEventListener('resize', onResize, { passive: true });\n    section.addEventListener('focusin', onFocus);\n    viewport.addEventListener('scroll', unscroll, { passive: true });\n  };\n  const disable = () => {\n    on = false;\n    removeEventListener('scroll', schedule);\n    removeEventListener('resize', onResize);\n    section.removeEventListener('focusin', onFocus);\n    viewport.removeEventListener('scroll', unscroll);\n    cancelAnimationFrame(frame);\n    frame = 0;\n    restoreSection();\n    restoreTrack();\n  };\n  const sync = () => {\n    const want = wide.matches && !reduce.matches;\n    if (want && !on) enable();\n    else if (!want && on) disable();\n  };\n\n  sync();\n  wide.addEventListener('change', sync);\n  reduce.addEventListener('change', sync);\n\n  return {\n    destroy() {\n      wide.removeEventListener('change', sync);\n      reduce.removeEventListener('change', sync);\n      if (on) disable();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/pinned-horizontal/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/pinned-horizontal/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createPinnedHorizontal, type PinnedHorizontalOptions } from './index';\n\n/**\n * Hook de `pinned-horizontal`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function usePinnedHorizontal<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: PinnedHorizontalOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createPinnedHorizontal(el, options), deps);\n}\n"
+    }
+  ]
+}
