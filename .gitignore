@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.next/
+out/
+*.tsbuildinfo
+.taste-skill/
+.DS_Store
+# Renders intermedios de Blender (los .webp finales sí se versionan)
+**/render-tmp/

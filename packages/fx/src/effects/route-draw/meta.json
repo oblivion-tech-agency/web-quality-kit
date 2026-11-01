@@ -1,0 +1,22 @@
+{
+  "name": "route-draw",
+  "title": "Recorrido que se dibuja",
+  "family": "scroll",
+  "intensity": 3,
+  "deps": [],
+  "description": "Un trazo SVG que se dibuja con el scroll, con marcador orientado y paradas que se encienden.",
+  "goodFor": [
+    "logística",
+    "turismo",
+    "energía",
+    "historia de marca"
+  ],
+  "pairsWith": [
+    "count-up",
+    "live-timeline"
+  ],
+  "avoidWith": [
+    "scroll-sequence"
+  ],
+  "signature": true
+}

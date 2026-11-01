@@ -1,0 +1,23 @@
+{
+  "name": "scroll-sequence",
+  "title": "Producto que gira con el scroll",
+  "family": "3d",
+  "intensity": 4,
+  "deps": [],
+  "description": "Secuencia de imágenes en canvas por capítulos: el scroll elige el capítulo y el giro se reproduce solo, con fundido.",
+  "goodFor": [
+    "producto físico",
+    "hardware",
+    "vehículos",
+    "maquinaria"
+  ],
+  "pairsWith": [
+    "model-turntable",
+    "count-up"
+  ],
+  "avoidWith": [
+    "route-draw",
+    "video-scrub"
+  ],
+  "signature": true
+}

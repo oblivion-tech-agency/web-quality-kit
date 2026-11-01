@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-flap",
+  "type": "registry:lib",
+  "title": "Cartel de aeropuerto",
+  "description": "Valores cortos que cambian letra por letra como un cartel de estación: destinos, estados, horarios.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "split-flap",
+    "title": "Cartel de aeropuerto",
+    "family": "texto",
+    "intensity": 2,
+    "deps": [],
+    "description": "Valores cortos que cambian letra por letra como un cartel de estación: destinos, estados, horarios.",
+    "goodFor": [
+      "logística",
+      "transporte",
+      "eventos",
+      "turismo"
+    ],
+    "pairsWith": [
+      "live-timeline",
+      "count-up"
+    ],
+    "avoidWith": [
+      "scramble"
+    ],
+    "signature": false,
+    "weightKb": 4.2
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/split-flap/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/split-flap/index.ts",
+      "content": "/**\n * split-flap — texto que cambia como un cartel de aeropuerto: cada carácter\n * pasa por letras intermedias hasta caer en el destino, en cascada.\n * Familia: texto · Intensidad 2 · 0 deps.\n *\n *   <span data-fx-flap>USHUAIA</span>\n *\n * Accesible: el valor real vive en un span visualmente oculto; lo que gira va\n * con `aria-hidden`. Dale al host cifras tabulares y `min-width` en `ch`.\n *\n * Reduced motion: `set()` es instantáneo y el ciclo automático no corre.\n * El ciclo se pausa fuera de pantalla y con la pestaña oculta.\n * destroy(): corta todo y devuelve el contenido original (sin duplicar texto\n * en un remount de StrictMode).\n */\n\nimport { onVisibility, preserve, prefersReducedMotion, type FxHandle } from '../../core/index';\n\nconst ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\nconst HIDDEN = 'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap';\n\nexport interface SplitFlapOptions {\n  /** Con dos o más, rota entre ellos cada `interval` ms. */\n  values?: string[];\n  interval?: number;\n  /** Letras intermedias por carácter. */\n  flips?: number;\n  /** ms por letra. */\n  step?: number;\n  /** ms de cascada entre caracteres. */\n  stagger?: number;\n  alphabet?: string;\n}\n\nexport interface SplitFlapHandle extends FxHandle {\n  set(value: string): void;\n}\n\nexport function createSplitFlap(\n  el: HTMLElement,\n  { values = [], interval = 3600, flips = 6, step = 45, stagger = 28, alphabet = ALPHABET }: SplitFlapOptions = {},\n): SplitFlapHandle {\n  const restore = preserve(el, { children: true });\n  let current = (el.textContent ?? '').trim();\n\n  const real = document.createElement('span');\n  real.style.cssText = HIDDEN;\n  const shown = document.createElement('span');\n  shown.setAttribute('aria-hidden', 'true');\n  el.replaceChildren(real, shown);\n  real.textContent = shown.textContent = current;\n\n  let raf = 0;\n  const set = (next: string) => {\n    cancelAnimationFrame(raf);\n    raf = 0;\n    real.textContent = next;\n    if (prefersReducedMotion()) {\n      shown.textContent = current = next;\n      return;\n    }\n    const from = current.padEnd(next.length);\n    const to = next.padEnd(from.length);\n    const start = performance.now();\n    const frame = (now: number) => {\n      const t = now - start;\n      let out = '';\n      let done = true;\n      for (let i = 0; i < to.length; i++) {\n        const target = to[i] ?? ' ';\n        const source = from[i] ?? ' ';\n        const n = Math.floor((t - i * stagger) / step);\n        if (n >= flips || target === ' ' || source === target) {\n          out += target;\n          continue;\n        }\n        done = false;\n        const base = alphabet.indexOf(source.toUpperCase());\n        out += n < 0 ? source : alphabet[(base + n + 1 + alphabet.length) % alphabet.length];\n      }\n      shown.textContent = out;\n      if (done) {\n        shown.textContent = current = next;\n        raf = 0;\n      } else raf = requestAnimationFrame(frame);\n    };\n    raf = requestAnimationFrame(frame);\n  };\n\n  let timer = 0;\n  let visible = false;\n  let index = Math.max(0, values.indexOf(current));\n  const cycle = () => {\n    clearInterval(timer);\n    timer = 0;\n    if (prefersReducedMotion() || values.length < 2 || !visible || document.hidden) return;\n    timer = window.setInterval(() => {\n      index = (index + 1) % values.length;\n      set(values[index] ?? '');\n    }, interval);\n  };\n  const offVisible = onVisibility(el, (v) => {\n    visible = v;\n    cycle();\n  });\n  document.addEventListener('visibilitychange', cycle);\n\n  return {\n    set,\n    destroy() {\n      offVisible();\n      document.removeEventListener('visibilitychange', cycle);\n      clearInterval(timer);\n      cancelAnimationFrame(raf);\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/split-flap/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/split-flap/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createSplitFlap, type SplitFlapOptions, type SplitFlapHandle } from './index';\n\n/**\n * Hook de `split-flap`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useSplitFlap<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: SplitFlapOptions,\n  deps: DependencyList = [],\n): RefObject<SplitFlapHandle | null> {\n  return useFx(ref, (el) => createSplitFlap(el, options), deps);\n}\n"
+    }
+  ]
+}

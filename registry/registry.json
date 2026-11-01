@@ -1,0 +1,55 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "oblivion-fx",
+  "homepage": "https://github.com/oblivion-tech-agency/web-quality-kit",
+  "items": [
+    {
+      "name": "fx-core",
+      "type": "registry:lib"
+    },
+    {
+      "name": "clip-reveal",
+      "type": "registry:lib"
+    },
+    {
+      "name": "count-up",
+      "type": "registry:lib"
+    },
+    {
+      "name": "cursor-label",
+      "type": "registry:lib"
+    },
+    {
+      "name": "live-timeline",
+      "type": "registry:lib"
+    },
+    {
+      "name": "model-turntable",
+      "type": "registry:lib"
+    },
+    {
+      "name": "pinned-horizontal",
+      "type": "registry:lib"
+    },
+    {
+      "name": "route-draw",
+      "type": "registry:lib"
+    },
+    {
+      "name": "scroll-progress",
+      "type": "registry:lib"
+    },
+    {
+      "name": "scroll-sequence",
+      "type": "registry:lib"
+    },
+    {
+      "name": "split-flap",
+      "type": "registry:lib"
+    },
+    {
+      "name": "turntable",
+      "type": "registry:lib"
+    }
+  ]
+}

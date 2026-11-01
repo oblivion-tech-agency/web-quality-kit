@@ -1,0 +1,22 @@
+{
+  "name": "pinned-horizontal",
+  "title": "Galería horizontal fijada",
+  "family": "scroll",
+  "intensity": 2,
+  "deps": [],
+  "description": "La sección se fija y la tira avanza de costado con el scroll vertical. En mobile, carrusel nativo.",
+  "goodFor": [
+    "portfolio",
+    "flota",
+    "colección",
+    "menú"
+  ],
+  "pairsWith": [
+    "cursor-label",
+    "clip-reveal"
+  ],
+  "avoidWith": [
+    "stacked-cards"
+  ],
+  "signature": false
+}

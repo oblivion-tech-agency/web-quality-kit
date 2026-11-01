@@ -1,0 +1,19 @@
+{
+  "name": "live-timeline",
+  "title": "Proceso en vivo (simulado)",
+  "family": "interacción",
+  "intensity": 2,
+  "deps": [],
+  "description": "Un proceso del sujeto simulado en bucle (viaje, pedido, etapa) que dibuja quien lo usa. Se pausa fuera de pantalla.",
+  "goodFor": [
+    "logística",
+    "industria",
+    "saas"
+  ],
+  "pairsWith": [
+    "split-flap",
+    "route-draw"
+  ],
+  "avoidWith": [],
+  "signature": true
+}

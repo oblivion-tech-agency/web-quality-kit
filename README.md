@@ -1,84 +1,68 @@
-# Web Quality Kit
+# Oblivion FX Kit
 
-Skills de Claude Code para llevar un sitio web de "funcional" a "alta gama" — auditoría técnica, sistema de
-tokens de diseño, reconstrucción de secciones con verificación visual real, y principios de motion design.
-Nace de aplicar este flujo en serio sobre un proyecto real (Oblivion Tech), no de teoría.
+El kit con el que Oblivion lleva un sitio de "funcional" a "deslumbra en el primer scroll". Tiene dos mitades:
+
+1. **Calidad:** skills de Claude Code para auditar, consolidar tokens y reconstruir secciones con verificación visual.
+2. **Alto impacto:** `@oblivion/fx`, un catálogo de efectos (scroll, 3D, tipografía, interacción) con un contrato
+   común, instalable en cualquier proyecto Next.js con `npx shadcn add`, y las reglas para elegirlos sin que
+   todos los sitios terminen pareciéndose.
+
+Nace de aplicarlo en serio sobre proyectos reales (Oblivion Tech, Transporte Lehman), no de teoría.
 
 ## Instalación
 
-Este repo es la fuente de verdad. Las skills se activan symlinkeándolas a `~/.claude/skills/` (disponibles
-en todo proyecto) o copiándolas a `.claude/skills/` dentro de un repo puntual.
+Este repo es la fuente de verdad. Las skills propias se symlinkean a `~/.claude/skills/`:
 
 ```bash
-# Global (recomendado) — un symlink por skill, así los cambios en este repo se reflejan solos
-for skill in audit-landing design-tokens rebuild-section motion-design fx-effects; do
-  ln -s "$(pwd)/skills/$skill" "$HOME/.claude/skills/$skill"
-done
-
-# Por proyecto (si preferís copiarlas sueltas a un repo puntual)
-cp -r skills/{audit-landing,design-tokens,rebuild-section,motion-design,fx-effects} /ruta/al/proyecto/.claude/skills/
-```
-
-Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`. Completá
-los tokens del front matter y el Overview con los datos reales de esa marca. Do's and Don'ts y el
-Checklist no se tocan: son las reglas que evitan el "look de IA genérica".
-
-Submódulos — inicializalos después de clonar:
-
-```bash
-git submodule update --init --recursive
-```
-
-## Skills compañeras (no vendoreadas acá, se instalan aparte)
-
-Son de terceros y tienen su propia licencia. No se forkean dentro de este repo: se instalan en
-`~/.claude/skills/` y se actualizan desde su repo original.
-
-| Skill | Para qué | Licencia |
-|---|---|---|
-| [Impeccable](https://github.com/pbakaus/impeccable) | Vocabulario de diseño, `critique` / `audit` / `polish` / `bolder` / `animate`, y reglas que detectan UI con cara de IA (`reference/craft-floor.md`) | Apache-2.0 |
-| [Taste Skill](https://github.com/Leonxlnx/taste-skill) | Dirección de arte, la "idea" y el "live thing", más `lint.mjs` e `inspect.mjs` para medir el render real a 1440, 768 y 390 | MIT |
-| [Emil Kowalski skills](https://github.com/emilkowalski/skills) | Animación e interacción de detalle: `animate`, `improve-animations`, `review-animations`, `animation-performance`, `animate-expo` para React Native | MIT |
-| [Humanizer](https://github.com/blader/humanizer) | Saca el tono "IA" del copy | MIT |
-| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Punto de partida sin marca: estilos, paletas por rubro y pares tipográficos que se vuelcan al `DESIGN.md`. Ver `web-fx-kit/recipes/librerias-de-componentes.md` | MIT |
-
-```bash
-git clone --depth 1 https://github.com/pbakaus/impeccable /tmp/impeccable
-cp -R /tmp/impeccable/.claude/skills/impeccable ~/.claude/skills/
-cp /tmp/impeccable/.claude/agents/*.md ~/.claude/agents/
-
-git clone --depth 1 https://github.com/Leonxlnx/taste-skill /tmp/taste-skill
-cp -R /tmp/taste-skill/skills/taste-skill ~/.claude/skills/
-
-git clone --depth 1 https://github.com/emilkowalski/skills /tmp/emil-skills
-for s in animate improve-animations review-animations animation-performance animation-vocabulary \
-         find-animation-opportunities emil-design-eng apple-design mobile-native animate-expo; do
-  cp -R /tmp/emil-skills/skills/$s ~/.claude/skills/
+for skill in audit-landing design-tokens rebuild-section motion-design fx-catalog; do
+  ln -sfn "$(pwd)/skills/$skill" "$HOME/.claude/skills/$skill"
 done
 ```
 
-UI UX Pro Max se instala aparte, con el marketplace de plugins o con su CLI (necesita Python 3):
+Para trabajar en el catálogo:
 
 ```bash
-# dentro de Claude Code
-/plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
-/plugin install ui-ux-pro-max@ui-ux-pro-max-skill
-# o por CLI
-npm install -g ui-ux-pro-max-cli && uipro init --ai claude --global
+pnpm install
+pnpm test        # contrato de cada efecto (destroy, reduced motion, StrictMode)
+pnpm build       # compila packages/fx a dist/ (lo usan los demos sin build)
+pnpm registry    # regenera registry/r/ y docs/CATALOG.md desde los meta.json
+pnpm check:docs  # toda ruta citada en la documentación existe
 ```
 
-Motion (animación) y 21st.dev (componentes React) no son skills: cuándo usarlos, cuánto pesan y cómo pasan
-por los tokens y los gates del kit está en `web-fx-kit/recipes/librerias-de-componentes.md`. La landing de
-ejemplo `web-fx-kit/demo/parlante/` los combina con los módulos del kit.
+Demos: `python3 -m http.server 4877` en la raíz y abrir `/apps/demo-static/` (catálogo) y
+`/apps/demo-static/parlante/` (landing completa de ejemplo). Necesitan `pnpm build` antes.
 
-El launcher de Impeccable (`scripts/impeccable`) descarga un binario la primera vez que corre. Si no
-querés eso, leé directo `reference/craft-floor.md` y `reference/new-work.md`: ahí están las reglas.
+Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`.
 
-**Formato de DESIGN.md:** el template sigue la [especificación de Google](https://github.com/google-labs-code/design.md)
-(tokens en YAML arriba y prosa por sección abajo), así cualquier agente lo lee igual.
-`reference/awesome-design-md/` sigue sirviendo como catálogo de sistemas de marcas reales.
+## El catálogo: `@oblivion/fx`
 
-## El flujo
+| Qué | Dónde |
+|---|---|
+| Efectos disponibles, por familia e intensidad (generado) | `docs/CATALOG.md` |
+| Contrato de todo efecto | `docs/CONTRACT.md` |
+| Firmas usadas por proyecto (leer antes de elegir) | `docs/SIGNATURES.md` |
+| Código fuente en TypeScript | `packages/fx/src/` (`core/`, `lib/`, `effects/<efecto>/`) |
+| Tests del contrato | `packages/fx/test/` |
+| Registry para shadcn | `registry/r/` |
+| Recetas | `docs/recipes/` |
+| Demos sin build y pipeline de Blender | `apps/demo-static/` |
+
+Cada efecto es `createX(elemento, opciones)` en vanilla y `useX(ref, opciones)` en React. Todos:
+- dejan el DOM como estaba al destruirse (sobreviven StrictMode);
+- respetan reduced motion en vivo, con un estado final legible;
+- leen colores y curvas de tokens `--fx-*`;
+- cargan lo pesado (Three.js) recién cuando hace falta.
+
+En un proyecto Next.js:
+
+```bash
+npx shadcn add https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/scroll-sequence.json
+```
+
+Motor: **GSAP + Lenis** para el movimiento y **Three.js** para el 3D (ver `docs/recipes/librerias-de-componentes.md`
+para Motion, 21st.dev y UI UX Pro Max).
+
+## El flujo de calidad
 
 ```
 /audit-landing            →  qué está roto, con archivo y línea
@@ -86,94 +70,77 @@ querés eso, leé directo `reference/craft-floor.md` y `reference/new-work.md`: 
 /rebuild-section [x]      →  reconstruye una sección, verificada con Playwright
 ```
 
-Corré `/audit-landing` primero siempre — sin diagnóstico, `/rebuild-section` reconstruye a ciegas. El orden
-importa: saltearse `/design-tokens` es la forma más común de terminar con una sección linda que no combina
-con el resto del sitio.
+Corré `/audit-landing` primero siempre: sin diagnóstico, `/rebuild-section` reconstruye a ciegas. Saltearse
+`/design-tokens` es la forma más común de terminar con una sección linda que no combina con el resto del sitio.
 
-`motion-design` (skill de LottieFiles, MIT, ver `skills/motion-design/LICENSE`) no se invoca por comando —
-se activa sola cuando se está armando cualquier animación, transición o reveal, y aporta timing/easing/
-choreography basados en principios de animación de Disney adaptados a UI.
+`motion-design` (skill de LottieFiles, MIT, ver `skills/motion-design/LICENSE`) se activa sola cuando se arma una
+animación y aporta timing, easing y coreografía. `fx-catalog` se usa cuando una sección necesita un efecto del catálogo.
 
-### Efectos visuales y prompts (`fx-effects`)
-
-La skill `fx-effects` es el puente entre el diagnóstico/tokens y la construcción visual de alto impacto.
-Se activa automáticamente desde `/rebuild-section` cuando una sección necesita un efecto WebGL, scroll
-narrativo, partículas, o cualquier tratamiento que va más allá de CSS puro.
-
-Incluye:
-- **Módulos ES** en `web-fx-kit/effects/` — partículas, gradientes, text-reveal, magnetic, y los de scroll y estado
-  (`scroll-progress`, `clip-reveal`, `count-up`, `route-draw`, `live-timeline`, `split-flap`, `pinned-horizontal`,
-  `cursor-label`, `scroll-sequence`, `turntable`, `model-turntable`, con `frame-player` y `spin-control` compartidos)
-- **Registro de firmas** en `web-fx-kit/SIGNATURES.md` — un efecto firma por proyecto y la combinación que usó cada
-  uno, para que los sitios del kit no se parezcan entre sí
-- **Wrappers React** en `web-fx-kit/react/` — para proyectos React/Next.js
-- **7 prompts** en `web-fx-kit/prompts/` — plantillas por tipo de sitio (hero 3D, editorial, portfolio, etc.)
-- **Recipes** en `web-fx-kit/recipes/` — guías de performance, stack, integración React y efectos de scroll en CSS
-- **Assets pipeline** en `web-fx-kit/assets-pipeline/` — generar imagen/video/3D con IA
-
-### Flujo completo
+### Flujo completo de un proyecto nuevo
 
 ```
-1. Copiar templates/DESIGN.md.template → DESIGN.md (formato Google). Completar Overview:
-   idea, live thing, modo y escena. Sin idea no se construye. Elegí la firma de motion con
-   web-fx-kit/SIGNATURES.md (una firma del sujeto + hasta dos secundarios, sin repetir otro proyecto).
+1. templates/DESIGN.md.template → DESIGN.md. Completar Overview: idea, live thing, modo y escena.
+   Elegir la firma de motion con docs/SIGNATURES.md (una firma + hasta dos secundarios, sin repetir).
 2. /audit-landing                  (si ya hay algo armado)
 3. /design-tokens                  → los tokens del front matter, aplicados al CSS real
-4. /rebuild-section [sección]      → con fx-effects y las reglas de craft-floor de Impeccable
+4. /rebuild-section [sección]      → con fx-catalog y las reglas de craft-floor de Impeccable
 5. Motion: /animate (Emil) o /impeccable animate, una orquestación por región
 6. Gates:  taste lint.mjs (0 FAIL) → taste inspect.mjs (1440/768/390) → /impeccable critique → polish
-7. Lighthouse desktop y mobile; checklist del DESIGN.md; sumar la fila a SIGNATURES.md
+7. Lighthouse desktop y mobile; checklist del DESIGN.md; sumar la fila a docs/SIGNATURES.md
 ```
+
+## Skills compañeras (de terceros, se instalan aparte)
+
+Tienen su propia licencia y se actualizan desde su repo original.
+
+| Skill | Para qué | Licencia |
+|---|---|---|
+| [Impeccable](https://github.com/pbakaus/impeccable) | Vocabulario de diseño, `critique` / `audit` / `polish` / `bolder` / `animate`, y reglas que detectan UI con cara de IA (`reference/craft-floor.md`) | Apache-2.0 |
+| [Taste Skill](https://github.com/Leonxlnx/taste-skill) | Dirección de arte, la "idea" y el "live thing", más `lint.mjs` e `inspect.mjs` para medir el render real a 1440, 768 y 390 | MIT |
+| [Emil Kowalski skills](https://github.com/emilkowalski/skills) | Animación e interacción de detalle: `animate`, `improve-animations`, `review-animations`, `animation-performance` | MIT |
+| [GSAP skills](https://github.com/greensock/gsap-skills) | Uso correcto de GSAP: timelines, ScrollTrigger, SplitText, Flip, React | MIT |
+| [Three.js skills](https://github.com/cloudai-x/threejs-skills) | Three.js: materiales, shaders, post-procesado | MIT |
+| [Humanizer](https://github.com/blader/humanizer) | Saca el tono "IA" del copy | MIT |
+| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Solo como consulta: paletas por rubro y pares tipográficos para un `DESIGN.md` sin marca | MIT |
+
+El launcher de Impeccable (`scripts/impeccable`) descarga un binario la primera vez que corre. Si no querés eso,
+leé directo `reference/craft-floor.md` y `reference/new-work.md` dentro de la skill.
+
+**Formato de DESIGN.md:** el template sigue la [especificación de Google](https://github.com/google-labs-code/design.md)
+(tokens en YAML arriba y prosa por sección abajo).
 
 ## Lecciones que quedaron adentro de las skills (no las repitas)
 
 - **Un mockup visual real gana siempre sobre un `DESIGN.md` en prosa.** Si alguien aprobó un diseño visual
-  (Figma, un artifact, una captura), esos son los tokens reales — la prosa se desactualiza.
+  (Figma, un artifact, una captura), esos son los tokens reales: la prosa se desactualiza.
 - **Detectá la arquitectura CSS antes de tocar nada.** Tailwind v4 con `@theme` inline no tiene
-  `tailwind.config.js` — no lo inventes.
-- **Nunca borres/renombres un token sin grepear todos sus usos primero.** Un `var()` colgante rompe layout
+  `tailwind.config.js`: no lo inventes.
+- **Nunca borres o renombres un token sin grepear todos sus usos primero.** Un `var()` colgante rompe layout
   en silencio.
-- **`'use client'` es el último recurso, no el default.** Aislá el estado/la animación en un componente
+- **`'use client'` es el último recurso, no el default.** Aislá el estado o la animación en un componente
   chico en vez de convertir toda una sección.
 - **Un `IntersectionObserver` de reveal que solo escanea una vez al montar se pierde el contenido que
-  aparece después de un fetch client-side.** Si una sección depende de datos asíncronos, el observer necesita
-  reaccionar a nodos nuevos (`MutationObserver` o equivalente), o esa sección queda invisible para siempre.
-- **Nunca corras `next build` con `next dev` vivo sobre el mismo `.next`.** Se corrompe la caché
-  (`MODULE_NOT_FOUND` típico en `webpack-runtime.js`). Matá el dev, `rm -rf .next`, build, recién ahí
-  volvé a levantar dev.
-- **Verificá visual, no solo build verde.** Playwright + screenshot de estados reales (modal abierto,
-  mobile, `prefers-reduced-motion`) antes de dar algo por terminado.
-- **Un `IntersectionObserver` no dispara sobre un elemento recortado al 100% con `clip-path`.** El
-  revelado con máscara recorta a los hijos y observa al padre, o la foto no aparece nunca.
-- **Un efecto de otro proyecto no es identidad.** Reusar el shader, las partículas o la serif de un
-  sitio anterior hace que el nuevo "parezca de ellos". La identidad sale de la idea del sujeto (su output,
-  su objeto, su ritual), y los efectos se derivan de ahí.
-- **Las paletas se eligen viéndolas sobre el sitio real.** Un panel `?lab` que cambia tokens en vivo
-  (y que solo se activa con un query param) decide en minutos lo que en mockups lleva días.
-- **Los fragmentos de interfaz son imagen legítima en software**, pero marcalos con `data-ui` y
-  etiquetalos como ilustrativos cuando no sean capturas reales.
-- **No copies assets de bancos de stock (Etsy, Shutterstock, etc.) a un sitio comercial.** Sirven como
-  referencia de estilo para dibujar algo original, nunca como archivo final.
+  aparece después de un fetch client-side.**
+- **Nunca corras `next build` con `next dev` vivo sobre el mismo `.next`.** Se corrompe la caché.
+- **Verificá visual, no solo build verde.** Capturas de estados reales (mobile, reduced motion) antes de dar algo
+  por terminado.
+- **Un `IntersectionObserver` no dispara sobre un elemento recortado al 100% con `clip-path`.** El revelado con
+  máscara recorta a los hijos y observa al padre.
+- **Un efecto de otro proyecto no es identidad.** La identidad sale de la idea del sujeto, y los efectos se
+  derivan de ahí.
+- **Con cuadros, un giro automático lento se ve a saltos aunque haya fundido.** Si el giro es protagonista, 3D en vivo.
+- **Las paletas se eligen viéndolas sobre el sitio real.**
+- **No copies assets de bancos de stock a un sitio comercial.** Sirven como referencia, nunca como archivo final.
 
 ## Estructura
 
 ```
-skills/
-  audit-landing/SKILL.md
-  design-tokens/SKILL.md
-  rebuild-section/SKILL.md
-  motion-design/              (upstream: github.com/LottieFiles/motion-design-skill, MIT)
-  fx-effects/SKILL.md         ← puente a web-fx-kit
-templates/
-  DESIGN.md.template           (formato google-labs-code/design.md: tokens YAML + secciones + checklist)
-reference/
-  awesome-design-md/          (submódulo git — github.com/VoltAgent/awesome-design-md, MIT)
-web-fx-kit/                    módulos de efectos, prompts, recipes y assets pipeline
-  effects/                     módulos ES sin build
-  react/                       wrappers React de effects/ y use-fx.js
-  SIGNATURES.md                firma de motion de cada proyecto (leer antes de elegir efectos)
-  demo/                        página para probar los módulos de scroll y estado
-  prompts/                     7 prompts por tipo de sitio
-  recipes/                     guías de combinación y performance
-  assets-pipeline/             generar imagen/video/3D con IA
+skills/            skills propias (audit-landing, design-tokens, rebuild-section, motion-design, fx-catalog)
+packages/fx/       @oblivion/fx: core/, lib/, effects/<efecto>/{index.ts, react.ts, meta.json}, test/
+registry/          registry de shadcn (generado)
+docs/              CONTRACT.md, CATALOG.md (generado), SIGNATURES.md, recipes/
+apps/demo-static/  demos sin build + speaker/ (pipeline de Blender: render.py, cuadros, .glb)
+scripts/           build-registry.mjs, check-docs.mjs
+templates/         DESIGN.md.template
+reference/         awesome-design-md (submódulo)
 ```

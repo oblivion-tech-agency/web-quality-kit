@@ -1,0 +1,21 @@
+{
+  "name": "cursor-label",
+  "title": "Etiqueta junto al puntero",
+  "family": "interacción",
+  "intensity": 2,
+  "deps": [],
+  "description": "Una etiqueta sigue al puntero sobre lo que se abre (\"Ver caso\"). Solo puntero fino.",
+  "goodFor": [
+    "portfolio",
+    "estudio",
+    "catálogo"
+  ],
+  "pairsWith": [
+    "pinned-horizontal",
+    "clip-reveal"
+  ],
+  "avoidWith": [
+    "magnetic"
+  ],
+  "signature": false
+}

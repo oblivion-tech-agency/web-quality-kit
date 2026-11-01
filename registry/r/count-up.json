@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "count-up",
+  "type": "registry:lib",
+  "title": "Cifras que suben",
+  "description": "Números reales que suben hasta su valor al entrar en vista. No toca lo que ya está en pantalla al montar.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "count-up",
+    "title": "Cifras que suben",
+    "family": "texto",
+    "intensity": 1,
+    "deps": [],
+    "description": "Números reales que suben hasta su valor al entrar en vista. No toca lo que ya está en pantalla al montar.",
+    "goodFor": [
+      "industria",
+      "logística",
+      "saas",
+      "institucional"
+    ],
+    "pairsWith": [
+      "route-draw",
+      "live-timeline"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 3.9
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/count-up/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/count-up/index.ts",
+      "content": "/**\n * count-up — cifras reales que suben hasta su valor al entrar en vista.\n * Familia: texto · Intensidad 1 · 0 deps.\n *\n *   <span data-fx-count=\"3150\">3.150</span> km\n *\n * El HTML trae el número final (SEO y sin JS). Prefijo y sufijo van fuera del\n * span para que el ancho no salte; usá `font-variant-numeric: tabular-nums`.\n * Si el número ya está en pantalla al montar, no se toca: bajarlo a 0 sería\n * un parpadeo.\n *\n * Reduced motion: no anima; los números quedan en su valor final.\n * destroy(): corta observers y frames y devuelve a cada número su texto original.\n */\n\nimport { motionSwitch, preserve, type FxHandle, type Restore } from '../../core/index';\n\nexport interface CountUpOptions {\n  /** Atributo que trae el valor final. */\n  attribute?: string;\n  /** ms de la cuenta. */\n  duration?: number;\n  /** Locale para el separador de miles; por defecto el `lang` del documento. */\n  locale?: string;\n}\n\nconst easeOutExpo = (k: number) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));\n\nexport function createCountUp(\n  root: HTMLElement,\n  { attribute = 'data-fx-count', duration = 1400, locale }: CountUpOptions = {},\n): FxHandle {\n  const els = Array.from(root.querySelectorAll<HTMLElement>(`[${attribute}]`));\n  const restores: Restore[] = els.map((el) => preserve(el, { children: true }));\n  const fmt = new Intl.NumberFormat(locale || document.documentElement.lang || undefined);\n  const valueOf = (el: HTMLElement) => Number(el.getAttribute(attribute));\n\n  const off = motionSwitch({\n    full: () => {\n      const frames = new Set<number>();\n      const run = (el: HTMLElement) => {\n        const target = valueOf(el);\n        const start = performance.now();\n        const tick = (now: number) => {\n          frames.delete(id);\n          const k = Math.min(1, (now - start) / duration);\n          el.textContent = fmt.format(Math.round(target * easeOutExpo(k)));\n          if (k < 1) frames.add((id = requestAnimationFrame(tick)));\n        };\n        let id = requestAnimationFrame(tick);\n        frames.add(id);\n      };\n      const io = new IntersectionObserver(\n        (entries) => {\n          for (const entry of entries) {\n            if (!entry.isIntersecting) continue;\n            io.unobserve(entry.target);\n            run(entry.target as HTMLElement);\n          }\n        },\n        { threshold: 0.6 },\n      );\n      const vh = window.innerHeight;\n      for (const el of els) {\n        const r = el.getBoundingClientRect();\n        if (r.top < vh && r.bottom > 0) continue; // ya visible: no parpadear\n        el.textContent = fmt.format(0);\n        io.observe(el);\n      }\n      return () => {\n        io.disconnect();\n        frames.forEach(cancelAnimationFrame);\n        restores.forEach((r) => r()); // si se corta a mitad, vuelve el valor real\n      };\n    },\n    reduced: () => restores.forEach((r) => r()),\n  });\n\n  return {\n    destroy() {\n      off();\n      restores.forEach((r) => r());\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/count-up/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/count-up/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createCountUp, type CountUpOptions } from './index';\n\n/**\n * Hook de `count-up`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useCountUp<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: CountUpOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createCountUp(el, options), deps);\n}\n"
+    }
+  ]
+}

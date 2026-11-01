@@ -1,0 +1,47 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "clip-reveal",
+  "type": "registry:lib",
+  "title": "Revelado con máscara",
+  "description": "Cada foto sube desde abajo con clip-path mientras se asienta un zoom leve. Reemplaza al fade genérico.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "clip-reveal",
+    "title": "Revelado con máscara",
+    "family": "imagen",
+    "intensity": 1,
+    "deps": [],
+    "description": "Cada foto sube desde abajo con clip-path mientras se asienta un zoom leve. Reemplaza al fade genérico.",
+    "goodFor": [
+      "portfolio",
+      "editorial",
+      "inmobiliaria",
+      "gastronomía"
+    ],
+    "pairsWith": [
+      "split-reveal",
+      "smooth-scroll"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 3.6
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/clip-reveal/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/clip-reveal/index.ts",
+      "content": "/**\n * clip-reveal — revelado con máscara. Cada hijo de `[data-fx-clip]` sube desde\n * abajo con `clip-path` mientras la imagen se asienta de un zoom leve.\n * Familia: imagen y media · Intensidad 1 · 0 deps.\n *\n * El clip va en los HIJOS del elemento observado: un IntersectionObserver no\n * dispara sobre un target recortado al 100%.\n *\n *   <figure data-fx-clip><img …></figure>\n *\n *   .js [data-fx-clip] > * { clip-path: inset(100% 0 0 0); transition: clip-path var(--fx-duration) var(--fx-ease); }\n *   .js [data-fx-clip] img { scale: 1.18; transition: clip-path var(--fx-duration) var(--fx-ease), scale 1600ms var(--fx-ease); }\n *   [data-fx-clip][data-fx-revealed] > * { clip-path: inset(0); }\n *   [data-fx-clip][data-fx-revealed] img { scale: 1; }\n *\n * Reduced motion: todo queda revelado al instante (también si cambia en vivo).\n * destroy(): desconecta el observer y saca `data-fx-revealed` de los que lo recibieron.\n */\n\nimport { motionSwitch, type FxHandle } from '../../core/index';\n\nexport interface ClipRevealOptions {\n  selector?: string;\n  rootMargin?: string;\n  threshold?: number;\n}\n\nexport interface ClipRevealHandle extends FxHandle {\n  /** Para nodos que llegan después del mount (fetch client-side). */\n  observe(el: Element): void;\n}\n\nconst MARK = 'data-fx-revealed';\n\nexport function createClipReveal(\n  root: HTMLElement,\n  { selector = '[data-fx-clip]', rootMargin = '0px 0px -10% 0px', threshold = 0.12 }: ClipRevealOptions = {},\n): ClipRevealHandle {\n  const touched = new Set<Element>();\n  const reveal = (el: Element) => {\n    if (!el.hasAttribute(MARK)) touched.add(el);\n    el.setAttribute(MARK, '');\n  };\n  let observe: (el: Element) => void = reveal;\n\n  const off = motionSwitch({\n    full: () => {\n      const io = new IntersectionObserver(\n        (entries) => {\n          for (const entry of entries) {\n            if (!entry.isIntersecting) continue;\n            reveal(entry.target);\n            io.unobserve(entry.target);\n          }\n        },\n        { rootMargin, threshold },\n      );\n      root.querySelectorAll(selector).forEach((el) => io.observe(el));\n      observe = (el) => io.observe(el);\n      return () => io.disconnect();\n    },\n    reduced: () => {\n      root.querySelectorAll(selector).forEach(reveal);\n      observe = reveal;\n    },\n  });\n\n  return {\n    observe: (el) => observe(el),\n    destroy() {\n      off();\n      touched.forEach((el) => el.removeAttribute(MARK));\n      touched.clear();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/clip-reveal/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/clip-reveal/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createClipReveal, type ClipRevealOptions, type ClipRevealHandle } from './index';\n\n/**\n * Hook de `clip-reveal`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useClipReveal<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: ClipRevealOptions,\n  deps: DependencyList = [],\n): RefObject<ClipRevealHandle | null> {\n  return useFx(ref, (el) => createClipReveal(el, options), deps);\n}\n"
+    }
+  ]
+}

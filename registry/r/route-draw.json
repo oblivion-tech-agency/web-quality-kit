@@ -1,0 +1,49 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "route-draw",
+  "type": "registry:lib",
+  "title": "Recorrido que se dibuja",
+  "description": "Un trazo SVG que se dibuja con el scroll, con marcador orientado y paradas que se encienden.",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "route-draw",
+    "title": "Recorrido que se dibuja",
+    "family": "scroll",
+    "intensity": 3,
+    "deps": [],
+    "description": "Un trazo SVG que se dibuja con el scroll, con marcador orientado y paradas que se encienden.",
+    "goodFor": [
+      "logística",
+      "turismo",
+      "energía",
+      "historia de marca"
+    ],
+    "pairsWith": [
+      "count-up",
+      "live-timeline"
+    ],
+    "avoidWith": [
+      "scroll-sequence"
+    ],
+    "signature": true,
+    "weightKb": 4.5
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/route-draw/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/route-draw/index.ts",
+      "content": "/**\n * route-draw — un trazo SVG que se dibuja con el scroll mientras la sección\n * está fijada, con un marcador orientado según la tangente y paradas que se\n * encienden al pasar. Para todo sujeto con una línea propia: una ruta, un río,\n * un cable, una cadena de montaje, una línea de tiempo.\n * Familia: scroll y narrativa · Intensidad 3 · 0 deps · Firma posible.\n *\n *   <section data-fx-route class=\"h-[380vh]\">\n *     <div class=\"sticky top-0 h-svh\">\n *       <svg>…<path data-fx-path />…<g data-fx-marker>…</g><circle data-fx-stop …/></svg>\n *\n * Reduced motion: pinta el recorrido terminado y no escucha el scroll (en vivo).\n * destroy(): saca listeners y frame y devuelve al trazo, al marcador y a las\n * paradas sus atributos y estilos originales.\n */\n\nimport { bundle, clamp01, createLoop, damp, motionSwitch, part, parts, preserve, progress, type FxHandle } from '../../core/index';\n\n/**\n * Fracción (0–1) del largo del trazo más cercana a un punto: para ubicar las\n * paradas sin calcular a mano dónde cae cada una.\n */\nexport function nearestFraction(path: SVGGeometryElement, x: number, y: number, samples = 600): number {\n  const len = path.getTotalLength();\n  let best = 0;\n  let bestD = Infinity;\n  for (let i = 0; i <= samples; i++) {\n    const p = path.getPointAtLength((i / samples) * len);\n    const d = (p.x - x) ** 2 + (p.y - y) ** 2;\n    if (d < bestD) [best, bestD] = [i / samples, d];\n  }\n  return best;\n}\n\nexport interface RouteInfo {\n  x: number;\n  y: number;\n  angle: number;\n  active: number;\n}\n\nexport interface RouteDrawOptions {\n  path?: SVGGeometryElement | null;\n  marker?: SVGGraphicsElement | null;\n  /** Fracción de cada parada, en orden. Por defecto se calcula desde `[data-fx-stop]` (cx/cy). */\n  stops?: number[];\n  /** Elementos que reciben `data-fx-passed` al llegar a la parada i. */\n  stopEls?: Element[][];\n  /** Tramo del pin que mapea a 0 → 1, para dejar aire al entrar y salir. */\n  range?: [number, number];\n  onProgress?: (t: number, info: RouteInfo) => void;\n}\n\nexport function createRouteDraw(section: HTMLElement, options: RouteDrawOptions = {}): FxHandle {\n  const path = options.path ?? part<SVGGeometryElement>(section, 'path');\n  if (!path) return { destroy() {} };\n  const marker = options.marker ?? part<SVGGraphicsElement>(section, 'marker');\n  const stopNodes = parts<SVGGraphicsElement>(section, 'stop');\n  const stopEls = options.stopEls ?? stopNodes.map((n) => [n]);\n  const stops =\n    options.stops ??\n    stopNodes.map((n) => nearestFraction(path, Number(n.getAttribute('cx')), Number(n.getAttribute('cy'))));\n  const [r0, r1] = options.range ?? [0.05, 0.9];\n\n  const restore = bundle(\n    preserve(path, { attributes: ['pathLength'], styles: ['stroke-dasharray', 'stroke-dashoffset'] }),\n    marker && preserve(marker, { attributes: ['transform'] }),\n    ...stopEls.flat().map((el) => preserve(el, { attributes: ['data-fx-passed'] })),\n  );\n\n  const len = path.getTotalLength();\n  path.setAttribute('pathLength', '1');\n  path.style.strokeDasharray = '1 1';\n\n  const paint = (t: number) => {\n    path.style.strokeDashoffset = String(1 - t);\n    const l = t * len;\n    const a = path.getPointAtLength(l);\n    const p0 = path.getPointAtLength(Math.max(0, l - 0.5));\n    const p1 = path.getPointAtLength(Math.min(len, l + 0.5));\n    const angle = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;\n    marker?.setAttribute('transform', `translate(${a.x.toFixed(2)} ${a.y.toFixed(2)}) rotate(${angle.toFixed(1)})`);\n    let active = 0;\n    stops.forEach((f, i) => {\n      const passed = t + 0.004 >= f;\n      if (passed) active = i;\n      stopEls[i]?.forEach((el) => el.toggleAttribute('data-fx-passed', passed));\n    });\n    options.onProgress?.(t, { x: a.x, y: a.y, angle, active });\n  };\n\n  const off = motionSwitch({\n    full: () => {\n      let target = 0;\n      let value = 0;\n      const read = () => {\n        const r = section.getBoundingClientRect();\n        const p = clamp01(-r.top / Math.max(1, r.height - window.innerHeight));\n        target = progress(p, r0, r1);\n      };\n      const loop = createLoop((dt) => {\n        value = damp(value, target, 0.0015, dt);\n        if (Math.abs(target - value) < 0.0004) value = target;\n        paint(value);\n        return value !== target;\n      });\n      const kick = () => {\n        read();\n        loop.wake();\n      };\n      read();\n      value = target;\n      paint(value);\n      addEventListener('scroll', kick, { passive: true });\n      addEventListener('resize', kick, { passive: true });\n      return () => {\n        removeEventListener('scroll', kick);\n        removeEventListener('resize', kick);\n        loop.stop();\n      };\n    },\n    reduced: () => paint(1),\n  });\n\n  return {\n    destroy() {\n      off();\n      restore();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/route-draw/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/route-draw/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport type { FxHandle } from '../../core/types';\nimport { createRouteDraw, type RouteDrawOptions } from './index';\n\n/**\n * Hook de `route-draw`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useRouteDraw<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: RouteDrawOptions,\n  deps: DependencyList = [],\n): RefObject<FxHandle | null> {\n  return useFx(ref, (el) => createRouteDraw(el, options), deps);\n}\n"
+    }
+  ]
+}

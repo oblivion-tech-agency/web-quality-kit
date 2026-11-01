@@ -1,0 +1,16 @@
+{
+  "name": "scroll-progress",
+  "title": "Avance de scroll en CSS",
+  "family": "scroll",
+  "intensity": 1,
+  "deps": [],
+  "description": "Escribe --fx-p (0→1) en cada [data-fx-progress]: el motor de los efectos resueltos en CSS (foto que se abre, parallax, tipografía variable, cartas que se reparten).",
+  "goodFor": [
+    "todos"
+  ],
+  "pairsWith": [
+    "*"
+  ],
+  "avoidWith": [],
+  "signature": false
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scroll-progress",
+  "type": "registry:lib",
+  "title": "Avance de scroll en CSS",
+  "description": "Escribe --fx-p (0→1) en cada [data-fx-progress]: el motor de los efectos resueltos en CSS (foto que se abre, parallax, tipografía variable, cartas que se reparten).",
+  "dependencies": [],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://raw.githubusercontent.com/oblivion-tech-agency/web-quality-kit/main/registry/r/fx-core.json"
+  ],
+  "meta": {
+    "name": "scroll-progress",
+    "title": "Avance de scroll en CSS",
+    "family": "scroll",
+    "intensity": 1,
+    "deps": [],
+    "description": "Escribe --fx-p (0→1) en cada [data-fx-progress]: el motor de los efectos resueltos en CSS (foto que se abre, parallax, tipografía variable, cartas que se reparten).",
+    "goodFor": [
+      "todos"
+    ],
+    "pairsWith": [
+      "*"
+    ],
+    "avoidWith": [],
+    "signature": false,
+    "weightKb": 3.9
+  },
+  "files": [
+    {
+      "path": "packages/fx/src/effects/scroll-progress/index.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/scroll-progress/index.ts",
+      "content": "/**\n * scroll-progress — escribe el avance de scroll como `--fx-p` (0 → 1) en cada\n * `[data-fx-progress]`. Es el motor de los efectos que se resuelven en CSS\n * (foto que se abre, parallax por columnas, tipografía variable, cartas que se\n * reparten). El JS solo mide; el efecto lo dibuja el CSS.\n * Familia: scroll · Intensidad 1–3 (según el CSS) · 0 deps.\n *\n * Modos (`data-fx-progress=\"…\"`):\n * - `\"\"` / `\"exit\"`: desde que la sección toca el tope hasta que sale por arriba.\n * - `\"view\"`: cruce completo de la pantalla.\n * - `\"sticky\"`: sección alta con hijo sticky; 0 al empezar el pin, 1 al terminar.\n *\n * Reduced motion: no escribe `--fx-p`; el CSS define el estado quieto con\n * `var(--fx-p, 1)`.\n * destroy(): saca listeners, el frame pendiente y `--fx-p` de cada elemento.\n */\n\nimport { clamp01, motionSwitch, preserve, type FxHandle, type Restore } from '../../core/index';\n\nexport interface ScrollProgressOptions {\n  selector?: string;\n  /** Nombre de la variable que se escribe. */\n  variable?: string;\n}\n\nexport interface ScrollProgressHandle extends FxHandle {\n  /** Volvé a buscar elementos (contenido montado después de un fetch). */\n  refresh(): void;\n}\n\nfunction progressOf(el: HTMLElement, vh: number): number {\n  const r = el.getBoundingClientRect();\n  switch (el.getAttribute('data-fx-progress')) {\n    case 'view':\n      return (vh - r.top) / (vh + r.height);\n    case 'sticky':\n      return -r.top / Math.max(1, r.height - vh);\n    default:\n      return -r.top / Math.max(1, r.height);\n  }\n}\n\nexport function createScrollProgress(\n  root: HTMLElement,\n  { selector = '[data-fx-progress]', variable = '--fx-p' }: ScrollProgressOptions = {},\n): ScrollProgressHandle {\n  let els: HTMLElement[] = [];\n  const restores = new Map<HTMLElement, Restore>();\n  const collect = () => {\n    els = Array.from(root.querySelectorAll<HTMLElement>(selector));\n    for (const el of els) if (!restores.has(el)) restores.set(el, preserve(el, { styles: [variable] }));\n  };\n  const clear = () => {\n    restores.forEach((r) => r());\n  };\n  collect();\n  let schedule = () => {};\n\n  const off = motionSwitch({\n    full: () => {\n      let frame = 0;\n      const measure = () => {\n        frame = 0;\n        const vh = window.innerHeight;\n        for (const el of els) el.style.setProperty(variable, clamp01(progressOf(el, vh)).toFixed(4));\n      };\n      schedule = () => {\n        if (!frame) frame = requestAnimationFrame(measure);\n      };\n      measure();\n      addEventListener('scroll', schedule, { passive: true });\n      addEventListener('resize', schedule, { passive: true });\n      return () => {\n        removeEventListener('scroll', schedule);\n        removeEventListener('resize', schedule);\n        cancelAnimationFrame(frame);\n        schedule = () => {};\n        clear();\n      };\n    },\n    reduced: () => clear(),\n  });\n\n  return {\n    refresh() {\n      collect();\n      schedule();\n    },\n    destroy() {\n      off();\n      clear();\n    },\n  };\n}\n"
+    },
+    {
+      "path": "packages/fx/src/effects/scroll-progress/react.ts",
+      "type": "registry:lib",
+      "target": "components/fx/effects/scroll-progress/react.ts",
+      "content": "'use client';\n\nimport type { DependencyList, RefObject } from 'react';\nimport { useFx } from '../../core/react';\nimport { createScrollProgress, type ScrollProgressOptions, type ScrollProgressHandle } from './index';\n\n/**\n * Hook de `scroll-progress`. Monta sobre `ref.current` y destruye al desmontar.\n * Las opciones se leen al montar; pasá `deps` para volver a montar cuando cambien.\n */\nexport function useScrollProgress<E extends HTMLElement>(\n  ref: RefObject<E | null>,\n  options?: ScrollProgressOptions,\n  deps: DependencyList = [],\n): RefObject<ScrollProgressHandle | null> {\n  return useFx(ref, (el) => createScrollProgress(el, options), deps);\n}\n"
+    }
+  ]
+}

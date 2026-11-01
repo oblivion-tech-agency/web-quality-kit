@@ -114,7 +114,7 @@ Listá cada componente con su rol, sus estados (hover, focus, disabled, loading,
 | Sección | 800–1100ms | `cubic-bezier(0.16, 1, 0.3, 1)` |
 | Continuo (scroll, puntero) | — | lerp exponencial: `v += (t - v) * (1 - Math.pow(0.0015, dt))` |
 
-- **Firma:** `[el efecto que sale del sujeto]` + como mucho dos secundarios: `[x]`, `[y]`. Elegidos con `web-fx-kit/SIGNATURES.md`, sin repetir la combinación de otro proyecto.
+- **Firma:** `[el efecto que sale del sujeto]` + como mucho dos secundarios: `[x]`, `[y]`. Elegidos con `docs/SIGNATURES.md` del kit, sin repetir la combinación de otro proyecto.
 - **Personalidad:** `[p.ej. rígida y sin rebote / suave y lenta / elástica]`. Todas las curvas y duraciones de la tabla la respetan.
 - **Una orquestación fuerte por región**, no el mismo fade en todas las secciones. Cuando suma, usá también blur, clip-path, mask y sombra, no solo transform y opacity.
 - **Animá desde un estado visible.** La primera pintura tiene que leerse sin JS.
@@ -152,4 +152,4 @@ Listá cada componente con su rol, sus estados (hover, focus, disabled, loading,
 - [ ] Primera pintura legible, sin scroll horizontal a 360px y funciona sin JS.
 - [ ] Los dos temas salen de tokens, o el proyecto se compromete a uno solo de forma explícita.
 - [ ] El presupuesto de performance se midió (Lighthouse en desktop y mobile).
-- [ ] La fila del proyecto está en `web-fx-kit/SIGNATURES.md`, con la firma y los secundarios que quedaron publicados.
+- [ ] La fila del proyecto está en `docs/SIGNATURES.md` del kit, con la firma y los secundarios que quedaron publicados.

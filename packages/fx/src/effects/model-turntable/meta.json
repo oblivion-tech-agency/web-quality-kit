@@ -1,0 +1,23 @@
+{
+  "name": "model-turntable",
+  "title": "Producto en 3D en vivo",
+  "family": "3d",
+  "intensity": 3,
+  "deps": [
+    "three"
+  ],
+  "description": "Un .glb con Three.js: gira solo, se arrastra con inercia, fluido a cualquier velocidad. setLight() recolorea su luz.",
+  "goodFor": [
+    "producto físico",
+    "hardware",
+    "ecommerce"
+  ],
+  "pairsWith": [
+    "scroll-sequence",
+    "count-up"
+  ],
+  "avoidWith": [
+    "turntable"
+  ],
+  "signature": true
+}
