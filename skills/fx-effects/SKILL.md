@@ -24,6 +24,34 @@ sin dependencias obligatorias. Todos exponen `destroy()` y respetan `prefers-red
 | `image-displacement.js` | — | Transición entre dos imágenes con mapa de desplazamiento. Para portfolio, casos, galerías. |
 | `scroll-narrative.js` | — | Escenografía fija + pasos con estado interpolados. Para storytelling largo, timelines, casos de estudio. |
 
+### Scroll, estado y detalle (sin dependencias)
+
+Salieron de Transporte Lehman o se sumaron para que no todos los sitios terminen con el mismo
+hero de partículas. Mismo contrato: `createX(…)` devuelve `{ destroy() }`, respeta
+`prefers-reduced-motion` y la primera pintura se lee sin JS.
+
+| Módulo | Cuándo usarlo |
+|---|---|
+| `scroll-progress.js` | Motor: escribe `--p` (modos `exit`, `view`, `sticky`). Los efectos de `recipes/scroll-css.md` (foto que se abre, columnas con parallax, tipografía variable) lo usan y se resuelven en CSS. |
+| `clip-reveal.js` | Fotos que suben con máscara mientras se asienta el zoom. El clip va en los hijos: un observer no dispara sobre un target recortado al 100%. |
+| `count-up.js` | Cifras reales que suben al entrar en vista. No toca lo que ya está en pantalla al montar. |
+| `route-draw.js` | **Firma posible.** Un trazo SVG que se dibuja con el scroll, con marcador orientado y paradas que se encienden. Rutas, ríos, cables, líneas de tiempo. |
+| `scroll-sequence.js` | **Firma posible.** Producto que gira con el scroll: secuencia de imágenes en un canvas, titulares por capítulo. Usá el modo `chapters` (`poses`): el scroll elige el capítulo y el giro se reproduce solo; el modo `scrub` se ve a saltos con pocos cuadros. Solo cuando hay un objeto protagonista (producto, máquina, vehículo). Necesita `frame-player.js`. |
+| `turntable.js` | Producto en 360° con cuadros (fundido entre vecinos): gira solo, se arrastra con inercia y responde a las flechas. Con giro automático lento se nota el pulso: si el giro es protagonista, usá `model-turntable`. Necesita `frame-player.js` y `spin-control.js`. |
+| `model-turntable.js` | **Live thing posible.** Depende de `three` (por parámetro). El producto en 3D en vivo desde un `.glb` exportado de Blender: fluido a cualquier velocidad, con `setLight()` para recolorear su luz desde un token. Necesita `spin-control.js`. |
+| `live-timeline.js` | **Firma posible.** Un proceso del sujeto simulado en bucle (viaje, pedido, etapa), pausado fuera de pantalla. Lo simulado se etiqueta como simulación. |
+| `split-flap.js` | Valores cortos que cambian como un cartel de aeropuerto: destinos, estados, horarios. |
+| `pinned-horizontal.js` | Galería horizontal que avanza con el scroll vertical. En mobile queda un carrusel nativo. |
+| `cursor-label.js` | Etiqueta junto al puntero sobre lo que se abre ("Ver caso"). Solo puntero fino. |
+
+En React/Next se montan con `react/use-fx.js` desde un único componente cliente de efectos.
+
+### Elegí con la regla de firma
+
+Antes de elegir módulos, leé `web-fx-kit/SIGNATURES.md`: **un** efecto firma derivado del sujeto,
+como mucho **dos** secundarios, y una combinación que no repita la de otro proyecto del registro.
+Al publicar, sumá la fila del proyecto. Sin esto, cada sitio nuevo se parece al anterior.
+
 ### Conflicto conocido
 
 `scroll-narrative` y `smooth-scroll` juntos: el modo `transform` del segundo rompe
@@ -64,10 +92,12 @@ anti-referencias y restricciones técnicas. **Siempre** requieren `DESIGN.md` en
 
 En `web-fx-kit/recipes/`. Consultá cuando necesites resolver un problema de integración:
 
+- `scroll-css.md` — foto que se abre, parallax por columnas, tipografía variable, `animation-timeline`, View Transitions, trazos e ilustraciones propias con estados
+- `producto-que-gira.md` — `scroll-sequence`, `turntable` y `model-turntable`: de dónde salen los cuadros y el `.glb` (Blender, Spline, video de IA, mesa giratoria), PNG → WebP, presupuesto y composición
 - `performance.md` — cómo no matar el sitio con el fondo WebGL
 - `stack-y-deploy.md` — HTML vs Astro vs Next+R3F, y dónde publicar
 - `react.md` — StrictMode, SSR, presupuesto real de un efecto en React/Next
-- `librerias-de-componentes.md` — ThreeUI, 21st.dev, Aceternity medidos
+- `librerias-de-componentes.md` — Motion, 21st.dev y la skill UI UX Pro Max: instalación, peso y dónde entra cada una en el flujo del kit
 - `flujo-con-ia.md` — orden completo de la idea al deploy
 
 ## Assets pipeline (referencia)

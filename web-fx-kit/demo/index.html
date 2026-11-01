@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>web-fx-kit · demo de scroll y estado</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    } }
+  </script>
+  <style>
+    :root {
+      --color-ground: #0b0f1c; --color-raised: #141a2e; --color-line: #263055;
+      --color-ink: #eef1f8; --color-dim: #a6afc8; --color-accent: #ffb23e; --color-on-accent: #1a1205;
+      --color-light: #4fd8ff; --color-rim: #9ec4ff;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--color-ground); color: var(--color-ink); font: 17px/1.55 system-ui, sans-serif; }
+    h1, h2 { margin: 0 0 12px; line-height: 1; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(32px, 5vw, 64px); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .block { padding-block: 18vh; }
+    .dim { color: var(--color-dim); }
+    .mono { font-family: ui-monospace, monospace; }
+
+    /* clip-reveal */
+    [data-clip] { overflow: clip; } /* el scale inicial de .ph no debe ensanchar la página en mobile */
+    .js [data-clip] > * { clip-path: inset(100% 0 0 0); transition: clip-path 1100ms var(--ease-out-expo); }
+    .js [data-clip] .ph { scale: 1.18; transition: clip-path 1100ms var(--ease-out-expo), scale 1600ms var(--ease-out-expo); }
+    .js [data-clip].revealed > * { clip-path: inset(0 0 0 0); }
+    .js [data-clip].revealed .ph { scale: 1; }
+    .ph { aspect-ratio: 4/3; background: linear-gradient(160deg, #2a4bb8, #0f1c48); }
+    .grid3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+    /* count-up */
+    .stat { font-size: clamp(56px, 9vw, 120px); font-weight: 800; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+
+    /* route-draw */
+    .route { height: 300vh; }
+    .route-sticky { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; }
+    .route svg { width: min(90vw, 720px); height: auto; }
+    .route .base { fill: none; stroke: var(--color-line); stroke-width: 2; stroke-dasharray: 3 5; }
+    .route .drawn { fill: none; stroke: var(--color-accent); stroke-width: 4; stroke-linecap: round; }
+    .route .stop { fill: var(--color-ground); stroke: var(--color-dim); stroke-width: 2; transition: fill 300ms, stroke 300ms; }
+    .route .stop[data-passed] { fill: var(--color-accent); stroke: var(--color-accent); }
+    .route-readout { position: absolute; bottom: 8vh; left: 0; right: 0; text-align: center; }
+
+    /* scroll-sequence */
+    .seq { height: 400vh; }
+    .seq-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+    .seq-canvas, .seq-fallback { position: absolute; top: 10%; right: 0; width: 50%; height: 80%; display: block;
+      transition: translate 900ms var(--ease-out-expo); }
+    .seq-fallback { object-fit: contain; }
+    .seq-fallback[hidden] { display: none; }
+    html:not(.js) .seq-canvas { display: none; }
+    .seq-copy { position: absolute; top: 0; left: 0; width: 50%; height: 100%; padding: 0 6vw; transition: translate 900ms var(--ease-out-expo); }
+    .seq-sticky[data-flip] .seq-canvas { translate: -100% 0; }
+    .seq-sticky[data-flip] .seq-copy { translate: 100% 0; }
+    .seq-head { position: absolute; left: 6vw; right: 6vw; top: 50%; opacity: 0; translate: 0 calc(-50% + 24px);
+      transition: opacity 500ms, translate 700ms var(--ease-out-expo); }
+    .seq-head[data-active] { opacity: 1; translate: 0 -50%; }
+    .seq-head h2 { font-size: clamp(30px, 4.4vw, 58px); }
+    @media (max-width: 767px) {
+      .seq-canvas, .seq-fallback { top: 6%; width: 100%; height: 52%; }
+      .seq-copy { top: 58%; width: 100%; height: 42%; padding: 0 20px; }
+      .seq-head { left: 20px; right: 20px; top: 0; translate: 0 24px; }
+      .seq-head[data-active] { translate: 0 0; }
+      .seq-sticky[data-flip] .seq-canvas, .seq-sticky[data-flip] .seq-copy { translate: none; }
+    }
+
+    /* turntable */
+    .spin { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: center; }
+    .spin-stage { position: relative; margin: 0; height: min(78svh, 720px); }
+    .spin-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; cursor: grab; }
+    .spin-canvas:active { cursor: grabbing; }
+    .spin-canvas:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+    .spin-canvas[hidden] { display: none; }
+    html:not(.js) canvas.spin-canvas { display: none; }
+    .spin-lights { display: flex; gap: 8px; margin-top: 20px; }
+    .spin-lights button { min-height: 44px; padding: 0 16px; border: 0; font: inherit; font-size: 15px; cursor: pointer;
+      background: var(--color-raised); color: var(--color-ink); }
+    .spin-lights button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-ground); }
+    .spin-hint { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 14px; transition: opacity 400ms; pointer-events: none; }
+    .spin-hint[data-hidden] { opacity: 0; }
+    @media (max-width: 767px) { .spin { grid-template-columns: 1fr; } .spin-stage { height: 64svh; } }
+
+    /* live-timeline */
+    .track { position: relative; height: 40px; margin-top: 24px; }
+    .track .rail { position: absolute; inset: 19px 0 auto; height: 2px; background: var(--color-line); }
+    .track .fill { position: absolute; inset: 19px 0 auto; height: 2px; background: var(--color-accent); transform-origin: left; }
+    .track .dot { position: absolute; top: 12px; width: 16px; height: 16px; margin-left: -8px; background: var(--color-accent); }
+
+    /* split-flap */
+    .board { display: inline-block; padding: 14px 18px; background: var(--color-raised); font: 600 clamp(28px, 5vw, 48px) ui-monospace, monospace; letter-spacing: 0.06em; min-width: 14ch; }
+
+    /* frame-expand (recipes/scroll-css.md §1) */
+    .frame-expand { height: 230vh; }
+    .frame-expand-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+    .frame-expand-frame { --e: min(1, calc(var(--p, 1) * 1.7)); position: absolute; inset: 0;
+      clip-path: inset(calc((1 - var(--e)) * 14%) calc((1 - var(--e)) * 9%)); background: linear-gradient(200deg, #3355c8, #0b1430); }
+    .frame-expand-copy { --c: clamp(0, calc((var(--p, 1) - 0.38) * 3.2), 1); position: absolute; left: 6vw; bottom: 10vh;
+      opacity: var(--c); translate: 0 calc((1 - var(--c)) * 40px); }
+
+    /* pinned-horizontal */
+    [data-pin-track] { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 20px; list-style: none; margin: 0; }
+    [data-pin-track] > li { flex: 0 0 min(78vw, 420px); scroll-snap-align: start; }
+    [data-pin-track] a { display: block; color: inherit; text-decoration: none; }
+    [data-pinned] [data-pin-viewport] { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+    [data-pinned] [data-pin-track] { overflow: visible; will-change: transform; }
+    .pin-bar { height: 2px; margin: 24px 20px 0; background: var(--color-line); }
+    .pin-bar > div { height: 100%; background: var(--color-accent); transform-origin: left; transform: scaleX(var(--p, 0)); }
+
+    /* cursor-label */
+    .fx-cursor { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; padding: 8px 12px; font-size: 14px; font-weight: 600;
+      background: var(--color-accent); color: var(--color-on-accent); opacity: 0; scale: 0.6; transition: opacity 160ms, scale 220ms var(--ease-out-expo); }
+    .fx-cursor[data-active] { opacity: 1; scale: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .js [data-clip] > *, .js [data-clip] .ph { clip-path: none; scale: 1; }
+      .frame-expand, .route { height: auto; }
+      .frame-expand-sticky { position: relative; }
+      .route-sticky { position: relative; height: auto; padding: 10vh 0; }
+      .seq { height: auto; }
+      .seq-sticky { position: relative; }
+      .seq-head { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap block">
+    <h1 style="font-size: clamp(44px, 8vw, 104px)">Módulos de scroll y estado</h1>
+    <p class="dim">Demo de <span class="mono">web-fx-kit/effects/</span>. Bajá para ver cada uno.</p>
+  </header>
+
+  <section class="wrap block" id="live">
+    <h2>live-timeline</h2>
+    <p class="dim">Simulación de un recorrido: <span id="live-leg" class="mono">En A</span> · <span id="live-km" class="mono">0</span> km</p>
+    <div class="track" id="live-track"><div class="rail"></div><div class="fill" id="live-fill"></div><div class="dot" id="live-dot"></div></div>
+  </section>
+
+  <section class="wrap block">
+    <h2>split-flap</h2>
+    <p class="dim">Próximo destino</p>
+    <span class="board" id="board">USHUAIA</span>
+  </section>
+
+  <section class="wrap block">
+    <h2>count-up</h2>
+    <div class="grid3">
+      <div><span class="stat">+<span data-count="15">15</span></span><p class="dim">años en ruta</p></div>
+      <div><span class="stat"><span data-count="3150">3.150</span></span><p class="dim">km de corredor</p></div>
+      <div><span class="stat"><span data-count="28">28</span></span><p class="dim">pallets por unidad</p></div>
+    </div>
+  </section>
+
+  <section class="wrap block">
+    <h2>clip-reveal</h2>
+    <div class="grid3">
+      <figure data-clip style="margin:0"><div class="ph"></div></figure>
+      <figure data-clip style="margin:0"><div class="ph"></div></figure>
+      <figure data-clip style="margin:0"><div class="ph"></div></figure>
+    </div>
+  </section>
+
+  <section class="route" id="route-section">
+    <div class="route-sticky">
+      <svg viewBox="0 0 720 300" aria-label="Recorrido de ejemplo con cuatro paradas">
+        <path class="base" d="M20 250 C 160 250 180 60 330 80 S 520 260 700 40" />
+        <path class="drawn" id="route-path" d="M20 250 C 160 250 180 60 330 80 S 520 260 700 40" />
+        <circle class="stop" cx="20" cy="250" r="7" />
+        <circle class="stop" cx="330" cy="80" r="7" />
+        <circle class="stop" cx="519" cy="154" r="7" />
+        <circle class="stop" cx="700" cy="40" r="7" />
+        <g id="route-marker"><circle r="13" fill="var(--color-ground)" stroke="var(--color-accent)" stroke-width="2" /><path d="M8 0-6 7-3 0-6-7Z" fill="var(--color-accent)" /></g>
+      </svg>
+      <p class="route-readout"><strong>route-draw</strong> <span class="dim">· parada <span id="route-active" class="mono">4</span> de 4</span></p>
+    </div>
+  </section>
+
+  <section class="seq" id="seq-section">
+    <div class="seq-sticky" id="seq-sticky">
+      <canvas class="seq-canvas" id="seq-canvas"></canvas>
+      <img class="seq-fallback" data-seq-fallback src="speaker/chapters/desktop/frame-001.webp" alt="Parlante cilíndrico negro de tela, con controles iluminados al frente">
+      <div class="seq-copy">
+        <div class="seq-head" data-active><h2>Un sonido que llena la sala</h2><p class="dim">scroll-sequence · 72 cuadros renderizados en Blender</p></div>
+        <div class="seq-head"><h2>Luz que sigue el ritmo</h2><p class="dim">El radiador de arriba late con la música.</p></div>
+        <div class="seq-head"><h2>Tela de punta a punta</h2><p class="dim">Sin costuras a la vista, sin bordes duros.</p></div>
+        <div class="seq-head"><h2>Todo a mano, sin mirar</h2><p class="dim">Volumen, pausa y modo de luz al alcance del pulgar.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap block spin" id="spin-section">
+    <div class="spin-copy">
+      <h2>model-turntable</h2>
+      <p class="dim">El parlante en 3D en vivo (Three.js + <span class="mono">speaker.glb</span>): gira solo, fluido a cualquier velocidad. Arrastralo con el mouse o el dedo, o enfocalo y usá ← →.</p>
+      <div class="spin-lights" role="group" aria-label="Color de la luz">
+        <button type="button" data-light="--color-light" aria-pressed="true">Luz cian</button>
+        <button type="button" data-light="--color-accent" aria-pressed="false">Luz ámbar</button>
+      </div>
+    </div>
+    <figure class="spin-stage">
+      <canvas class="spin-canvas" id="spin-canvas"></canvas>
+      <img class="spin-canvas" data-model-fallback src="speaker/chapters/desktop/frame-001.webp" alt="Parlante cilíndrico negro de tela, visto de frente">
+      <figcaption class="spin-hint dim" id="spin-hint">↔ Arrastrá para girar</figcaption>
+    </figure>
+  </section>
+
+  <section class="frame-expand" data-progress="sticky">
+    <div class="frame-expand-sticky">
+      <div class="frame-expand-frame"></div>
+      <div class="frame-expand-copy"><h2>frame-expand</h2><p class="dim">scroll-progress + CSS</p></div>
+    </div>
+  </section>
+
+  <section data-pin id="pin">
+    <div data-pin-viewport>
+      <h2 class="wrap" style="width:100%">pinned-horizontal <span class="dim" style="font-size:.4em">+ cursor-label</span></h2>
+      <ul data-pin-track>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 1</p></a></li>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 2</p></a></li>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 3</p></a></li>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 4</p></a></li>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 5</p></a></li>
+        <li><a href="#pin" data-cursor="Ver unidad"><div class="ph"></div><p>Unidad 6</p></a></li>
+      </ul>
+      <div class="pin-bar"><div></div></div>
+    </div>
+  </section>
+
+  <footer class="wrap block dim">Fin de la demo.</footer>
+
+  <script type="module">
+    import { createScrollProgress } from '../effects/scroll-progress.js';
+    import { createClipReveal } from '../effects/clip-reveal.js';
+    import { createCountUp } from '../effects/count-up.js';
+    import { createRouteDraw, nearestFraction } from '../effects/route-draw.js';
+    import { createLiveTimeline, segmentsFromStops } from '../effects/live-timeline.js';
+    import { createSplitFlap } from '../effects/split-flap.js';
+    import { createPinnedHorizontal } from '../effects/pinned-horizontal.js';
+    import { createCursorLabel } from '../effects/cursor-label.js';
+
+    const handles = [];
+    handles.push(createScrollProgress(document));
+    handles.push(createClipReveal(document));
+    handles.push(createCountUp(document, { locale: 'es-AR' }));
+
+    const path = document.getElementById('route-path');
+    const circles = [...document.querySelectorAll('#route-section .stop')];
+    const active = document.getElementById('route-active');
+    handles.push(createRouteDraw({
+      section: document.getElementById('route-section'),
+      path,
+      marker: document.getElementById('route-marker'),
+      stops: circles.map((c) => nearestFraction(path, +c.getAttribute('cx'), +c.getAttribute('cy'))),
+      stopEls: circles.map((c) => [c]),
+      onProgress: (t, info) => { active.textContent = String(info.active + 1); },
+    }));
+
+    const names = ['A', 'B', 'C', 'D'];
+    const km = [0, 720, 1800, 3150];
+    const track = document.getElementById('live-track');
+    const dot = document.getElementById('live-dot');
+    const fill = document.getElementById('live-fill');
+    const kmEl = document.getElementById('live-km');
+    const legEl = document.getElementById('live-leg');
+    handles.push(createLiveTimeline(track, {
+      segments: segmentsFromStops(km, { travel: 8000 }),
+      onFrame: ({ value, segment }) => {
+        const x = value / km[km.length - 1];
+        dot.style.transform = `translateX(${x * track.clientWidth}px)`;
+        fill.style.transform = `scaleX(${x})`;
+        kmEl.textContent = Math.round(value).toLocaleString('es-AR');
+        legEl.textContent = segment.moving ? `${names[segment.index]} → ${names[segment.index + 1]}` : `En ${names[segment.index]}`;
+      },
+    }));
+
+    handles.push(createSplitFlap(document.getElementById('board'), {
+      values: ['USHUAIA', 'RIO GALLEGOS', 'COMODORO', 'VIEDMA'],
+      interval: 2600,
+    }));
+    handles.push(createPinnedHorizontal(document.getElementById('pin')));
+    handles.push(createCursorLabel(document));
+
+    window.__fx = handles;
+
+    // --- scroll-sequence (modo capítulos) + model-turntable: parlante de speaker/render.py ---
+    // El scroll elige el capítulo; el giro entre poses se reproduce solo.
+    // chapters: 72 × 960 px desktop (2,7 MB), 36 × 560 px mobile (0,6 MB).
+    // speaker.glb: 1,5 MB; Three.js y el modelo cargan recién al acercarse a la sección.
+    import { createScrollSequence } from '../effects/scroll-sequence.js';
+    import { createModelTurntable } from '../effects/model-turntable.js';
+
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const seqList = (set, dir, count) => Array.from({ length: count }, (_, i) => `speaker/${set}/${dir}/frame-${String(i + 1).padStart(3, '0')}.webp`);
+    const seqUrls = isMobile ? seqList('chapters', 'mobile', 36) : seqList('chapters', 'desktop', 72);
+    const seqHeads = [...document.querySelectorAll('#seq-section .seq-head')];
+    const seqSticky = document.getElementById('seq-sticky');
+    const seq = createScrollSequence({
+      section: document.getElementById('seq-section'),
+      canvas: document.getElementById('seq-canvas'),
+      frames: seqUrls,
+      range: [0.04, 0.96],
+      stops: [0, 0.25, 0.5, 0.75],
+      poses: [0, 1 / 3, 2 / 3, 1],
+      duration: 2.4,
+      onChapter: (ch) => {
+        seqHeads.forEach((h, k) => h.toggleAttribute('data-active', k === ch));
+        seqSticky.toggleAttribute('data-flip', ch % 2 === 1);
+      },
+    });
+    handles.push(seq);
+
+    const spinHint = document.getElementById('spin-hint');
+    const spinCanvas = document.getElementById('spin-canvas');
+    spinCanvas.addEventListener('pointerdown', () => spinHint.setAttribute('data-hidden', ''), { once: true });
+    const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const lightButtons = [...document.querySelectorAll('.spin-lights button')];
+    let light = '--color-light';
+    let spin = null;
+    const onLightClick = (e) => {
+      light = e.currentTarget.dataset.light;
+      lightButtons.forEach((b) => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
+      spin?.setLight(token(light));
+    };
+    lightButtons.forEach((b) => b.addEventListener('click', onLightClick));
+    handles.push({ destroy: () => lightButtons.forEach((b) => b.removeEventListener('click', onLightClick)) });
+
+    const near = new IntersectionObserver(async ([e]) => {
+      if (!e.isIntersecting) return;
+      near.disconnect();
+      try {
+        const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+          import('three'),
+          import('three/addons/loaders/GLTFLoader.js'),
+          import('three/addons/environments/RoomEnvironment.js'),
+        ]);
+        spin = createModelTurntable({
+          canvas: spinCanvas, THREE, GLTFLoader, RoomEnvironment, url: 'speaker/speaker.glb',
+          rim: token('--color-rim'), tilt: 24, exposure: 1.35, turnSeconds: 12,
+        });
+        spin.setLight(token(light));
+        handles.push(spin);
+        window.__seq.spin = spin;
+      } catch {
+        // Sin CDN o sin WebGL queda la foto del producto.
+      }
+    }, { rootMargin: '100% 0px' });
+    near.observe(spinCanvas);
+    handles.push({ destroy: () => near.disconnect() });
+    window.__seq = { handle: seq, spin, urls: seqUrls.map((u) => new URL(u, location.href).href) };
+  </script>
+</body>
+</html>

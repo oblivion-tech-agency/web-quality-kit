@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ondra Pulse · parlante portátil 360°</title>
+  <meta name="description" content="Ondra Pulse: parlante portátil que suena en 360°, 24 horas de batería y una luz que elegís vos. US$ 149 con funda." />
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=panchang@700&f[]=switzer@400,500&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="../speaker/scene/hero.webp" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="../speaker/scene/hero-1200.webp" media="(max-width: 767px)" />
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+    } }
+  </script>
+  <style>
+    :root {
+      /* Paleta tomada del producto: tela negra, el fondo de la escena y la luz del aro. */
+      --bg: #030405; --surface: #0f1216; --ink: #f1f3f6; --muted: #959eab;
+      --accent: #4fd8ff; --accent-ink: #031016;
+      --field-2: #e9edf0; --field-2-ink: #0a0a0a;
+      --field-3: #161b22; --field-3-ink: #f1f3f6;
+      --field-4: #0b2630; --field-4-ink: #f1f3f6;
+      --light-cian: #4fd8ff; --light-ambar: #ffb547; --light-verde: #5ef0a2; --light-rojo: #ff6b5c;
+      --rim: #9ec4ff;
+
+      --font-display: 'Panchang', 'Arial Black', sans-serif;
+      --font-text: 'Switzer', system-ui, sans-serif;
+      --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+      --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+      --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+      --step-display: clamp(3rem, 1rem + 6.2vw, 7.5rem);
+
+      --margin: clamp(16px, 2.2vw, 32px);
+      --gap-section: clamp(120px, 14vw, 220px);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 64px; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 400 var(--step-body)/1.5 var(--font-text); }
+    img, canvas { display: block; max-width: 100%; }
+    a { color: inherit; }
+    h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1; }
+    p { margin: 0; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 26px; border: 0;
+      font: 500 var(--step-body)/1 var(--font-text); text-decoration: none; cursor: pointer;
+      background: var(--accent); color: var(--accent-ink); transition: transform 180ms var(--ease-out), background-color 300ms; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(1px); }
+
+    /* Barra: marca, tres enlaces, una acción. */
+    .bar { position: absolute; inset: 0 0 auto; z-index: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      padding: 20px var(--margin); }
+    .wordmark { font: 700 var(--step-body)/1 var(--font-display); text-decoration: none; letter-spacing: 0.02em; }
+    .bar ul { display: flex; gap: 32px; margin: 0; padding: 0; list-style: none; }
+    .bar ul a { text-decoration: none; color: var(--muted); transition: color 200ms; }
+    .bar ul a:hover { color: var(--ink); }
+    .bar .btn { justify-self: end; min-height: 40px; padding: 0 18px; font-size: var(--step-small); background: var(--ink); color: var(--bg); }
+
+    /* Hero: el objeto parte el titular. */
+    .hero { position: relative; height: 100svh; min-height: 640px; overflow: hidden; background: var(--bg); }
+    .hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
+    .hero h1 { position: absolute; left: 0; right: 0; top: 21%; height: calc(45% + 1.1em); font-size: var(--step-display); line-height: 0.95; }
+    .hero h1 .line { position: absolute; left: var(--margin); right: var(--margin); text-align: center; overflow: hidden; padding-block: 0.06em; }
+    .hero h1 .line > span { display: inline-block; }
+    .hero h1 .l1 { top: 0; }
+    .hero h1 .l2 { bottom: 0; }
+    .hero-side { position: absolute; top: 47%; width: min(22vw, 300px); font-size: var(--step-body); }
+    .hero-side.left { left: var(--margin); }
+    .hero-side.right { right: var(--margin); text-align: right; }
+    .hero-side .price { font: 700 var(--step-lead)/1.2 var(--font-display); }
+    .hero-side .btn { margin-top: 20px; }
+
+    /* Capítulos: el objeto delante de la tipografía. */
+    .chapters { position: relative; height: 180svh; margin-top: var(--gap-section); }
+    .chapters-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; grid-template-columns: repeat(12, 1fr);
+      column-gap: 16px; padding: 9vh var(--margin) 7vh; }
+    .stack { grid-column: 1 / -1; grid-row: 1; margin: 0; padding: 0; list-style: none; font: 700 var(--step-display)/0.9 var(--font-display);
+      text-transform: uppercase; letter-spacing: -0.02em; white-space: nowrap; color: var(--muted); }
+    .stack li { transition: color 400ms; }
+    .stack li[data-active] { color: var(--ink); }
+    .chapters canvas, .chapters .seq-fallback { position: absolute; z-index: 2; right: 4vw; top: 4vh; width: 42vw; height: 76vh; object-fit: contain; }
+    .seq-fallback[hidden] { display: none; }
+    html:not(.js) .chapters canvas { display: none; }
+    .facts { grid-column: 1 / 7; grid-row: 2; align-self: end; position: relative; z-index: 3; }
+    .facts h2 { font-size: var(--step-head); margin-bottom: 24px; }
+    .fact { display: none; max-width: 44ch; }
+    .fact[data-active] { display: block; }
+    .fact h3 { font: 500 var(--step-lead)/1.3 var(--font-text); text-transform: none; letter-spacing: 0; margin-bottom: 8px; }
+
+    /* Datos: tres bloques que no se alinean. */
+    .stats { position: relative; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 8px; align-items: start; padding: 0 var(--margin); margin-top: var(--gap-section); }
+    .stats h2 { position: absolute; left: calc(var(--margin) + (100% - 2 * var(--margin)) / 2 + 4px); top: 0; font-size: var(--step-head); }
+    .tile { display: flex; flex-direction: column; justify-content: space-between; padding: 28px; }
+    .tile .figure { font: 700 var(--step-display)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+    .tile .figure small { font-size: 0.45em; margin-left: 0.15em; }
+    .tile p { max-width: 30ch; }
+    .tile-a { grid-column: 1 / 7; height: 70vh; background: var(--accent); color: var(--accent-ink); transition: background-color 300ms; }
+    .tile-b { grid-column: 7 / 10; height: 44vh; margin-top: 18vh; background: var(--field-2); color: var(--field-2-ink); }
+    .tile-c { grid-column: 10 / 13; height: 34vh; margin-top: 30vh; background: var(--field-4); color: var(--field-4-ink); }
+    .tile-b .figure, .tile-c .figure { font-size: var(--step-head); }
+
+    /* Detalles: cuatro cartas que se reparten. */
+    .fan { position: relative; height: 220svh; margin-top: var(--gap-section); background: var(--surface); }
+    .fan-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; padding: 9vh var(--margin) 0; }
+    .fan-stage h2 { font-size: var(--step-head); }
+    .fan-stage > p { margin-top: 14px; max-width: 46ch; }
+    .cards { position: absolute; left: 50%; bottom: 7vh; width: 340px; height: 440px; margin: 0; padding: 0; list-style: none; }
+    .card { --t: clamp(0, calc(var(--p, 1) * 3.4 - var(--i) + 1), 1);
+      position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px; padding: 24px;
+      transform: translate(calc(var(--i) * 250px - 545px), calc((1 - var(--t)) * 110vh)) rotate(calc(var(--r) * var(--t)));
+      will-change: transform; }
+    .card h3 { font: 500 var(--step-lead)/1.2 var(--font-text); text-transform: none; letter-spacing: 0; max-width: 200px; }
+    .card img { width: 200px; height: 200px; object-fit: cover; }
+    .card p { max-width: 200px; }
+    .card:nth-child(1) { --i: 0; --r: -3deg; background: var(--accent); color: var(--accent-ink); transition: background-color 300ms; }
+    .card:nth-child(2) { --i: 1; --r: 2deg; background: var(--field-2); color: var(--field-2-ink); }
+    .card:nth-child(3) { --i: 2; --r: -2deg; background: var(--field-4); color: var(--field-4-ink); }
+    .card:nth-child(4) { --i: 3; --r: 4deg; background: var(--field-3); color: var(--field-3-ink); }
+
+    /* Lo que se toca: el Pulse en 3D y su luz. */
+    .live { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 16px; align-items: center; padding: 0 var(--margin); margin-top: var(--gap-section); }
+    .live-copy { grid-column: 1 / 6; }
+    .live-copy h2 { font-size: var(--step-head); }
+    .live-copy > p { margin-top: 20px; max-width: 40ch; }
+    .lights { margin: 36px 0 0; padding: 0; border: 0; }
+    .lights legend { font-weight: 500; margin-bottom: 14px; padding: 0; }
+    .lights-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .lights label { position: relative; display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 20px 0 14px; cursor: pointer;
+      background: var(--field-3); transition: background-color 200ms; }
+    .lights label:hover { background: var(--surface); }
+    .lights input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .lights .chip { width: 22px; height: 22px; border-radius: 50%; background: var(--c); }
+    .lights label:has(input:checked) { background: var(--ink); color: var(--bg); }
+    .lights label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .live-stage { grid-column: 6 / 13; position: relative; margin: 0; height: min(84svh, 820px); }
+    .live-stage canvas, .live-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; cursor: grab; }
+    .live-stage canvas:active { cursor: grabbing; }
+    .live-stage img[hidden] { display: none; }
+    .live-stage figcaption { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; color: var(--muted); font-size: var(--step-small); }
+
+    /* Precio: una frase. */
+    .price-block { padding: 0 var(--margin); margin-top: var(--gap-section); }
+    .price-block h2 { font-size: var(--step-display); line-height: 0.92; }
+    .price-row { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 16px; margin-top: 48px; align-items: start; }
+    .price-row ul { grid-column: 1 / 7; margin: 0; padding: 0 0 0 1.1em; font-size: var(--step-lead); }
+    .price-row ul li + li { margin-top: 6px; }
+    .price-row .buy { grid-column: 8 / 13; }
+    .price-row .buy p { margin-top: 14px; color: var(--muted); }
+    .price-row .btn { width: 100%; min-height: 64px; font-size: var(--step-lead); }
+
+    /* Preguntas. */
+    .faq { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 16px; padding: 0 var(--margin); margin-top: var(--gap-section); }
+    .faq h2 { grid-column: 1 / 6; align-self: start; position: sticky; top: 96px; font-size: var(--step-head); padding-right: 16px; }
+    .faq-list { grid-column: 7 / 13; display: grid; gap: 8px; }
+    .faq details { background: var(--surface); transition: background-color 250ms; }
+    .faq summary { position: relative; display: flex; align-items: center; min-height: 72px; padding: 0 64px 0 24px;
+      font-size: var(--step-lead); font-weight: 500; cursor: pointer; list-style: none; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::before, .faq summary::after { content: ""; position: absolute; right: 24px; top: 50%; width: 16px; height: 3px; margin-top: -1.5px;
+      background: currentColor; transition: transform 250ms var(--ease-out); }
+    .faq summary::after { transform: rotate(90deg); }
+    .faq details[open] { background: var(--accent); color: var(--accent-ink); }
+    .faq details[open] summary::after { transform: rotate(0deg); }
+    .faq details p { padding: 0 24px 24px; max-width: 52ch; }
+
+    /* Cierre y pie. */
+    .close { position: relative; height: 100svh; min-height: 620px; margin-top: var(--gap-section); overflow: hidden; background: var(--field-2); color: var(--field-2-ink);
+      display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 16px; padding: 12vh var(--margin) 0; align-content: start; }
+    .close h2 { grid-column: 1 / 8; font-size: var(--step-head); }
+    .close .btn { grid-column: 1 / 4; margin-top: 32px; background: var(--field-2-ink); color: var(--field-2); justify-self: start; }
+    .close ul { grid-column: 10 / 13; grid-row: 1 / 3; margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; align-content: start; }
+    .close ul a { text-decoration: none; }
+    .close ul a:hover { text-decoration: underline; }
+    .legal { position: absolute; left: var(--margin); right: var(--margin); bottom: calc(26vw * 0.66); display: flex; justify-content: space-between; gap: 16px; font-size: var(--step-small); }
+    .giant { position: absolute; left: var(--margin); bottom: 0; margin: 0; font: 700 26vw/0.8 var(--font-display); letter-spacing: -0.04em; white-space: nowrap; transform: translateY(24%); }
+
+    /* El titular sube desde atrás de su línea apenas pinta (CSS: no espera al CDN). */
+    @keyframes rise { from { transform: translateY(105%); } }
+    .hero .rise { animation: rise 700ms var(--ease-out) both; }
+    .hero .l2 .rise { animation-delay: 90ms; }
+    /* Las demás entradas las hace Motion. Oculto solo con JS; se muestra si Motion no carga. */
+    .js .enter { opacity: 0; }
+    .motion-off .enter { opacity: 1; }
+
+    @media (max-width: 900px) {
+      .bar ul { gap: 18px; }
+      .hero-side.left { top: auto; bottom: 28px; left: var(--margin); right: var(--margin); width: auto; max-width: 60ch; }
+      .hero-side.right { display: none; }
+      .close .btn { grid-column: 1 / -1; white-space: nowrap; }
+      .live { grid-template-columns: 1fr; row-gap: 24px; }
+      .live-copy, .live-stage { grid-column: 1; }
+      .live-stage { height: 72svh; }
+      .chapters { height: 180svh; }
+      .chapters-stage { grid-template-rows: auto 1fr auto; row-gap: 12px; padding: 7vh var(--margin) 5vh; }
+      .stack { font-size: 9vw; }
+      .chapters canvas, .chapters .seq-fallback { position: relative; inset: auto; grid-column: 1 / -1; grid-row: 2; width: 100%; height: 100%; min-height: 0; }
+      .facts { grid-column: 1 / -1; grid-row: 3; }
+      .faq h2 { grid-column: 1 / -1; position: static; margin-bottom: 24px; padding-right: 0; }
+      .faq-list { grid-column: 1 / -1; }
+      .close { height: auto; min-height: 0; padding-bottom: calc(34vw * 0.66 + 96px); }
+      .fan { height: auto; padding: 1px 0 64px; }
+      .fan-stage { position: static; height: auto; padding-top: 64px; }
+      .cards { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: auto; height: auto; margin-top: 32px; }
+      .card { position: static; transform: none; }
+      .card img { width: 100%; height: auto; aspect-ratio: 1; }
+      .card h3, .card p { max-width: none; }
+      .close ul { grid-column: 1 / -1; grid-row: auto; display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 32px; }
+      .stats h2 { position: static; grid-column: 1 / -1; margin-bottom: 24px; }
+      .tile-b, .tile-c { margin-top: 0; }
+      .tile-a { grid-column: 1 / -1; height: 48vh; }
+      .tile-b { grid-column: 1 / 7; height: 36vh; margin-top: 8px; }
+      .tile-c { grid-column: 7 / 13; height: 36vh; margin-top: 40px; }
+    }
+    @media (max-width: 767px) {
+      .bar { grid-template-columns: 1fr auto; }
+      .bar nav { display: none; }
+      .hero { min-height: 600px; }
+      .hero h1 { font-size: 7.4vw; }
+      .hero h1 { top: 20%; height: calc(40% + 1.1em); }
+      .hero-side.left { top: auto; bottom: 28px; left: var(--margin); right: var(--margin); width: auto; }
+      .hero-side.right { display: none; }
+      .stack { font-size: 11vw; }
+      .facts h2 { margin-bottom: 12px; }
+      .fact p { font-size: var(--step-body); }
+      .stats { column-gap: 6px; }
+      .tile-a { height: 60vw; }
+      .tile-b { height: auto; min-height: 56vw; padding: 20px; }
+      .tile-c { height: auto; min-height: 56vw; padding: 20px; }
+      .cards { grid-template-columns: 1fr; }
+      .price-block h2 { font-size: 7.4vw; }
+      .price-row ul, .price-row .buy { grid-column: 1 / -1; }
+      .price-row .buy { margin-top: 32px; }
+      .faq-list { gap: 6px; }
+      .faq summary { min-height: 64px; padding: 14px 56px 14px 20px; }
+      .close h2 { grid-column: 1 / -1; font-size: 7.4vw; }
+      .close .btn { grid-column: 1 / -1; justify-self: stretch; }
+      .legal { flex-direction: column; gap: 4px; bottom: calc(34vw * 0.66); }
+      .giant { font-size: 34vw; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .chapters, .fan { height: auto; }
+      .chapters-stage, .fan-stage { position: relative; height: auto; }
+      .chapters canvas, .chapters .seq-fallback { position: relative; right: auto; top: auto; width: 100%; height: 60vh; grid-column: 1 / -1; }
+      .fact { display: block; margin-bottom: 20px; }
+      .cards { position: relative; left: auto; bottom: auto; display: flex; flex-wrap: wrap; gap: 12px; width: auto; height: auto; margin-top: 32px; }
+      .card { position: relative; inset: auto; width: 300px; transform: none; }
+      .btn, .card, .stack li { transition: none; }
+      .hero .rise { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <a class="wordmark" href="#top">Ondra</a>
+    <nav aria-label="Principal">
+      <ul>
+        <li><a href="#sonido">Sonido</a></li>
+        <li><a href="#luz">Luz</a></li>
+        <li><a href="#precio">Precio</a></li>
+      </ul>
+    </nav>
+    <a class="btn" href="#precio">Comprar</a>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <picture>
+        <source media="(max-width: 767px)" srcset="../speaker/scene/hero-1200.webp" />
+        <img class="hero-photo" src="../speaker/scene/hero.webp" width="2400" height="1350" fetchpriority="high"
+          alt="Ondra Pulse, parlante cilíndrico de tela negra, parado sobre un piso negro bajo un haz de luz, con el anillo de encendido y la tira de volumen encendidos" />
+      </picture>
+      <h1 id="hero-title"><span class="line l1"><span class="rise">Toda la sala</span></span> <span class="line l2"><span class="rise">en una mano</span></span></h1>
+      <p class="hero-side left enter">Ondra Pulse es un parlante portátil que suena en 360°: el grave sale por arriba y llena la habitación desde cualquier lugar de la mesa.</p>
+      <div class="hero-side right enter">
+        <p>22 cm · 980 g</p>
+        <p class="price">US$ 149</p>
+        <a class="btn" href="#precio">Comprar</a>
+      </div>
+    </section>
+
+    <section class="chapters" id="sonido" aria-labelledby="chapters-title">
+      <div class="chapters-stage">
+        <ul class="stack" aria-hidden="true">
+          <li data-active>Sonido</li>
+          <li>Luz</li>
+          <li>Tela</li>
+          <li>Control</li>
+        </ul>
+        <canvas id="seq-canvas"></canvas>
+        <img class="seq-fallback" data-seq-fallback src="../speaker/chapters/desktop/frame-001.webp" width="960" height="1200" loading="lazy"
+          alt="Ondra Pulse de frente, con los controles a la vista" />
+        <div class="facts">
+          <h2 id="chapters-title">Mirá cada lado</h2>
+          <div class="fact" data-active><h3>Un sonido que llena la sala</h3><p>Dos parlantes de rango completo y un radiador pasivo arriba. El grave se abre para todos lados, así que no hay un lado de atrás.</p></div>
+          <div class="fact"><h3>Una luz que sigue los graves</h3><p>El aro y el logo de arriba laten con la música. Se elige el color o se apaga con un toque largo en el botón de modo.</p></div>
+          <div class="fact"><h3>Tela de punta a punta</h3><p>Un tejido sin costuras a la vista ni tornillos. Aguanta lluvia, arena y una caída de la mesa de la terraza.</p></div>
+          <div class="fact"><h3>Todo a mano, sin mirar</h3><p>Volumen, pausa y modo de luz en relieve, en una sola tira: se encuentran con el pulgar en la oscuridad.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-labelledby="stats-title">
+      <h2 id="stats-title" class="enter">Todo el día</h2>
+      <div class="tile tile-a enter"><p class="figure"><span data-count="24">24</span><small>h</small></p><p>de batería con el volumen a la mitad. Diez minutos de carga dan dos horas más.</p></div>
+      <div class="tile tile-b enter"><p class="figure"><span data-count="40">40</span><small>W</small></p><p>de potencia, sin distorsión a todo volumen.</p></div>
+      <div class="tile tile-c enter"><p class="figure">IP<span data-count="67">67</span></p><p>contra agua y polvo: media hora bajo un metro de agua.</p></div>
+    </section>
+
+    <section class="fan" data-progress="sticky" aria-labelledby="fan-title">
+      <div class="fan-stage">
+        <h2 id="fan-title" class="enter">Hecho para usarlo</h2>
+        <p class="enter">Cuatro detalles que se notan el primer día y no cambian con el uso.</p>
+        <ul class="cards">
+          <li class="card"><h3>Luz a tu gusto</h3><img src="../speaker/scene/light.webp" width="900" height="1125" loading="lazy" alt="El radiador de arriba del Pulse visto desde arriba, con el aro y las ondas del logo encendidos" /><p>El aro y el logo laten con los graves, en el color que elijas.</p></li>
+          <li class="card"><h3>Botones en relieve</h3><img src="../speaker/scene/controls.webp" width="900" height="1125" loading="lazy" alt="Primer plano de la tira de volumen con borde de luz y el botón de pausa" /><p>Volumen, pausa y modo se encuentran con el pulgar.</p></li>
+          <li class="card"><h3>Tela sin costuras</h3><img src="../speaker/scene/fabric.webp" width="900" height="1125" loading="lazy" alt="Primer plano del tejido negro del cuerpo con luz rasante" /><p>Aguanta lluvia, arena y caídas sin rasgarse.</p></li>
+          <li class="card"><h3>De a dos, estéreo</h3><img src="../speaker/scene/stereo.webp" width="900" height="1125" loading="lazy" alt="Dos Ondra Pulse uno al lado del otro sobre un piso negro que los refleja" /><p>Emparejá dos y cada uno toma un canal.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="live" id="luz" aria-labelledby="live-title">
+      <div class="live-copy">
+        <h2 id="live-title" class="enter">Elegí su luz</h2>
+        <p class="enter">Giralo con el mouse o el dedo y probá los cuatro colores del aro. La página entera cambia con él.</p>
+        <fieldset class="lights enter">
+          <legend>Color de la luz</legend>
+          <div class="lights-row">
+            <label><input type="radio" name="light" value="cian" checked /><span class="chip" style="--c: var(--light-cian)"></span>Cian</label>
+            <label><input type="radio" name="light" value="ambar" /><span class="chip" style="--c: var(--light-ambar)"></span>Ámbar</label>
+            <label><input type="radio" name="light" value="verde" /><span class="chip" style="--c: var(--light-verde)"></span>Verde</label>
+            <label><input type="radio" name="light" value="rojo" /><span class="chip" style="--c: var(--light-rojo)"></span>Rojo</label>
+          </div>
+        </fieldset>
+      </div>
+      <figure class="live-stage">
+        <canvas id="model-canvas"></canvas>
+        <img data-model-fallback src="../speaker/chapters/desktop/frame-001.webp" width="960" height="1200" loading="lazy" alt="Ondra Pulse de frente" />
+        <figcaption>Arrastralo para girarlo</figcaption>
+      </figure>
+    </section>
+
+    <section class="price-block" id="precio" aria-labelledby="price-title">
+      <h2 id="price-title" class="enter">US$ 149<br />con funda</h2>
+      <div class="price-row">
+        <ul class="enter">
+          <li>El parlante, en el color de luz que elijas</li>
+          <li>Funda de malla con cordón</li>
+          <li>Cable USB-C</li>
+          <li>Envío gratis y dos años de garantía</li>
+        </ul>
+        <div class="buy enter">
+          <a class="btn" id="buy" href="mailto:ventas@ondra.example?subject=Quiero%20un%20Ondra%20Pulse%20(luz%20cian)">Comprar el Pulse</a>
+          <p>Te escribimos para coordinar el pago y el envío.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Preguntas</h2>
+      <div class="faq-list">
+        <details name="faq" open><summary>¿Se puede mojar?</summary><p>Sí. Es IP67: aguanta lluvia, salpicaduras y media hora bajo un metro de agua dulce. Después del mar, enjuagalo con agua limpia.</p></details>
+        <details name="faq"><summary>¿Cuánto tarda en cargar?</summary><p>Tres horas de cero a lleno por USB-C. Diez minutos alcanzan para unas dos horas de música.</p></details>
+        <details name="faq"><summary>¿Puedo usar dos juntos?</summary><p>Sí. Con dos, cada uno toma un canal y suenan en estéreo. Con más de dos, todos reproducen lo mismo a la vez.</p></details>
+        <details name="faq"><summary>¿Se puede apagar la luz?</summary><p>Sí. Un toque en el botón de modo cambia el color; un toque largo la apaga y la batería rinde un poco más.</p></details>
+        <details name="faq"><summary>¿Sirve para llamadas?</summary><p>Tiene micrófono con reducción de ruido: atendés con el botón de pausa y cortás con un toque doble.</p></details>
+        <details name="faq"><summary>¿Qué trae la caja?</summary><p>El parlante, la funda de malla con cordón y un cable USB-C. El cargador de pared no viene incluido.</p></details>
+        <details name="faq"><summary>¿Qué garantía tiene?</summary><p>Dos años contra fallas de fábrica. Si algo anda mal, lo cambiamos y pagamos el envío.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="close" aria-labelledby="close-title">
+    <h2 id="close-title">Que suene<br />en tu casa</h2>
+    <a class="btn" href="#precio">Comprar · US$ 149</a>
+    <ul>
+      <li><a href="mailto:hola@ondra.example">hola@ondra.example</a></li>
+      <li><a href="#precio">Envíos y garantía</a></li>
+      <li><a href="#luz">Probar la luz</a></li>
+    </ul>
+    <div class="legal"><span>© 2026 Ondra. Marca ficticia: landing de ejemplo del web-fx-kit.</span><span>Producto modelado y renderizado en Blender.</span></div>
+    <p class="giant" aria-hidden="true">ONDRA</p>
+  </footer>
+
+  <script type="module">
+    import { createScrollSequence } from '../../effects/scroll-sequence.js';
+    import { createScrollProgress } from '../../effects/scroll-progress.js';
+    import { createCountUp } from '../../effects/count-up.js';
+    import { createModelTurntable } from '../../effects/model-turntable.js';
+
+    const handles = [];
+    window.__fx = handles;
+    const root = document.documentElement;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobile = window.matchMedia('(max-width: 767px)').matches;
+    const css = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+    const list = (set, dir, count) => Array.from({ length: count }, (_, i) => `../speaker/${set}/${dir}/frame-${String(i + 1).padStart(3, '0')}.webp`);
+
+    // Firma: el Pulse gira por capítulos delante de las palabras.
+    const words = [...document.querySelectorAll('.stack li')];
+    const facts = [...document.querySelectorAll('.fact')];
+    handles.push(createScrollSequence({
+      section: document.getElementById('sonido'),
+      canvas: document.getElementById('seq-canvas'),
+      frames: mobile ? list('chapters', 'mobile', 36) : list('chapters', 'desktop', 72),
+      range: [0.02, 0.98],
+      stops: [0, 0.25, 0.5, 0.75],
+      poses: [0, 1 / 3, 2 / 3, 1],
+      duration: 2.4,
+      onChapter: (ch) => {
+        words.forEach((w, k) => w.toggleAttribute('data-active', k === ch));
+        facts.forEach((f, k) => f.toggleAttribute('data-active', k === ch));
+      },
+    }));
+    handles.push(createScrollProgress(document));
+    handles.push(createCountUp(document, { locale: 'es-AR' }));
+
+    // Lo que se toca: el color de la luz es el acento de toda la página.
+    let model = null;
+    const buy = document.getElementById('buy');
+    const names = { cian: 'cian', ambar: 'ámbar', verde: 'verde', rojo: 'rojo' };
+    const setLight = (name) => {
+      const color = css(`--light-${name}`);
+      root.style.setProperty('--accent', color);
+      model?.setLight(color);
+      buy.href = `mailto:ventas@ondra.example?subject=${encodeURIComponent(`Quiero un Ondra Pulse (luz ${names[name]})`)}`;
+    };
+    const radios = [...document.querySelectorAll('input[name="light"]')];
+    const onLight = (e) => setLight(e.target.value);
+    radios.forEach((r) => r.addEventListener('change', onLight));
+    handles.push({ destroy: () => radios.forEach((r) => r.removeEventListener('change', onLight)) });
+
+    // Three.js se carga recién cuando la sección está cerca.
+    const stage = document.getElementById('model-canvas');
+    const near = new IntersectionObserver(async ([e]) => {
+      if (!e.isIntersecting) return;
+      near.disconnect();
+      try {
+        const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+          import('three'),
+          import('three/addons/loaders/GLTFLoader.js'),
+          import('three/addons/environments/RoomEnvironment.js'),
+        ]);
+        model = createModelTurntable({ canvas: stage, THREE, GLTFLoader, RoomEnvironment, url: '../speaker/speaker.glb', rim: css('--rim'), tilt: 24, exposure: 1.35, turnSeconds: 12 });
+        model.setLight(css('--accent'));
+        handles.push(model);
+        window.__model = model;
+      } catch {
+        // Sin CDN queda la foto del producto.
+      }
+    }, { rootMargin: '100% 0px' });
+    near.observe(stage);
+    handles.push({ destroy: () => near.disconnect() });
+
+    // Entradas con Motion (vanilla): el titular sube desde atrás de su línea,
+    // después cada parte de cada sección. Si el CDN falla, todo queda visible.
+    const show = () => root.classList.add('motion-off');
+    const failsafe = setTimeout(show, 2500);
+    try {
+      if (reduce) throw new Error('reduced motion');
+      const { animate, inView, stagger } = await import('https://cdn.jsdelivr.net/npm/motion@14.3.0/+esm');
+      clearTimeout(failsafe);
+      const ease = [0.16, 1, 0.3, 1];
+      animate('.hero .enter', { opacity: [0, 1], y: [16, 0] }, { duration: 0.6, ease, delay: 0.25 });
+      animate('.hero-photo', { scale: [1.06, 1] }, { duration: 2.4, ease });
+      const stop = inView('section:not(.hero), footer', (section) => {
+        const parts = section.querySelectorAll('.enter');
+        if (parts.length) animate(parts, { opacity: [0, 1], y: [24, 0] }, { duration: 0.8, ease, delay: stagger(0.075) });
+      }, { amount: 0.15 });
+      handles.push({ destroy: stop });
+    } catch {
+      clearTimeout(failsafe);
+      show();
+    }
+  </script>
+</body>
+</html>

@@ -19,9 +19,9 @@ done
 cp -r skills/{audit-landing,design-tokens,rebuild-section,motion-design,fx-effects} /ruta/al/proyecto/.claude/skills/
 ```
 
-Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`, y completalo
-con los datos reales de esa marca (secciones 0-5). Las secciones 6-9 no se tocan — son las reglas que evitan
-el "look de IA genérica".
+Copiá también `templates/DESIGN.md.template` a la raíz de cada proyecto nuevo como `DESIGN.md`. Completá
+los tokens del front matter y el Overview con los datos reales de esa marca. Do's and Don'ts y el
+Checklist no se tocan: son las reglas que evitan el "look de IA genérica".
 
 Submódulos — inicializalos después de clonar:
 
@@ -29,24 +29,54 @@ Submódulos — inicializalos después de clonar:
 git submodule update --init --recursive
 ```
 
-## Herramientas compañeras (no vendoreadas acá, se instalan aparte)
+## Skills compañeras (no vendoreadas acá, se instalan aparte)
 
-Son plugins completos de Claude Code (marketplace propio), no un `SKILL.md` suelto — no tiene sentido
-forkearlos adentro de este repo, se instalan directo y quedan actualizables solos:
+Son de terceros y tienen su propia licencia. No se forkean dentro de este repo: se instalan en
+`~/.claude/skills/` y se actualizan desde su repo original.
+
+| Skill | Para qué | Licencia |
+|---|---|---|
+| [Impeccable](https://github.com/pbakaus/impeccable) | Vocabulario de diseño, `critique` / `audit` / `polish` / `bolder` / `animate`, y reglas que detectan UI con cara de IA (`reference/craft-floor.md`) | Apache-2.0 |
+| [Taste Skill](https://github.com/Leonxlnx/taste-skill) | Dirección de arte, la "idea" y el "live thing", más `lint.mjs` e `inspect.mjs` para medir el render real a 1440, 768 y 390 | MIT |
+| [Emil Kowalski skills](https://github.com/emilkowalski/skills) | Animación e interacción de detalle: `animate`, `improve-animations`, `review-animations`, `animation-performance`, `animate-expo` para React Native | MIT |
+| [Humanizer](https://github.com/blader/humanizer) | Saca el tono "IA" del copy | MIT |
+| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Punto de partida sin marca: estilos, paletas por rubro y pares tipográficos que se vuelcan al `DESIGN.md`. Ver `web-fx-kit/recipes/librerias-de-componentes.md` | MIT |
 
 ```bash
-# Taste Skill — anti-slop de diseño frontend (88k★, github.com/Leonxlnx/taste-skill)
-/plugin marketplace add Leonxlnx/taste-skill
-/plugin install taste-skill@taste-skill
+git clone --depth 1 https://github.com/pbakaus/impeccable /tmp/impeccable
+cp -R /tmp/impeccable/.claude/skills/impeccable ~/.claude/skills/
+cp /tmp/impeccable/.claude/agents/*.md ~/.claude/agents/
 
-# Humanizer — saca el tono "IA" de cualquier texto (50k★, github.com/blader/humanizer)
-/plugin marketplace add blader/humanizer
-/plugin install humanizer@humanizer
+git clone --depth 1 https://github.com/Leonxlnx/taste-skill /tmp/taste-skill
+cp -R /tmp/taste-skill/skills/taste-skill ~/.claude/skills/
+
+git clone --depth 1 https://github.com/emilkowalski/skills /tmp/emil-skills
+for s in animate improve-animations review-animations animation-performance animation-vocabulary \
+         find-animation-opportunities emil-design-eng apple-design mobile-native animate-expo; do
+  cp -R /tmp/emil-skills/skills/$s ~/.claude/skills/
+done
 ```
 
-Usalos así: `taste-skill` antes/junto con `/rebuild-section` para que el resultado no caiga en los defaults
-típicos de IA (gradientes morados, Inter para todo, shadcn sin tocar); `humanizer` al final, sobre cualquier
-copy que haya escrito un agente (hero, casos, contacto) para que no suene a IA.
+UI UX Pro Max se instala aparte, con el marketplace de plugins o con su CLI (necesita Python 3):
+
+```bash
+# dentro de Claude Code
+/plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+/plugin install ui-ux-pro-max@ui-ux-pro-max-skill
+# o por CLI
+npm install -g ui-ux-pro-max-cli && uipro init --ai claude --global
+```
+
+Motion (animación) y 21st.dev (componentes React) no son skills: cuándo usarlos, cuánto pesan y cómo pasan
+por los tokens y los gates del kit está en `web-fx-kit/recipes/librerias-de-componentes.md`. La landing de
+ejemplo `web-fx-kit/demo/parlante/` los combina con los módulos del kit.
+
+El launcher de Impeccable (`scripts/impeccable`) descarga un binario la primera vez que corre. Si no
+querés eso, leé directo `reference/craft-floor.md` y `reference/new-work.md`: ahí están las reglas.
+
+**Formato de DESIGN.md:** el template sigue la [especificación de Google](https://github.com/google-labs-code/design.md)
+(tokens en YAML arriba y prosa por sección abajo), así cualquier agente lo lee igual.
+`reference/awesome-design-md/` sigue sirviendo como catálogo de sistemas de marcas reales.
 
 ## El flujo
 
@@ -71,21 +101,28 @@ Se activa automáticamente desde `/rebuild-section` cuando una sección necesita
 narrativo, partículas, o cualquier tratamiento que va más allá de CSS puro.
 
 Incluye:
-- **8 módulos ES** en `web-fx-kit/effects/` — partículas, gradientes, scroll, text-reveal, magnetic, etc.
+- **Módulos ES** en `web-fx-kit/effects/` — partículas, gradientes, text-reveal, magnetic, y los de scroll y estado
+  (`scroll-progress`, `clip-reveal`, `count-up`, `route-draw`, `live-timeline`, `split-flap`, `pinned-horizontal`,
+  `cursor-label`, `scroll-sequence`, `turntable`, `model-turntable`, con `frame-player` y `spin-control` compartidos)
+- **Registro de firmas** en `web-fx-kit/SIGNATURES.md` — un efecto firma por proyecto y la combinación que usó cada
+  uno, para que los sitios del kit no se parezcan entre sí
 - **Wrappers React** en `web-fx-kit/react/` — para proyectos React/Next.js
 - **7 prompts** en `web-fx-kit/prompts/` — plantillas por tipo de sitio (hero 3D, editorial, portfolio, etc.)
-- **Recipes** en `web-fx-kit/recipes/` — guías de performance, stack, integración React
+- **Recipes** en `web-fx-kit/recipes/` — guías de performance, stack, integración React y efectos de scroll en CSS
 - **Assets pipeline** en `web-fx-kit/assets-pipeline/` — generar imagen/video/3D con IA
 
-### Flujo con efectos
+### Flujo completo
 
 ```
-1. Copiar DESIGN.md.template al proyecto, llenar secciones 0-5
-2. /audit-landing  (si ya hay algo armado)
-3. /design-tokens
-4. Elegir un prompt de web-fx-kit/prompts/ que matchee el tipo de sitio
-5. /rebuild-section [sección]  →  lee el prompt + usa efectos del fx-kit
-6. Verificar con checklist de DESIGN.md sección 9
+1. Copiar templates/DESIGN.md.template → DESIGN.md (formato Google). Completar Overview:
+   idea, live thing, modo y escena. Sin idea no se construye. Elegí la firma de motion con
+   web-fx-kit/SIGNATURES.md (una firma del sujeto + hasta dos secundarios, sin repetir otro proyecto).
+2. /audit-landing                  (si ya hay algo armado)
+3. /design-tokens                  → los tokens del front matter, aplicados al CSS real
+4. /rebuild-section [sección]      → con fx-effects y las reglas de craft-floor de Impeccable
+5. Motion: /animate (Emil) o /impeccable animate, una orquestación por región
+6. Gates:  taste lint.mjs (0 FAIL) → taste inspect.mjs (1440/768/390) → /impeccable critique → polish
+7. Lighthouse desktop y mobile; checklist del DESIGN.md; sumar la fila a SIGNATURES.md
 ```
 
 ## Lecciones que quedaron adentro de las skills (no las repitas)
@@ -106,6 +143,15 @@ Incluye:
   volvé a levantar dev.
 - **Verificá visual, no solo build verde.** Playwright + screenshot de estados reales (modal abierto,
   mobile, `prefers-reduced-motion`) antes de dar algo por terminado.
+- **Un `IntersectionObserver` no dispara sobre un elemento recortado al 100% con `clip-path`.** El
+  revelado con máscara recorta a los hijos y observa al padre, o la foto no aparece nunca.
+- **Un efecto de otro proyecto no es identidad.** Reusar el shader, las partículas o la serif de un
+  sitio anterior hace que el nuevo "parezca de ellos". La identidad sale de la idea del sujeto (su output,
+  su objeto, su ritual), y los efectos se derivan de ahí.
+- **Las paletas se eligen viéndolas sobre el sitio real.** Un panel `?lab` que cambia tokens en vivo
+  (y que solo se activa con un query param) decide en minutos lo que en mockups lleva días.
+- **Los fragmentos de interfaz son imagen legítima en software**, pero marcalos con `data-ui` y
+  etiquetalos como ilustrativos cuando no sean capturas reales.
 - **No copies assets de bancos de stock (Etsy, Shutterstock, etc.) a un sitio comercial.** Sirven como
   referencia de estilo para dibujar algo original, nunca como archivo final.
 
@@ -119,12 +165,14 @@ skills/
   motion-design/              (upstream: github.com/LottieFiles/motion-design-skill, MIT)
   fx-effects/SKILL.md         ← puente a web-fx-kit
 templates/
-  DESIGN.md.template           (secciones 0-9, con tokens, anti-slop y checklist)
+  DESIGN.md.template           (formato google-labs-code/design.md: tokens YAML + secciones + checklist)
 reference/
   awesome-design-md/          (submódulo git — github.com/VoltAgent/awesome-design-md, MIT)
 web-fx-kit/                    módulos de efectos, prompts, recipes y assets pipeline
-  effects/                     8 módulos ES sin build
-  react/                       wrappers React de effects/
+  effects/                     módulos ES sin build
+  react/                       wrappers React de effects/ y use-fx.js
+  SIGNATURES.md                firma de motion de cada proyecto (leer antes de elegir efectos)
+  demo/                        página para probar los módulos de scroll y estado
   prompts/                     7 prompts por tipo de sitio
   recipes/                     guías de combinación y performance
   assets-pipeline/             generar imagen/video/3D con IA
